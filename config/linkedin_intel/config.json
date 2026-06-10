@@ -1,0 +1,43 @@
+{
+  "company_name": "Innovación Radical",
+  "company_page_url": "https://www.linkedin.com/company/innovaci%C3%B3nradical/",
+  "website": "https://innovacionradical.cl/",
+  "storage_state": "secrets/linkedin_innovacionradical_storage_state.json",
+  "locale": "es-CL",
+  "region": {
+    "name": "Chile",
+    "geo_urn": "104621616",
+    "language": "es",
+    "boost_terms": [
+      "chile", "chileno", "chilena", "santiago", "stgo", "latam", "latinoamerica",
+      "latinoamérica", "concepcion", "concepción", "valparaiso", "valparaíso",
+      "region metropolitana", "innovacion radical", "innovación radical"
+    ],
+    "demote_terms": [
+      "chicago", "united states", " usa", "new york", "san francisco",
+      "texas", "california", "london", " united kingdom", "hybrid)",
+      "estados unidos", "north america"
+    ],
+    "job_noise_terms": [
+      "hiring:", "we're hiring", "we are hiring", "estamos contratando",
+      "job opening", "apply now", "location: chicago", "8+ years"
+    ]
+  },
+  "keywords": [
+    "devops chile",
+    "transformacion digital chile",
+    "mlops chile",
+    "agentes ia chile",
+    "cloud aws chile",
+    "kubernetes chile",
+    "observabilidad llm",
+    "finops cloud latam",
+    "sre chile",
+    "rag corporativo"
+  ],
+  "competitors": [],
+  "max_posts_per_keyword": 5,
+  "max_feed_posts": 15,
+  "pause_between_searches_sec": 6,
+  "headless": true
+}

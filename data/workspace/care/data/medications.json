@@ -1,0 +1,13 @@
+{
+  "items": [
+    {
+      "name": "Ejemplo — reemplazar",
+      "dose": "1 comprimido",
+      "schedule": [
+        "08:00",
+        "20:00"
+      ],
+      "notes": "Editar data/medications.json con tus medicamentos reales"
+    }
+  ]
+}

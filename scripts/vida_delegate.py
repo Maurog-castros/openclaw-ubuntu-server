@@ -1,0 +1,191 @@
+"""Delegación determinística agente care (/care)."""
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import subprocess
+import sys
+import time
+from pathlib import Path
+from typing import Any
+
+ROOT = Path("/home/node/openclaw-mauro")
+if not ROOT.exists():
+    ROOT = Path(__file__).resolve().parent.parent
+SCR = ROOT / "scripts"
+RUN = SCR / "run-vida-py.sh"
+
+sys.path.insert(0, str(SCR))
+from vida_common import truncate_whatsapp
+
+CARE_PREFIX = re.compile(r"^\s*/care\b\s*", re.I)
+IMAGE_EXT = {".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"}
+INBOUND_CANDIDATES = [
+    ROOT / "data/config/media/inbound",
+    Path("/home/node/.openclaw/media/inbound"),
+    Path("/home/mauro/openclaw-mauro/data/config/media/inbound"),
+]
+DIARY_EXPLICIT_RE = re.compile(
+    r"(?:"
+    r"^\s*diario\b|"
+    r"\banota(?:r|lo|la|me)?\s+en\s+(?:el\s+)?diario\b|"
+    r"\ban[oó]talo\s+en\s+(?:el\s+)?diario\b|"
+    r"\bguarda(?:r|lo|la|me)?\s+en\s+(?:el\s+)?diario\b"
+    r")",
+    re.I,
+)
+
+
+def strip_prefix(text: str) -> str:
+    return CARE_PREFIX.sub("", text or "").strip()
+
+
+def latest_inbound_image(max_age_sec: int = 3600) -> Path | None:
+    now = time.time()
+    best: Path | None = None
+    for inbound in INBOUND_CANDIDATES:
+        if not inbound.exists():
+            continue
+        for p in inbound.iterdir():
+            if not p.is_file() or p.suffix.lower() not in IMAGE_EXT:
+                continue
+            if (now - p.stat().st_mtime) > max_age_sec:
+                continue
+            if best is None or p.stat().st_mtime > best.stat().st_mtime:
+                best = p
+    return best
+
+
+def run_script(script: str, *args: str, timeout: int = 200) -> dict:
+    cmd = [str(RUN), str(SCR / script), *args, "--json"]
+    proc = subprocess.run(cmd, cwd=str(ROOT), text=True, capture_output=True, timeout=timeout, check=False)
+    if proc.stdout.strip():
+        try:
+            payload = json.loads(proc.stdout)
+        except json.JSONDecodeError:
+            payload = {"status": "ok", "whatsapp_reply": proc.stdout.strip()}
+    else:
+        payload = {"status": "error", "whatsapp_reply": proc.stderr.strip() or "Error en script care."}
+    if payload.get("whatsapp_reply"):
+        payload["whatsapp_reply"] = truncate_whatsapp(str(payload["whatsapp_reply"]))
+    return payload
+
+
+def run_json(cmd: list[str], timeout: int = 240) -> tuple[int, dict[str, Any], str, str]:
+    proc = subprocess.run(cmd, cwd=str(ROOT), text=True, capture_output=True, timeout=timeout, check=False)
+    payload: dict[str, Any] = {}
+    if proc.stdout.strip():
+        try:
+            payload = json.loads(proc.stdout)
+        except json.JSONDecodeError:
+            payload = {"whatsapp_reply": proc.stdout.strip()}
+    return proc.returncode, payload, proc.stdout, proc.stderr
+
+
+def run_care_conversation(body: str, session_key: str = "agent:care:whatsapp:direct") -> dict:
+    """Conversación profunda vía agente care (psicólogo de confianza, ≤250 chars)."""
+    cmd = [
+        "openclaw",
+        "agent",
+        "--local",
+        "--agent",
+        "care",
+        "--session-key",
+        session_key,
+        "--message",
+        body,
+        "--json",
+    ]
+    code, payload, _, stderr = run_json(cmd, timeout=180)
+    reply = ""
+    for item in payload.get("payloads") or []:
+        if isinstance(item, dict) and item.get("text"):
+            reply = str(item["text"]).strip()
+            break
+    if not reply:
+        reply = str(payload.get("whatsapp_reply") or "").strip()
+    if code != 0 or not reply:
+        return {
+            "status": "error",
+            "whatsapp_reply": truncate_whatsapp(
+                "No pude responder ahora. ¿Puedes contarme un poco más en una frase?"
+            ),
+            "stderr": stderr[-400:],
+        }
+    return {"status": "ok", "whatsapp_reply": truncate_whatsapp(reply)}
+
+
+def should_process_exam_photo(text: str, has_media: bool, image_path: str | None) -> bool:
+    if has_media or image_path:
+        return True
+    lower = strip_prefix(text).lower()
+    return any(k in lower for k in ("examen", "laboratorio", "orden", "agenda", "cita", "calendario", "toma"))
+
+
+def route(text: str, *, has_media: bool = False, image_path: str | None = None) -> dict:
+    body = strip_prefix(text)
+    lower = body.lower()
+
+    if should_process_exam_photo(text, has_media, image_path):
+        img = image_path or (str(latest_inbound_image()) if has_media else None)
+        if img:
+            return run_script("vida_exam_appointment.py", "--image", img, "--text", body or text)
+
+    if not body:
+        return run_script("vida_checkin.py")
+
+    if lower.startswith("perfil") or "perfílame" in lower or lower.startswith("profile"):
+        ans = body.split(maxsplit=1)[1] if len(body.split()) > 1 else ""
+        args = ["--answer", ans] if ans else []
+        return run_script("vida_profile.py", *args)
+
+    if DIARY_EXPLICIT_RE.search(body):
+        entry = DIARY_EXPLICIT_RE.sub("", body, count=1).strip()
+        return run_script("vida_diary.py", "--text", entry or body)
+
+    if any(k in lower for k in ("medic", "pastilla", "farmaco", "fármaco")):
+        return run_script("vida_meds.py")
+    if any(k in lower for k in ("despensa", "refriger", "comida", "cena", "almuerzo", "desayuno")):
+        mode = "update" if any(k in lower for k in ("tengo", "agreg", "hay")) else "suggest"
+        return run_script("vida_pantry.py", "--text", body, "--mode", mode)
+    if any(k in lower for k in ("calendario", "citas", "agenda")) and not any(
+        k in lower for k in ("examen", "laboratorio", "orden")
+    ):
+        return run_script("vida_calendar.py")
+    if any(k in lower for k in ("doctor", "medico", "médico")):
+        return run_script("vida_calendar.py")
+    if re.search(r"\b(?:inspir|frase\s+del\s+d[ií]a)\b", lower):
+        return run_script("vida_inspire.py")
+    if any(k in lower for k in ("ejercicio", "gym", "caminar", "movimiento")):
+        return {
+            "status": "ok",
+            "whatsapp_reply": truncate_whatsapp(
+                "10-20 min bastan: caminata, estiramientos o subir escaleras. "
+                "Empieza pequeño; consistencia > intensidad."
+            ),
+        }
+
+    # Conversación emocional / motivación / charla — agente care, sin diario automático
+    return run_care_conversation(body)
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--text", required=True)
+    ap.add_argument("--has-media", action="store_true")
+    ap.add_argument("--image", default=None)
+    ap.add_argument("--json", action="store_true")
+    args = ap.parse_args()
+
+    image_path = args.image or (str(latest_inbound_image()) if args.has_media else None)
+    payload = route(args.text, has_media=args.has_media, image_path=image_path)
+    payload["agent"] = "care"
+    if args.json:
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
+    else:
+        print(payload.get("whatsapp_reply", ""))
+
+
+if __name__ == "__main__":
+    main()

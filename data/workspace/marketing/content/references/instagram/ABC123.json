@@ -1,0 +1,13 @@
+{
+  "status": "ok",
+  "url": "https://www.instagram.com/p/ABC123/",
+  "shortcode": "ABC123",
+  "fetched_at": "2026-06-10T08:47:12",
+  "author": "",
+  "caption": "",
+  "image_paths": [],
+  "oembed": {},
+  "vision_analysis": {},
+  "summary": "=== Inspiracion Instagram ===\nURL: https://www.instagram.com/p/ABC123/\nAutor: \n\n\nSiguiente: content_draft_instagram.py --topic \"...\" --brief \"<adaptacion>\" o pedir borrador nuevo inspirado en esto.",
+  "whatsapp_reply": "Revisé el post de @desconocido (Instagram)\n\n\nFormato típico: lista de noticias positivas con emojis por ítem (viral informativo, no enterprise).\n\n¿Quieres que arme un post nuevo inspirado en este estilo para tu marca (agentes IA / DevOps), sin copiar el contenido? Responde sí y el ángulo, o pide cambios.\n\nRef: https://www.instagram.com/p/ABC123/"
+}

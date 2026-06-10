@@ -1,0 +1,66 @@
+{
+  "owner": "Mauricio Guillermo Castro Sandoval",
+  "email": "maurog.castros@gmail.com",
+  "linkedin": "https://www.linkedin.com/in/maurog-castros/",
+  "location": "Santiago, Chile",
+  "cv_dir": "content/CV",
+  "cv_include_globs": ["Mauricio*.pdf", "CV_Mauricio*.pdf"],
+  "cv_exclude_patterns": ["Carlos_Perez"],
+  "target_roles": [
+    "DevOps Engineer",
+    "Senior DevOps",
+    "Site Reliability Engineer",
+    "SRE",
+    "Cloud Engineer",
+    "Cloud Architect",
+    "Platform Engineer",
+    "MLOps Engineer",
+    "AI Engineer",
+    "AI Platform Engineer",
+    "Technical Lead",
+    "DevSecOps",
+    "Data Engineer"
+  ],
+  "core_skills": [
+    "kubernetes", "docker", "aws", "azure", "gcp", "terraform", "jenkins",
+    "github actions", "ci/cd", "devops", "sre", "observability", "argocd",
+    "gitops", "python", "mlops", "llm", "rag", "finops", "devsecops",
+    "platform engineering", "cloudformation", "eks", "prometheus", "grafana"
+  ],
+  "job_post_terms": [
+    "vacante", "hiring", "we're hiring", "we are hiring", "estamos contratando",
+    "buscamos", "se busca", "job opening", "oportunidad laboral", "reclutando",
+    "apply now", "postula", "postular", "trabajo", "empleo", "ingeniero devops",
+    "devops engineer", "sre", "cloud engineer", "platform engineer", "mlops"
+  ],
+  "demote_terms": [
+    "intern", "practicante", "sin experiencia", "junior only", "0-1 years",
+    "chicago", "united states only", "must be us citizen", "no remote"
+  ],
+  "min_match_score": 12,
+  "linkedin_signals_glob": "data/workspace/marketing/intel/data/linkedin_signals_*.json",
+  "linkedin_storage_state": "secrets/linkedin_storage_state.json",
+  "applications_csv": "data/workspace/jobs/applications.csv",
+  "geo_urn": "104621616",
+  "location_search": "Chile",
+  "easy_apply_only": true,
+  "max_auto_apply_per_run": 3,
+  "headless": true,
+  "phone": "+56945046845",
+  "locale": "es-CL",
+  "job_search_keywords": [
+    "devops engineer",
+    "site reliability engineer",
+    "cloud engineer",
+    "platform engineer",
+    "mlops engineer"
+  ],
+  "profile_answers": {
+    "years_experience": "15+",
+    "work_authorization": "Chilean citizen, authorized to work in Chile",
+    "notice_period": "2 weeks",
+    "salary_expectation": "According to market range for senior DevOps/Cloud roles in Chile",
+    "english_level": "Professional working proficiency",
+    "generic_short": "Yes, I have relevant hands-on experience."
+  }
+}

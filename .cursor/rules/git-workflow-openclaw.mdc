@@ -1,0 +1,46 @@
+---
+description: Flujo git obligatorio en openclaw-mauro (servidor Ubuntu)
+alwaysApply: true
+---
+
+# Git workflow — openclaw-mauro
+
+Repositorio principal: `/home/mauro/openclaw-mauro` (Ubuntu 192.168.1.12). También accesible vía `Y:\home\mauro\openclaw-mauro`.
+
+## Antes de modificar archivos
+
+1. Revisar estado y cambios pendientes en el repo donde se trabaja:
+   - `git status`
+   - `git diff` (sin stage) y `git diff --cached` (staged)
+   - `git log -5 --oneline` si hay commits previos
+2. Leer el diff para entender qué ya está modificado y no pisar trabajo ajeno o commits a medias.
+3. No commitear secretos (`secrets/`, `.env`, `client_secret*.json`) ni runtime (`data/`, `.venv-*`).
+
+## Después de cada cambio (obligatorio)
+
+1. Volver a revisar: `git status` + `git diff`.
+2. Stagear y commitear con mensaje claro en español o inglés técnico:
+
+```bash
+git add .
+git commit -m "tipo: resumen breve
+
+Detalle de qué cambió y por qué (1-3 oraciones)."
+```
+
+Usar Conventional Commits en el subject: `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`.
+
+**Nota:** `-m` es de `git commit`, no de `git add`.
+
+3. No hacer `git push` salvo que el usuario lo pida.
+4. Preferir commits atómicos por tema (finanzas, intel, gitignore, etc.) si el diff es muy grande.
+
+## Comandos útiles
+
+```bash
+# Quitar del índice sin borrar disco (venv, data mal agregados)
+git rm -r --cached .venv-finanzas-docker data secrets 2>/dev/null || true
+
+# Verificar que .gitignore funciona
+git check-ignore -v .venv-finanzas-docker/
+```

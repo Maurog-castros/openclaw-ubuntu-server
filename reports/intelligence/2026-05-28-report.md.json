@@ -1,0 +1,239 @@
+{
+  "payloads": [
+    {
+      "text": "# Daily Intelligence Report - Chile\n**Fecha:** 28 de mayo de 2026 (Jueves)\n**Analista:** Intel-Agent para Mauro Castro\n\n---\n\n### 📊 Resumen Ejecutivo\nEl mercado financiero chileno muestra un comportamiento alcista, impulsado por expectativas de desescalada en el conflicto geopolítico entre Irán y Estados Unidos. A nivel social, la conversación pública se divide entre el entretenimiento televisivo masivo y una creciente preocupación por la ciberseguridad y el impacto de la Inteligencia Artificial, temas que están redefiniendo las regulaciones y el consumo digital en el país.\n\n---\n\n### 🔥 Top 5 Tendencias (Chile - Mayo 2026)\n1.  **Dominio del Video Corto y Social Commerce:** El formato vertical sigue siendo rey; las redes sociales actúan cada vez más como motores de búsqueda para la Gen Z, priorizando la autenticidad radical sobre el contenido pulido.\n2.  **Ciberseguridad y Nuevas Regulaciones:** Tras el análisis reciente del impacto de la IA y el *phishing*, junto con la nueva Ley Marco de Ciberseguridad, la protección de datos es un tema viral y crítico para empresas y usuarios.\n3.  **Engagement Televisivo:** Programas como #GanarOServir y #ContigoCHV están generando picos masivos de conversación en redes, demostrando que la TV lineal sigue siendo el detonante principal de tendencias digitales.\n4.  **Agenda Política Judicial:** El caso del diputado Joaquín Lavín (notificado por fraude al fisco y tráfico de influencia) mantiene alta la atención pública y polarización en foros digitales.\n5.  **Colaboración Marca-Creador:** Las empresas están migrando de competir con creadores a colaborar con ellos, integrando el *social commerce* directamente en los flujos de contenido viral.\n\n---\n\n### 🏢 Impacto para PYMEs Chile\n-   **Oportunidad de Venta Directa:** Aprovechar que Instagram y TikTok funcionan como buscadores optimizando perfiles con palabras clave locales y tutoriales prácticos.\n-   **Riesgo Cibernético:** La implementación de la nueva Ley Marco de Ciberseguridad exige a las PYMEs reforzar sus protocolos contra *phishing* y asegurar la infraestructura digital para evitar sanciones o pérdida de confianza.\n-   **Estrategia de Contenido:** Priorizar videos cortos auténticos que muestren el \"detrás de escena\" del negocio, alineándose con la tendencia de consumo actual.\n\n---\n\n### 📈 Acciones Hoy (Bolsa de Santiago)\n*Datos al cierre del 27/05 y proyección 28/05*\n\n**Indicadores Clave:**\n-   **S&P IPSA:** ~10.922,71 pts (+1,63%) 🟢\n-   **Dólar (CLP):** $894,05\n-   **UF:** $40.543,07\n\n**Acciones Destacadas (Alzas recientes):**\n1.  **Cencosud (CSIG):** +6,76% 🚀\n2.  **Banco de Crédito e Inversiones (BCIE):** +3,23%\n3.  **Compañía de Cervecerías Unidas (CCU):** +3,38%\n4.  **Empresas CMPC:** +3,01%\n\n---\n\n### 📚 Fuentes Consultadas\n-   [Bolsa y Mercados - BTG Pactual](https://app.btgpactual.cl/mercados-en-linea/detalle)\n-   [Mercados en Línea - DF Cl](https://www.df.cl/marketdata/bolsadesantiago)\n-   [IPSA Index - Bloomberg Linea](https://www.bloomberglinea.com/quote/IPSA:IND/)\n-   [LarrainVial Mercados](https://mercados.larrainvial.com/www/v2/index.html?mercado=chile)\n-   [Análisis de Mercado - XTB](https://www.xtb.com/cl/analisis-y-noticias/analisis-de-mercado/la-bolsa-hoy-el-petroleo-sube-tras-la-represalia-irani)\n-   [Uso de Redes Sociales en Chile - Seonet Digital](https://www.seonetdigital.cl/uso-de-redes-sociales-en-chile)\n-   [Tendencias IAB Chile 2026](https://iab.cl/noticias-y-estudios/post-tendencias-que-redefinen-las-redes-sociales-en-2026/)",
+      "mediaUrl": null
+    }
+  ],
+  "meta": {
+    "durationMs": 59575,
+    "agentMeta": {
+      "sessionId": "b65c9bdb-bc86-4fe6-acc0-172865c988c8",
+      "sessionFile": "/home/node/.openclaw/agents/intel/sessions/b65c9bdb-bc86-4fe6-acc0-172865c988c8.jsonl",
+      "provider": "remote-lm",
+      "model": "openclaw-remote",
+      "contextTokens": 32768,
+      "agentHarnessId": "pi",
+      "lastCallUsage": {
+        "input": 0,
+        "output": 0,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "total": 0
+      },
+      "contextBudgetStatus": {
+        "schemaVersion": 1,
+        "source": "pre-prompt-estimate",
+        "updatedAt": 1779954587864,
+        "provider": "remote-lm",
+        "model": "openclaw-remote",
+        "route": "fits",
+        "shouldCompact": false,
+        "estimatedPromptTokens": 6758,
+        "contextTokenBudget": 32768,
+        "promptBudgetBeforeReserve": 16384,
+        "reserveTokens": 16384,
+        "effectiveReserveTokens": 16384,
+        "remainingPromptBudgetTokens": 9626,
+        "overflowTokens": 0,
+        "toolResultReducibleChars": 0,
+        "messageCount": 14,
+        "unwindowedMessageCount": 14,
+        "sessionId": "b65c9bdb-bc86-4fe6-acc0-172865c988c8"
+      }
+    },
+    "aborted": false,
+    "systemPromptReport": {
+      "source": "run",
+      "generatedAt": 1779954587710,
+      "sessionId": "b65c9bdb-bc86-4fe6-acc0-172865c988c8",
+      "sessionKey": "agent:intel:daily:2026-05-28",
+      "provider": "remote-lm",
+      "model": "openclaw-remote",
+      "workspaceDir": "/home/node/.openclaw/workspace/marketing/intel",
+      "bootstrapMaxChars": 12000,
+      "bootstrapTotalMaxChars": 8000,
+      "bootstrapTruncation": {
+        "warningMode": "always",
+        "warningShown": false,
+        "truncatedFiles": 0,
+        "nearLimitFiles": 0,
+        "totalNearLimit": false
+      },
+      "sandbox": {
+        "mode": "off",
+        "sandboxed": false
+      },
+      "systemPrompt": {
+        "chars": 780,
+        "projectContextChars": 0,
+        "nonProjectContextChars": 780,
+        "hash": "f694fabf7509b757164fb9db14b3f388173ffa012a25e32d436e5511941f1565"
+      },
+      "injectedWorkspaceFiles": [
+        {
+          "name": "AGENTS.md",
+          "path": "/home/node/.openclaw/workspace/marketing/intel/AGENTS.md",
+          "missing": false,
+          "rawChars": 2460,
+          "injectedChars": 2460,
+          "truncated": false
+        },
+        {
+          "name": "SOUL.md",
+          "path": "/home/node/.openclaw/workspace/marketing/intel/SOUL.md",
+          "missing": false,
+          "rawChars": 1853,
+          "injectedChars": 1853,
+          "truncated": false
+        },
+        {
+          "name": "TOOLS.md",
+          "path": "/home/node/.openclaw/workspace/marketing/intel/TOOLS.md",
+          "missing": false,
+          "rawChars": 910,
+          "injectedChars": 910,
+          "truncated": false
+        },
+        {
+          "name": "IDENTITY.md",
+          "path": "/home/node/.openclaw/workspace/marketing/intel/IDENTITY.md",
+          "missing": false,
+          "rawChars": 163,
+          "injectedChars": 163,
+          "truncated": false
+        },
+        {
+          "name": "USER.md",
+          "path": "/home/node/.openclaw/workspace/marketing/intel/USER.md",
+          "missing": false,
+          "rawChars": 534,
+          "injectedChars": 534,
+          "truncated": false
+        },
+        {
+          "name": "HEARTBEAT.md",
+          "path": "/home/node/.openclaw/workspace/marketing/intel/HEARTBEAT.md",
+          "missing": false,
+          "rawChars": 225,
+          "injectedChars": 225,
+          "truncated": false
+        }
+      ],
+      "skills": {
+        "promptChars": 711,
+        "hash": "7a268b72ed0dfc97a53d4d45e107497ac80241edf9a12535be0c87a8b70c8fc9",
+        "entries": [
+          {
+            "name": "browser-automation",
+            "blockChars": 133
+          },
+          {
+            "name": "canvas",
+            "blockChars": 95
+          }
+        ]
+      },
+      "tools": {
+        "listChars": 0,
+        "schemaChars": 3993,
+        "entries": [
+          {
+            "name": "read",
+            "summaryChars": 298,
+            "summaryHash": "f8a1d7cf1ecfe02b1b5865c93387e6a5891e5079117b4fe18614b6f912521727",
+            "schemaChars": 304,
+            "schemaHash": "5fad0fa7493528bc4284f5c447781325f67099f5fc018206efdc461d33962e85",
+            "propertiesCount": 3
+          },
+          {
+            "name": "edit",
+            "summaryChars": 326,
+            "summaryHash": "c498a85576e187d069e8e8ea4f70f81bddd57829600d385ef61c4359fd634c9e",
+            "schemaChars": 834,
+            "schemaHash": "35f838a1c312a5795b1fc1f7b36fba400cc87229a0025c42c248f12f43ff6d6f",
+            "propertiesCount": 2
+          },
+          {
+            "name": "write",
+            "summaryChars": 127,
+            "summaryHash": "cdb1c46027b22d1f1b923b47bfe297821d9fe589a9f9d92994961948060a4d89",
+            "schemaChars": 225,
+            "schemaHash": "7e51d1de0f2ccb5fe8de82d51ee3a1d9065e3c4f7c53497ce12f283d6f2f5aa0",
+            "propertiesCount": 2
+          },
+          {
+            "name": "exec",
+            "summaryChars": 446,
+            "summaryHash": "369f5e5e195c647ab1e3cfad282e6d25488d4b9fe269f1157e273a546ca80295",
+            "schemaChars": 1187,
+            "schemaHash": "75ca88a76588ace4567865f751df8a229a04a7470a102a001cc46ec8ec005bff",
+            "propertiesCount": 12
+          },
+          {
+            "name": "web_search",
+            "summaryChars": 65,
+            "summaryHash": "b38e9b3c079beaa988d3c576303660b91a55c2e72f56351da04160529173273f",
+            "schemaChars": 991,
+            "schemaHash": "24de6a88147bd50f6312e3c93615c22537d283238c6862750994fd2d13a1c228",
+            "propertiesCount": 12
+          },
+          {
+            "name": "memory_search",
+            "summaryChars": 605,
+            "summaryHash": "0f918d28864d3682ae77731f149273997c84773592a466b18c7cd0121b599a05",
+            "schemaChars": 237,
+            "schemaHash": "0cc2ef5113533f7e2e08a684b41eeb3eb31f65cdd1f55ff3eb8fc59ddf33683b",
+            "propertiesCount": 4
+          },
+          {
+            "name": "memory_get",
+            "summaryChars": 239,
+            "summaryHash": "bff1141a3da31a345c550337417efc9ace4da2909004606c727c59ca1a294495",
+            "schemaChars": 215,
+            "schemaHash": "559dad1c0c7e971d1cbc830bca1966c87e451a9f42c8a9b94dc4a583f42d88bd",
+            "propertiesCount": 4
+          }
+        ]
+      },
+      "currentTurn": {
+        "promptChars": 201,
+        "runtimeContextChars": 0
+      }
+    },
+    "finalPromptText": "Genera el Daily Intelligence Report de hoy para Chile con: Strong Trends, Technical Pain Points, Viral Topics, Potential Clients, Product Opportunities, Recommended Content. Incluye fuentes URL reales.",
+    "finalAssistantVisibleText": "# Daily Intelligence Report - Chile\n**Fecha:** 28 de mayo de 2026 (Jueves)\n**Analista:** Intel-Agent para Mauro Castro\n\n---\n\n### 📊 Resumen Ejecutivo\nEl mercado financiero chileno muestra un comportamiento alcista, impulsado por expectativas de desescalada en el conflicto geopolítico entre Irán y Estados Unidos. A nivel social, la conversación pública se divide entre el entretenimiento televisivo masivo y una creciente preocupación por la ciberseguridad y el impacto de la Inteligencia Artificial, temas que están redefiniendo las regulaciones y el consumo digital en el país.\n\n---\n\n### 🔥 Top 5 Tendencias (Chile - Mayo 2026)\n1.  **Dominio del Video Corto y Social Commerce:** El formato vertical sigue siendo rey; las redes sociales actúan cada vez más como motores de búsqueda para la Gen Z, priorizando la autenticidad radical sobre el contenido pulido.\n2.  **Ciberseguridad y Nuevas Regulaciones:** Tras el análisis reciente del impacto de la IA y el *phishing*, junto con la nueva Ley Marco de Ciberseguridad, la protección de datos es un tema viral y crítico para empresas y usuarios.\n3.  **Engagement Televisivo:** Programas como #GanarOServir y #ContigoCHV están generando picos masivos de conversación en redes, demostrando que la TV lineal sigue siendo el detonante principal de tendencias digitales.\n4.  **Agenda Política Judicial:** El caso del diputado Joaquín Lavín (notificado por fraude al fisco y tráfico de influencia) mantiene alta la atención pública y polarización en foros digitales.\n5.  **Colaboración Marca-Creador:** Las empresas están migrando de competir con creadores a colaborar con ellos, integrando el *social commerce* directamente en los flujos de contenido viral.\n\n---\n\n### 🏢 Impacto para PYMEs Chile\n-   **Oportunidad de Venta Directa:** Aprovechar que Instagram y TikTok funcionan como buscadores optimizando perfiles con palabras clave locales y tutoriales prácticos.\n-   **Riesgo Cibernético:** La implementación de la nueva Ley Marco de Ciberseguridad exige a las PYMEs reforzar sus protocolos contra *phishing* y asegurar la infraestructura digital para evitar sanciones o pérdida de confianza.\n-   **Estrategia de Contenido:** Priorizar videos cortos auténticos que muestren el \"detrás de escena\" del negocio, alineándose con la tendencia de consumo actual.\n\n---\n\n### 📈 Acciones Hoy (Bolsa de Santiago)\n*Datos al cierre del 27/05 y proyección 28/05*\n\n**Indicadores Clave:**\n-   **S&P IPSA:** ~10.922,71 pts (+1,63%) 🟢\n-   **Dólar (CLP):** $894,05\n-   **UF:** $40.543,07\n\n**Acciones Destacadas (Alzas recientes):**\n1.  **Cencosud (CSIG):** +6,76% 🚀\n2.  **Banco de Crédito e Inversiones (BCIE):** +3,23%\n3.  **Compañía de Cervecerías Unidas (CCU):** +3,38%\n4.  **Empresas CMPC:** +3,01%\n\n---\n\n### 📚 Fuentes Consultadas\n-   [Bolsa y Mercados - BTG Pactual](https://app.btgpactual.cl/mercados-en-linea/detalle)\n-   [Mercados en Línea - DF Cl](https://www.df.cl/marketdata/bolsadesantiago)\n-   [IPSA Index - Bloomberg Linea](https://www.bloomberglinea.com/quote/IPSA:IND/)\n-   [LarrainVial Mercados](https://mercados.larrainvial.com/www/v2/index.html?mercado=chile)\n-   [Análisis de Mercado - XTB](https://www.xtb.com/cl/analisis-y-noticias/analisis-de-mercado/la-bolsa-hoy-el-petroleo-sube-tras-la-represalia-irani)\n-   [Uso de Redes Sociales en Chile - Seonet Digital](https://www.seonetdigital.cl/uso-de-redes-sociales-en-chile)\n-   [Tendencias IAB Chile 2026](https://iab.cl/noticias-y-estudios/post-tendencias-que-redefinen-las-redes-sociales-en-2026/)",
+    "finalAssistantRawText": "# Daily Intelligence Report - Chile\n**Fecha:** 28 de mayo de 2026 (Jueves)\n**Analista:** Intel-Agent para Mauro Castro\n\n---\n\n### 📊 Resumen Ejecutivo\nEl mercado financiero chileno muestra un comportamiento alcista, impulsado por expectativas de desescalada en el conflicto geopolítico entre Irán y Estados Unidos. A nivel social, la conversación pública se divide entre el entretenimiento televisivo masivo y una creciente preocupación por la ciberseguridad y el impacto de la Inteligencia Artificial, temas que están redefiniendo las regulaciones y el consumo digital en el país.\n\n---\n\n### 🔥 Top 5 Tendencias (Chile - Mayo 2026)\n1.  **Dominio del Video Corto y Social Commerce:** El formato vertical sigue siendo rey; las redes sociales actúan cada vez más como motores de búsqueda para la Gen Z, priorizando la autenticidad radical sobre el contenido pulido.\n2.  **Ciberseguridad y Nuevas Regulaciones:** Tras el análisis reciente del impacto de la IA y el *phishing*, junto con la nueva Ley Marco de Ciberseguridad, la protección de datos es un tema viral y crítico para empresas y usuarios.\n3.  **Engagement Televisivo:** Programas como #GanarOServir y #ContigoCHV están generando picos masivos de conversación en redes, demostrando que la TV lineal sigue siendo el detonante principal de tendencias digitales.\n4.  **Agenda Política Judicial:** El caso del diputado Joaquín Lavín (notificado por fraude al fisco y tráfico de influencia) mantiene alta la atención pública y polarización en foros digitales.\n5.  **Colaboración Marca-Creador:** Las empresas están migrando de competir con creadores a colaborar con ellos, integrando el *social commerce* directamente en los flujos de contenido viral.\n\n---\n\n### 🏢 Impacto para PYMEs Chile\n-   **Oportunidad de Venta Directa:** Aprovechar que Instagram y TikTok funcionan como buscadores optimizando perfiles con palabras clave locales y tutoriales prácticos.\n-   **Riesgo Cibernético:** La implementación de la nueva Ley Marco de Ciberseguridad exige a las PYMEs reforzar sus protocolos contra *phishing* y asegurar la infraestructura digital para evitar sanciones o pérdida de confianza.\n-   **Estrategia de Contenido:** Priorizar videos cortos auténticos que muestren el \"detrás de escena\" del negocio, alineándose con la tendencia de consumo actual.\n\n---\n\n### 📈 Acciones Hoy (Bolsa de Santiago)\n*Datos al cierre del 27/05 y proyección 28/05*\n\n**Indicadores Clave:**\n-   **S&P IPSA:** ~10.922,71 pts (+1,63%) 🟢\n-   **Dólar (CLP):** $894,05\n-   **UF:** $40.543,07\n\n**Acciones Destacadas (Alzas recientes):**\n1.  **Cencosud (CSIG):** +6,76% 🚀\n2.  **Banco de Crédito e Inversiones (BCIE):** +3,23%\n3.  **Compañía de Cervecerías Unidas (CCU):** +3,38%\n4.  **Empresas CMPC:** +3,01%\n\n---\n\n### 📚 Fuentes Consultadas\n-   [Bolsa y Mercados - BTG Pactual](https://app.btgpactual.cl/mercados-en-linea/detalle)\n-   [Mercados en Línea - DF Cl](https://www.df.cl/marketdata/bolsadesantiago)\n-   [IPSA Index - Bloomberg Linea](https://www.bloomberglinea.com/quote/IPSA:IND/)\n-   [LarrainVial Mercados](https://mercados.larrainvial.com/www/v2/index.html?mercado=chile)\n-   [Análisis de Mercado - XTB](https://www.xtb.com/cl/analisis-y-noticias/analisis-de-mercado/la-bolsa-hoy-el-petroleo-sube-tras-la-represalia-irani)\n-   [Uso de Redes Sociales en Chile - Seonet Digital](https://www.seonetdigital.cl/uso-de-redes-sociales-en-chile)\n-   [Tendencias IAB Chile 2026](https://iab.cl/noticias-y-estudios/post-tendencias-que-redefinen-las-redes-sociales-en-2026/)",
+    "replayInvalid": false,
+    "livenessState": "working",
+    "stopReason": "stop",
+    "executionTrace": {
+      "winnerProvider": "remote-lm",
+      "winnerModel": "openclaw-remote",
+      "attempts": [
+        {
+          "provider": "remote-lm",
+          "model": "openclaw-remote",
+          "result": "success",
+          "stage": "assistant"
+        }
+      ],
+      "fallbackUsed": false,
+      "runner": "embedded"
+    },
+    "requestShaping": {
+      "thinking": "off"
+    },
+    "toolSummary": {
+      "calls": 4,
+      "tools": [
+        "web_search"
+      ],
+      "failures": 0
+    },
+    "completion": {
+      "stopReason": "stop",
+      "finishReason": "stop"
+    }
+  }
+}

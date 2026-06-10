@@ -1,0 +1,16 @@
+{
+  "store": "FULL SHOPPING",
+  "store_branch": "AV.CARLOS VALDOVINOS 251 San Joaquin",
+  "merchant_rut": "76.636.728-3",
+  "receipt_number": "2041522",
+  "purchase_date": "2026-06-03",
+  "purchase_time": "13:05:00",
+  "payment_method": "desconocido",
+  "ticket_total": 4900,
+  "items": [
+    {"product": "K300", "quantity": 1, "amount": 300, "category": "salud_farmacia"},
+    {"product": "KD_6971286454679", "quantity": 2, "amount": 1400, "category": "salud_farmacia"},
+    {"product": "CX_6975802804290", "quantity": 1, "amount": 2000, "category": "salud_farmacia"},
+    {"product": "7pc雕刻刀/CUCHILLO DE ESCULPIR EX_604933", "quantity": 1, "amount": 1200, "category": "salud_farmacia"}
+  ]
+}

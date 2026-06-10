@@ -1,0 +1,10 @@
+#!/bin/sh
+quote_arg() {
+  printf "'%s'" "$(printf '%s' "$1" | sed "s/'/'\\''/g")"
+}
+cmd=$(quote_arg "$1")
+shift
+for arg in "$@"; do
+  cmd="$cmd $(quote_arg "$arg")"
+done
+exec host-sh "$cmd"

@@ -1,0 +1,34 @@
+{
+  "aliases": [
+    {
+      "id": "mall-chino",
+      "label": "mall chino",
+      "patterns": [
+        "comercial kaisheng",
+        "comercial kaish",
+        "kaisheng"
+      ],
+      "notes": "Comercial Kaisheng en cartola Santander (Tembici / mall chino)"
+    },
+    {
+      "id": "lider",
+      "label": "lider",
+      "patterns": [
+        "hiper lider",
+        "lider san j",
+        "compra hiper lider"
+      ],
+      "notes": "Compras Lider (cartola o boleta)"
+    },
+    {
+      "id": "simi",
+      "label": "simi",
+      "patterns": [
+        "farmacia simi",
+        "doctor simi",
+        "farmacias del dr simi"
+      ],
+      "notes": "Farmacias Simi"
+    }
+  ]
+}

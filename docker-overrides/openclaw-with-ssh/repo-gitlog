@@ -1,0 +1,39 @@
+#!/bin/sh
+set -eu
+limit="${1:-15}"
+root="$(git rev-parse --show-toplevel 2>/dev/null)" || { echo "repo-gitlog: no git repo" >&2; exit 1; }
+cd "$root"
+out="GITLOG.md"
+{
+  echo "# GITLOG"
+  echo
+  echo "Actualizado: $(date -Iseconds)"
+  echo "Repo: $(basename "$root")"
+  echo "Branch: $(git branch --show-current 2>/dev/null || echo detached)"
+  echo
+  echo "## Ultimos $limit commits"
+  for sha in $(git log -n "$limit" --format='%H'); do
+    short="$(git rev-parse --short "$sha")"
+    subject="$(git log -1 --format='%s' "$sha")"
+    author="$(git log -1 --format='%an <%ae>' "$sha")"
+    date="$(git log -1 --date=short --format='%ad' "$sha")"
+    body="$(git log -1 --format='%b' "$sha" | sed '/^[[:space:]]*$/d' | head -20)"
+    echo
+    echo "### $short - $subject"
+    echo
+    echo "- Fecha: $date"
+    echo "- Autor: $author"
+    if [ -n "$body" ]; then
+      echo "- Comentario:"
+      printf '%s\n' "$body" | sed 's/^/  - /'
+    fi
+    echo "- Archivos modificados:"
+    files="$(git diff-tree --root --no-commit-id --name-only -r "$sha" | head -40)"
+    if [ -n "$files" ]; then
+      printf '%s\n' "$files" | sed 's/^/  - /'
+    else
+      echo "  - sin archivos listados"
+    fi
+  done
+} > "$out"
+echo "$out actualizado"

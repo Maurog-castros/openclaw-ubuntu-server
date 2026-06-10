@@ -1,0 +1,247 @@
+{
+  "updated_at": "2026-06-09T11:29:32-04:00",
+  "count": 16,
+  "cv_dir": "/home/mauro/openclaw-mauro/content/CV",
+  "items": [
+    {
+      "filename": "CV_MauricioCastro-IaC-022026.pdf",
+      "path": "/home/mauro/openclaw-mauro/content/CV/CV_MauricioCastro-IaC-022026.pdf",
+      "tags": [
+        "devops",
+        "kubernetes",
+        "cloud",
+        "iac",
+        "mlops",
+        "ai",
+        "data",
+        "techlead",
+        "premium"
+      ],
+      "chars": 5106,
+      "excerpt": "Mauricio Guillermo Castro Sandoval Senior Cloud Engineer | IaC | Cloud Arc| Python Automation Santiago, Chile | +56 9 4504 6845 | maurog.castros@gmail.com | LinkedIn : https://www.linkedin.com/in/maurog-castros/ | GitHub:https://github.com/Maurog-castros | Portafolio: https://maurocastro.cl Professional Summary Senior Cloud Engineer with 10+ years of experience designing, implementing, and operating AWS-based cloud infrastructures using Infrastructure as Code (Terraform and CloudFormation). Strong expertise in CI/CD automation, distributed systems, resilient architectures, and secure cloud networking. Proven ability to translate functional and feature requirements into scalable, production-ready AWS solutions. Hands-on experience with Python automation, EC2/EKS architectures, VPC design, IAM least-privilege models, high availability strategies, and cloud cost optimization. Experienced working in agile, cross-functional, and international environments. Comfortable operating fully in English. Technical Skills Cloud & AWS AWS (EC2, EKS, Lambda, VPC, IAM, ALB/NLB, Route53, CloudWatch, S3, WAF, Auto Scaling, Systems Manager), Azure Infrastructure as Code Terraform (modular, reusable, multi-environment design), CloudFormation Programming Python (automation, scripting, deployment validation), C#, JavaScript/TypeScript, SQL (T-SQL), Java CI/CD Jenkins, GitHub Actions, GitLab CI Cloud Architecture VPC segmentation, IAM least-privilege policies, secure networking, TLS termination, roll"
+    },
+    {
+      "filename": "CV_MauricioCastro_040626.pdf",
+      "path": "/home/mauro/openclaw-mauro/content/CV/CV_MauricioCastro_040626.pdf",
+      "tags": [
+        "devops",
+        "kubernetes",
+        "cloud",
+        "iac",
+        "mlops",
+        "data",
+        "techlead",
+        "premium"
+      ],
+      "chars": 2954,
+      "excerpt": "Mauricio Guillermo Castro Sandoval Data Engineer AWS | Big Data & Serverless Architect Santiago, Chile | +56 9 4504 6845 | maurog.castros@gmail.com | LinkedIn : https://www.linkedin.com/in/maurog-castros/ | GitHub:https://github.com/Maurog-castros | Portafolio: maurocastro.cl PERFIL PROFESIONAL Ingeniero con más de 10 años de experiencia en arquitectura cloud y automatización en AWS, especializado en soluciones serverless y procesamiento distribuido de datos. Experiencia en diseño de flujos ETL, orquestación con Step Functions, Lambda y manejo avanzado de políticas IAM bajo principios de mínimo privilegio. Experiencia en modelamiento SQL, optimización de consultas y arquitectura de clusters. Fuerte orientación a resiliencia, seguridad y eficiencia de costos en entornos AWS. COMPETENCIAS TÉCNICAS AWS & Big Data ● AWS Lambda ● AWS Step Functions ● Amazon S3 ● IAM (Policies, Roles, Least Privilege) ● CloudWatch ● EC2 (Auto Scaling, VPC) ● Arquitecturas Serverless ● Diseño de flujos ETL Procesamiento y Bases de Datos ● SQL (T-SQL, modelamiento relacional) ● Optimización de queries ● Arquitecturas de clusters ● Diseño de APIs para consumo y exposición de datos ● Redis (caching distribuido) Infraestructura & Automatización ● Terraform / CloudFormation ● Docker / Kubernetes ● Jenkins / GitHub Actions ● Python (automatización y microservicios) EXPERIENCIA PROFESIONAL HDI Seguros Senior DevSecOps / Cloud Engineer Oct 2024 – Presente | Santiago, Chile ● Diseño y operación de infraestru"
+    },
+    {
+      "filename": "CV_MauricioCastro_DataEngineer.pdf",
+      "path": "/home/mauro/openclaw-mauro/content/CV/CV_MauricioCastro_DataEngineer.pdf",
+      "tags": [
+        "devops",
+        "kubernetes",
+        "cloud",
+        "iac",
+        "mlops",
+        "data",
+        "techlead",
+        "premium"
+      ],
+      "chars": 2954,
+      "excerpt": "Mauricio Guillermo Castro Sandoval Data Engineer AWS | Big Data & Serverless Architect Santiago, Chile | +56 9 4504 6845 | maurog.castros@gmail.com | LinkedIn : https://www.linkedin.com/in/maurog-castros/ | GitHub:https://github.com/Maurog-castros | Portafolio: maurocastro.cl PERFIL PROFESIONAL Ingeniero con más de 10 años de experiencia en arquitectura cloud y automatización en AWS, especializado en soluciones serverless y procesamiento distribuido de datos. Experiencia en diseño de flujos ETL, orquestación con Step Functions, Lambda y manejo avanzado de políticas IAM bajo principios de mínimo privilegio. Experiencia en modelamiento SQL, optimización de consultas y arquitectura de clusters. Fuerte orientación a resiliencia, seguridad y eficiencia de costos en entornos AWS. COMPETENCIAS TÉCNICAS AWS & Big Data ● AWS Lambda ● AWS Step Functions ● Amazon S3 ● IAM (Policies, Roles, Least Privilege) ● CloudWatch ● EC2 (Auto Scaling, VPC) ● Arquitecturas Serverless ● Diseño de flujos ETL Procesamiento y Bases de Datos ● SQL (T-SQL, modelamiento relacional) ● Optimización de queries ● Arquitecturas de clusters ● Diseño de APIs para consumo y exposición de datos ● Redis (caching distribuido) Infraestructura & Automatización ● Terraform / CloudFormation ● Docker / Kubernetes ● Jenkins / GitHub Actions ● Python (automatización y microservicios) EXPERIENCIA PROFESIONAL HDI Seguros Senior DevSecOps / Cloud Engineer Oct 2024 – Presente | Santiago, Chile ● Diseño y operación de infraestru"
+    },
+    {
+      "filename": "CV_Mauricio_Castro_AI_Developer.pdf",
+      "path": "/home/mauro/openclaw-mauro/content/CV/CV_Mauricio_Castro_AI_Developer.pdf",
+      "tags": [
+        "devops",
+        "kubernetes",
+        "cloud",
+        "mlops",
+        "ai",
+        "techlead"
+      ],
+      "chars": 4405,
+      "excerpt": "Mauricio Guillermo Castro Sandoval AI Engineer | AI Developer | Cloud DevOps | MLOps Engineer Santiago, Chile | +56 9 4504 6845 | maurog.castros@gmail.com LinkedIn: linkedin.com/in/maurog-castros | GitHub: github.com/Maurog-castros | Portafolio: maurocastro.cl Perfil Profesional Ingeniero de Software y Cloud con experiencia en desarrollo Python, automatización, DevOps, plataformas cloud e integración de soluciones basadas en Inteligencia Artificial. Experiencia construyendo agentes IA, soluciones RAG, integración de APIs OpenAI, Azure OpenAI, AWS Bedrock y modelos open-source. Capacidad para diseñar arquitecturas escalables, APIs, microservicios y pipelines de datos, colaborando con equipos de arquitectura, QA, seguridad y operaciones. Resumen de Ajuste para Desarrollador IA - HITSS • Desarrollo de soluciones IA y automatización empresarial. • Python avanzado para APIs, automatización y procesamiento de datos. • Integración de OpenAI, Azure OpenAI, AWS Bedrock y modelos locales. • Experiencia práctica con RAG, embeddings y bases vectoriales. • Docker, Kubernetes y despliegue de servicios productivos. • Diseño de pipelines CI/CD y automatización de despliegues. • Experiencia en observabilidad y monitoreo de plataformas. Competencias Técnicas Lenguajes: Python, Java, Groovy, Bash, PowerShell Frameworks IA: LangChain, LlamaIndex, agentes IA, RAG LLM Providers: OpenAI, Azure OpenAI, AWS Bedrock, Ollama, Hugging Face Vector Databases: ChromaDB, pgvector, embeddings APIs: REST APIs"
+    },
+    {
+      "filename": "CV_Mauricio_Castro_AWS_Cloud_Engineer_Logistica.pdf",
+      "path": "/home/mauro/openclaw-mauro/content/CV/CV_Mauricio_Castro_AWS_Cloud_Engineer_Logistica.pdf",
+      "tags": [
+        "devops",
+        "kubernetes",
+        "cloud",
+        "iac",
+        "data",
+        "techlead"
+      ],
+      "chars": 4563,
+      "excerpt": "Mauricio Guillermo Castro Sandoval Senior AWS Cloud Engineer | Cloud Architect | DevOps | FinOps Santiago, Chile | +56 9 4504 6845 | maurog.castros@gmail.com LinkedIn: linkedin.com/in/maurog-castros | GitHub: github.com/Maurog-castros | maurocastro.cl Perfil Profesional Ingeniero Cloud y DevOps Senior con más de 15 años de experiencia en tecnología y más de 7 años trabajando con plataformas AWS, automatización, infraestructura como código, observabilidad y operación de servicios críticos. Experiencia liderando iniciativas de modernización cloud, CI/CD, gobierno tecnológico, resiliencia operacional y optimización de costos. Especializado en arquitecturas AWS empresariales, Kubernetes, Terraform, Linux y automatización de infraestructura. Resumen Ejecutivo • Diseño y operación de plataformas AWS empresariales. • Infraestructura multiambiente y multi-cuenta. • Terraform, CloudFormation e Infraestructura como Código. • Kubernetes, Docker y arquitecturas modernas. • GitHub Actions, Jenkins y automatización CI/CD. • Observabilidad, continuidad operacional y resiliencia. • Seguridad Cloud, IAM y cumplimiento. • Optimización de costos y prácticas FinOps. Competencias Técnicas AWS: EC2, IAM, VPC, Lambda, Step Functions, EKS, RDS, S3, CloudWatch, API Gateway IaC: Terraform, CloudFormation Containers: Docker, Kubernetes, EKS CI/CD: Jenkins, GitHub Actions, GitHub Enterprise Observabilidad: CloudWatch, Grafana, DataDog, Apache DevLake Sistemas Operativos: Linux (CentOS, Ubuntu, RedHat), "
+    },
+    {
+      "filename": "CV_Mauricio_Castro_CloudOps_Itau.pdf",
+      "path": "/home/mauro/openclaw-mauro/content/CV/CV_Mauricio_Castro_CloudOps_Itau.pdf",
+      "tags": [
+        "devops",
+        "kubernetes",
+        "cloud",
+        "iac",
+        "mlops",
+        "data",
+        "techlead"
+      ],
+      "chars": 4472,
+      "excerpt": "Mauricio Guillermo Castro Sandoval CloudOps Engineer | Cloud Architect | DevOps | Platform Engineering Santiago, Chile | +56 9 4504 6845 | maurog.castros@gmail.com LinkedIn: linkedin.com/in/maurog-castros | GitHub: github.com/Maurog-castros | Portafolio: maurocastro.cl Perfil Profesional Ingeniero Cloud y DevOps Senior con más de 15 años de experiencia en tecnología y más de 7 años liderando iniciativas de automatización, infraestructura cloud, Kubernetes, CI/CD y observabilidad. Experiencia diseñando plataformas empresariales en AWS, Azure y GCP, habilitando modelos de autoservicio, gobierno de infraestructura, resiliencia operacional y adopción de buenas prácticas DevOps. Orientado a CloudOps, Platform Engineering y transformación tecnológica en entornos de alta exigencia. Resumen Ejecutivo para Itaú CloudOps • Estrategia de adopción Cloud y modernización tecnológica. • Diseño de plataformas reutilizables y automatización self-service. • Kubernetes, EKS, AKS y contenedores empresariales. • Terraform, Ansible e Infraestructura como Código. • Multi-Cloud: AWS, Azure y GCP. • Observabilidad, resiliencia y continuidad operacional. • Liderazgo técnico y acompañamiento de equipos de ingeniería. • Gobierno de plataformas, estándares y mejores prácticas. Competencias Técnicas Cloud: AWS, Azure, GCP Containers: Docker, Kubernetes, EKS, AKS IaC: Terraform, CloudFormation, Ansible CI/CD: Jenkins, GitHub Actions, Azure DevOps Observabilidad: Grafana, CloudWatch, DataDog, DevLake Sistem"
+    },
+    {
+      "filename": "CV_Mauricio_Castro_DevOps_IA_SII_Group.pdf",
+      "path": "/home/mauro/openclaw-mauro/content/CV/CV_Mauricio_Castro_DevOps_IA_SII_Group.pdf",
+      "tags": [
+        "devops",
+        "kubernetes",
+        "cloud",
+        "iac",
+        "mlops",
+        "ai",
+        "data",
+        "techlead"
+      ],
+      "chars": 4045,
+      "excerpt": "Mauricio Guillermo Castro Sandoval DevOps IA | MLOps Engineer | AI Platform Engineer Santiago, Chile | +56 9 4504 6845 | maurog.castros@gmail.com LinkedIn: linkedin.com/in/maurog-castros | GitHub: github.com/Maurog-castros | maurocastro.cl Perfil Profesional Ingeniero Cloud, DevOps y AI Platform Engineer con experiencia en AWS, Azure, Kubernetes, Jenkins, Terraform y observabilidad. Experiencia liderando plataformas CI/CD para más de 200 aplicaciones, automatización de despliegues, métricas DORA y plataformas cloud empresariales. Orientado a MLOps e Infraestructura IA, con experiencia práctica en agentes IA, LLMs, RAG, OpenAI, Ollama, AWS Bedrock, observabilidad de modelos y automatización de pipelines. Competencias Clave para la Vacante • MLOps y ciclo de vida de modelos IA • Kubernetes, EKS, AKS y operación de plataformas distribuidas • Kubeflow (conocimiento arquitectónico y adopción para pipelines ML) • Terraform, CloudFormation e Infraestructura como Código • Jenkins, GitHub Actions y automatización CI/CD • Multi-Cloud: AWS, Azure y GCP • Observabilidad: Prometheus, Grafana, ELK, CloudWatch, DataDog • Versionamiento de datos y modelos (DVC, Git, artefactos) • Python, Bash, PowerShell y automatización • Seguridad Cloud, IAM, OAuth2, OIDC y gestión de secretos Experiencia Profesional HDI Seguros Chile – Senior DevOps / Cloud Engineer (2024 – Actualidad) • Diseño y operación de pipelines CI/CD para más de 200 aplicaciones. • Implementación de métricas DORA mediante Apache D"
+    },
+    {
+      "filename": "CV_Mauricio_Castro_DevOps_SRE_Kubernetes_ArgoCD.pdf",
+      "path": "/home/mauro/openclaw-mauro/content/CV/CV_Mauricio_Castro_DevOps_SRE_Kubernetes_ArgoCD.pdf",
+      "tags": [
+        "devops",
+        "sre",
+        "kubernetes",
+        "cloud",
+        "techlead",
+        "premium"
+      ],
+      "chars": 4276,
+      "excerpt": "Mauricio Guillermo Castro Sandoval Senior DevOps Engineer | Site Reliability Engineer (SRE) | Kubernetes Engineer Santiago, Chile | +56 9 4504 6845 | maurog.castros@gmail.com LinkedIn: linkedin.com/in/maurog-castros | GitHub: github.com/Maurog-castros | maurocastro.cl PERFIL PROFESIONAL Ingeniero DevOps y Cloud Senior con más de 15 años de experiencia en tecnología y más de 7 años liderando automatización, CI/CD, contenedores, observabilidad y operación de plataformas críticas. Especializado en Kubernetes, Jenkins, GitHub, Docker, AWS, GCP y automatización de despliegues. Experiencia implementando prácticas SRE, resiliencia operacional, observabilidad y mejora continua para entornos empresariales. RESUMEN EJECUTIVO • Kubernetes y plataformas de contenedores empresariales. • Jenkins Pipelines as Code. • GitOps, ArgoCD y automatización de despliegues. • Docker y registries privados. • AWS y GCP. • Observabilidad y monitoreo de aplicaciones. • Linux, Bash y troubleshooting avanzado. • DevSecOps e integración con herramientas de calidad y seguridad. COMPETENCIAS TÉCNICAS Containers: Docker, Kubernetes, EKS, Anthos Concepts CI/CD: Jenkins, GitHub Actions, GitOps GitOps: ArgoCD, promoción entre ambientes Cloud: AWS, GCP, Azure Observabilidad: Grafana, CloudWatch, DataDog, DevLake DevSecOps: SonarQube, Dependabot, SCA/SAST Sistemas Operativos: Linux (CentOS, Ubuntu, RedHat) Automatización: Bash, Python, Groovy, PowerShell Versionamiento: GitHub Enterprise, Git EXPERIENCIA PROFESIONA"
+    },
+    {
+      "filename": "CV_Mauricio_Castro_TechLead.pdf",
+      "path": "/home/mauro/openclaw-mauro/content/CV/CV_Mauricio_Castro_TechLead.pdf",
+      "tags": [
+        "devops",
+        "cloud",
+        "mlops",
+        "techlead"
+      ],
+      "chars": 4421,
+      "excerpt": "Mauricio Guillermo Castro Sandoval Technical Lead | Full Stack Architect | Node.js | React | AWS Santiago, Chile | +56 9 4504 6845 | maurog.castros@gmail.com LinkedIn: linkedin.com/in/maurog-castros | GitHub: github.com/Maurog-castros | maurocastro.cl RESUMEN EJECUTIVO Ingeniero de Software y Arquitecto Cloud con más de 15 años de experiencia en desarrollo de aplicaciones empresariales, arquitectura de soluciones, liderazgo técnico y transformación digital. Experiencia liderando equipos multidisciplinarios, desarrollando aplicaciones Full Stack, diseñando arquitecturas escalables y gestionando plataformas cloud en AWS. Amplio conocimiento en Node.js, React, PostgreSQL, GitHub, CI/CD y buenas prácticas de ingeniería de software. PERFIL ALINEADO A LA VACANTE • Liderazgo técnico de equipos de desarrollo. • Arquitectura de soluciones Frontend, Backend y Base de Datos. • Desarrollo Backend con Node.js. • Desarrollo Frontend con React. • Diseño y optimización de bases de datos PostgreSQL. • Gestión de código fuente mediante GitHub. • AWS Cloud Architecture y DevOps. • Mentoría técnica, revisión de código y mejora continua. COMPETENCIAS TÉCNICAS Backend: Node.js, Express, APIs REST, Microservicios Frontend: React, JavaScript, TypeScript, HTML5, CSS3 Bases de Datos: PostgreSQL, SQL Server, MySQL ORM: Sequelize, modelado relacional, migraciones y optimización de consultas Cloud: AWS (EC2, IAM, Lambda, API Gateway, RDS, S3, CloudWatch) DevOps: Jenkins, GitHub Actions, Docker, CI/CD Ver"
+    },
+    {
+      "filename": "CV_Mauricio_Castro_TechLead_Node_React_PostgreSQL.pdf",
+      "path": "/home/mauro/openclaw-mauro/content/CV/CV_Mauricio_Castro_TechLead_Node_React_PostgreSQL.pdf",
+      "tags": [
+        "devops",
+        "cloud",
+        "mlops",
+        "techlead"
+      ],
+      "chars": 4421,
+      "excerpt": "Mauricio Guillermo Castro Sandoval Technical Lead | Full Stack Architect | Node.js | React | AWS Santiago, Chile | +56 9 4504 6845 | maurog.castros@gmail.com LinkedIn: linkedin.com/in/maurog-castros | GitHub: github.com/Maurog-castros | maurocastro.cl RESUMEN EJECUTIVO Ingeniero de Software y Arquitecto Cloud con más de 15 años de experiencia en desarrollo de aplicaciones empresariales, arquitectura de soluciones, liderazgo técnico y transformación digital. Experiencia liderando equipos multidisciplinarios, desarrollando aplicaciones Full Stack, diseñando arquitecturas escalables y gestionando plataformas cloud en AWS. Amplio conocimiento en Node.js, React, PostgreSQL, GitHub, CI/CD y buenas prácticas de ingeniería de software. PERFIL ALINEADO A LA VACANTE • Liderazgo técnico de equipos de desarrollo. • Arquitectura de soluciones Frontend, Backend y Base de Datos. • Desarrollo Backend con Node.js. • Desarrollo Frontend con React. • Diseño y optimización de bases de datos PostgreSQL. • Gestión de código fuente mediante GitHub. • AWS Cloud Architecture y DevOps. • Mentoría técnica, revisión de código y mejora continua. COMPETENCIAS TÉCNICAS Backend: Node.js, Express, APIs REST, Microservicios Frontend: React, JavaScript, TypeScript, HTML5, CSS3 Bases de Datos: PostgreSQL, SQL Server, MySQL ORM: Sequelize, modelado relacional, migraciones y optimización de consultas Cloud: AWS (EC2, IAM, Lambda, API Gateway, RDS, S3, CloudWatch) DevOps: Jenkins, GitHub Actions, Docker, CI/CD Ver"
+    },
+    {
+      "filename": "Mauricio_Castro_CV_DevOps.pdf",
+      "path": "/home/mauro/openclaw-mauro/content/CV/Mauricio_Castro_CV_DevOps.pdf",
+      "tags": [
+        "devops",
+        "cloud",
+        "iac",
+        "data",
+        "techlead",
+        "premium"
+      ],
+      "chars": 1154,
+      "excerpt": "Mauricio Guillermo Castro Sandoval Senior Cloud Engineer | DevSecOps | AWS | IaC Santiago, Chile | maurog.castros@gmail.com | +56 9 4504 6845 Resumen Ingeniero DevOps Senior con experiencia en automatización CI/CD, arquitectura cloud y seguridad. Especializado en AWS, contenedores, IaC y métricas de rendimiento. Enfocado en eficiencia operativa, reducción de costos y despliegues seguros. Experiencia Innovación Radical SpA — Consultor Freelance (Mar 2026 – Actual) - Automatización con Power Automate (-50% tiempos operativos) - Integraciones empresariales y optimización de procesos HDI Seguros — Senior DevSecOps / Cloud Engineer (Oct 2024 – Presente) - Plataforma CI/CD para +200 aplicaciones - Jenkins, Docker, GitHub Actions, SonarQube - Implementación de prácticas DevSecOps y observabilidad GEODIS — Senior Developer / DevSecOps Tech Lead (Mar 2023 – Abr 2024) - MFA + cifrado (-60% vulnerabilidades) - Migración a microservicios y optimización de APIs (+50%) Ingenia Global / Babel — Líder de Desarrollo (Ene 2020 – Ago 2022) - Arquitectura serverless AWS (Lambda, Step Functions) - Reducción de costos (-30%) - CI/CD con Jenkins (-80% fallas)"
+    },
+    {
+      "filename": "Mauricio_Castro_CV_Premium.pdf",
+      "path": "/home/mauro/openclaw-mauro/content/CV/Mauricio_Castro_CV_Premium.pdf",
+      "tags": [
+        "devops",
+        "kubernetes",
+        "cloud",
+        "iac",
+        "techlead",
+        "premium"
+      ],
+      "chars": 1299,
+      "excerpt": "Mauricio Guillermo Castro Sandoval Senior Cloud Engineer | DevSecOps | AWS | IaC | CI/CD Santiago, Chile | +56 9 4504 6845 | maurog.castros@gmail.com LinkedIn: https://www.linkedin.com/in/maurog-castros/ GitHub: https://github.com/Maurog-castros | Portafolio: maurocastro.cl Perfil Ingeniero Cloud & DevSecOps con +15 años de experiencia en AWS, Azure y GCP. Especialista en CI/CD, IaC y seguridad. Enfocado en eficiencia, reducción de costos y despliegues seguros. Experiencia Profesional HDI Seguros — Senior DevSecOps / Cloud Engineer (Oct 2024 – Presente) - Plataforma CI/CD para +200 aplicaciones - DevSecOps: SAST, SCA, Dependabot - Arquitectura multiambiente con rollback GEODIS — Senior Developer / DevSecOps Tech Lead (Mar 2023 – Abr 2024) - Microservicios, MFA, AWS KMS - +50% performance, -60% vulnerabilidades Ingenia Global / Babel — Líder de Desarrollo (Ene 2020 – Ago 2022) - Serverless AWS, Terraform, Jenkins - -30% costos, -80% fallas despliegue Innovación Radical — Technical Lead (Jul 2014 – Ago 2017) - Automatización procesos (-50%) - Odoo, Power BI, SharePoint Skills AWS, Azure, GCP | Terraform | Docker | Kubernetes | Jenkins | GitHub Actions | Python | Node.js Certificaciones CertiProf Lifelong Learning | Scrum SFPC | Docker on AWS | Azure ML | Power BI | Python Avanzado"
+    },
+    {
+      "filename": "Mauricio_Castro_Cloud_IaC.pdf",
+      "path": "/home/mauro/openclaw-mauro/content/CV/Mauricio_Castro_Cloud_IaC.pdf",
+      "tags": [
+        "devops",
+        "kubernetes",
+        "cloud",
+        "iac",
+        "mlops",
+        "ai",
+        "data",
+        "techlead",
+        "premium"
+      ],
+      "chars": 5570,
+      "excerpt": "Mauricio Guillermo Castro Sandoval Cloud Engineer AWS/GCP/Azure | Solution Architect Santiago, Chile | +56 9 4504 6845 | correo: maurog.castros@gmail.com | LinkedIn : https://www.linkedin.com/in/maurog-castros/ | GitHub:https://github.com/Maurog-castros | Portafolio: http://maurocastro.cl PERFIL PROFESIONAL Ingeniero DevOps y Cloud con más de 15 años de experiencia diseñando, automatizando y operando infraestructuras escalables en entornos multi-cloud (AWS, Azure, GCP) mediante Infrastructure as Code (Terraform, CloudFormation) y orquestación de contenedores (Docker, Kubernetes). Especializado en arquitectura de plataformas cloud, CI/CD pipelines, automatización de infraestructura y diseño de entornos seguros y reproducibles bajo modelos DEV / QA / PROD. Experiencia liderando el diseño de plataformas DevOps y DevSecOps resilientes, con foco en seguridad (IAM, mínimo privilegio), observabilidad, alta disponibilidad y continuidad operativa. Experto en arquitecturas cloud distribuidas utilizando IaaS, PaaS y serverless, aplicando patrones de arquitectura transferibles entre proveedores y buenas prácticas de automatización, gobernanza y escalabilidad para plataformas de software de misión crítica.. COMPETENCIAS TÉCNICAS Cloud Services & Diseño de Soluciones y Arquitecturas de Software: 1. Arquitecturas IaaS / PaaS / Serverless 2. Redes virtuales, segmentación y seguridad 3. IAM y control de acceso basado en roles 4. Balanceadores de carga y alta disponibilidad 5. Observabilidad y"
+    },
+    {
+      "filename": "Mauricio_Castro_MLOps_DevOps_IA_ACL (1).pdf",
+      "path": "/home/mauro/openclaw-mauro/content/CV/Mauricio_Castro_MLOps_DevOps_IA_ACL (1).pdf",
+      "tags": [
+        "devops",
+        "kubernetes",
+        "cloud",
+        "iac",
+        "mlops",
+        "ai",
+        "data",
+        "techlead"
+      ],
+      "chars": 2471,
+      "excerpt": "Mauricio Guillermo Castro Sandoval Senior Cloud Engineer | DevOps | MLOps | AI Platform Engineering Santiago, Chile | +56 9 4504 6845 | maurog.castros@gmail.com LinkedIn: https://www.linkedin.com/in/maurog-castros/ GitHub: https://github.com/Maurog-castros Portafolio: maurocastro.cl Perfil Profesional Ingeniero Cloud & DevOps Senior con experiencia en automatización CI/CD, observabilidad, infraestructura cloud y despliegue de plataformas críticas. Especializado en AWS, Kubernetes, Docker, Jenkins y GitHub Actions, con enfoque en resiliencia operacional, seguridad y automatización. Actualmente orientado a AI Platform Engineering y MLOps, trabajando en despliegue de agentes IA, inferencia local de LLMs, observabilidad de modelos y automatización. Competencias Técnicas • AWS, Azure y GCP • Docker, Kubernetes, EKS y AKS • Jenkins, GitHub Actions y GitLab CI • Terraform y CloudFormation • CloudWatch, Grafana, DataDog y Apache DevLake • Ollama, OpenAI API, Azure OpenAI y AWS Bedrock • RAG, Prompt Versioning y observabilidad de LLMs • Python, Bash, PowerShell y Groovy • IAM, OAuth2, OIDC y gestión de secretos Experiencia Profesional HDI Seguros Chile – Senior DevOps / Cloud Engineer 2024 – Actualidad • Diseño y operación de pipelines CI/CD para más de 200 aplicaciones. • Implementación de métricas DORA y observabilidad mediante Apache DevLake. • Automatización de despliegues usando Jenkins, GitHub Actions y Docker. • Integración de controles de calidad y seguridad con SonarQube y De"
+    },
+    {
+      "filename": "Mauricio_Castro_MLOps_DevOps_IA_ACL.pdf",
+      "path": "/home/mauro/openclaw-mauro/content/CV/Mauricio_Castro_MLOps_DevOps_IA_ACL.pdf",
+      "tags": [
+        "devops",
+        "kubernetes",
+        "cloud",
+        "iac",
+        "mlops",
+        "ai",
+        "data",
+        "techlead"
+      ],
+      "chars": 2471,
+      "excerpt": "Mauricio Guillermo Castro Sandoval Senior Cloud Engineer | DevOps | MLOps | AI Platform Engineering Santiago, Chile | +56 9 4504 6845 | maurog.castros@gmail.com LinkedIn: https://www.linkedin.com/in/maurog-castros/ GitHub: https://github.com/Maurog-castros Portafolio: maurocastro.cl Perfil Profesional Ingeniero Cloud & DevOps Senior con experiencia en automatización CI/CD, observabilidad, infraestructura cloud y despliegue de plataformas críticas. Especializado en AWS, Kubernetes, Docker, Jenkins y GitHub Actions, con enfoque en resiliencia operacional, seguridad y automatización. Actualmente orientado a AI Platform Engineering y MLOps, trabajando en despliegue de agentes IA, inferencia local de LLMs, observabilidad de modelos y automatización. Competencias Técnicas • AWS, Azure y GCP • Docker, Kubernetes, EKS y AKS • Jenkins, GitHub Actions y GitLab CI • Terraform y CloudFormation • CloudWatch, Grafana, DataDog y Apache DevLake • Ollama, OpenAI API, Azure OpenAI y AWS Bedrock • RAG, Prompt Versioning y observabilidad de LLMs • Python, Bash, PowerShell y Groovy • IAM, OAuth2, OIDC y gestión de secretos Experiencia Profesional HDI Seguros Chile – Senior DevOps / Cloud Engineer 2024 – Actualidad • Diseño y operación de pipelines CI/CD para más de 200 aplicaciones. • Implementación de métricas DORA y observabilidad mediante Apache DevLake. • Automatización de despliegues usando Jenkins, GitHub Actions y Docker. • Integración de controles de calidad y seguridad con SonarQube y De"
+    },
+    {
+      "filename": "Mauricio_Castro_SRE_EN_Mayo2026.pdf",
+      "path": "/home/mauro/openclaw-mauro/content/CV/Mauricio_Castro_SRE_EN_Mayo2026.pdf",
+      "tags": [
+        "devops",
+        "sre",
+        "kubernetes",
+        "cloud",
+        "iac",
+        "mlops",
+        "data",
+        "techlead",
+        "premium"
+      ],
+      "chars": 4129,
+      "excerpt": "Mauricio Guillermo Castro Sandoval Senior DevOps Engineer | Azure | Terraform | CI/CD | Kubernetes | DevSecOps Santiago, Chile | +56 9 4504 6845 | maurog.castros@gmail.com LinkedIn: linkedin.com/in/maurog-castros | GitHub: github.com/Maurog-castros Professional Summary Senior DevOps Engineer with 10+ years of experience designing, automating, and operating scalable cloud platforms in AWS and Azure environments. Specialized in complex system integrations, CI/CD platform engineering, and DevSecOps practices. Proven track record leading platform-level initiatives that improve deployment speed, reduce operational risk, and increase system reliability across multi-environment architectures. Strong focus on automation, security, observability, and infrastructure as code, with hands- on experience building resilient pipelines and integrating enterprise systems at scale. Core Skills  AWS (EC2, VPC, IAM, EKS, S3, CloudWatch, WAF, API Gateway, Networking)  Multi-environment architecture (DEV / QA / PROD)  CI/CD & Automation  Jenkins (Docker-based, distributed agents)  GitHub Actions / GitHub Enterprise  Pipeline standardization & orchestration  Terraform (modular, multi-environment)  CloudFormation  Python automation (validation, orchestration)  SAST / SCA / Dependency scanning  Secrets management (IAM / Parameter Store)  OWASP practices  Policy as Code  Docker / Kubernetes  Microservices integration  API orchestration & system interoperability  DORA metrics & DevOps d"
+    }
+  ]
+}

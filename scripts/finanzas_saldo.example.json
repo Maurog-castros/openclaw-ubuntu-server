@@ -1,0 +1,10 @@
+{
+  "payment_profile": "digital",
+  "last_actual": null,
+  "anchors": [],
+  "_doc": {
+    "payment_profile": "digital = ~95% tarjeta/debito; desconocido en boleta cuenta como digital.",
+    "last_actual": "Ultimo saldo real reportado (texto o screenshot app Santander).",
+    "anchors": "Historial de anclas (max 20)."
+  }
+}

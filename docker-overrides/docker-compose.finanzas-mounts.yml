@@ -1,0 +1,14 @@
+# Montajes para agente finanzas (generado por apply_openclaw_finanzas_config.py)
+services:
+  openclaw-gateway:
+    volumes:
+      - ${OPENCLAW_PROJECT_DIR:-/home/mauro/openclaw-mauro}/scripts:/home/node/openclaw-mauro/scripts:ro
+      - ${OPENCLAW_PROJECT_DIR:-/home/mauro/openclaw-mauro}/.venv-finanzas-docker:/home/node/openclaw-mauro/.venv-finanzas-docker:rw
+      - ${OPENCLAW_PROJECT_DIR:-/home/mauro/openclaw-mauro}/.venv-finanzas:/home/node/openclaw-mauro/.venv-finanzas:ro
+      - ${OPENCLAW_PROJECT_DIR:-/home/mauro/openclaw-mauro}/data:/home/node/openclaw-mauro/data:rw
+  openclaw-cli:
+    volumes:
+      - ${OPENCLAW_PROJECT_DIR:-/home/mauro/openclaw-mauro}/scripts:/home/node/openclaw-mauro/scripts:ro
+      - ${OPENCLAW_PROJECT_DIR:-/home/mauro/openclaw-mauro}/.venv-finanzas-docker:/home/node/openclaw-mauro/.venv-finanzas-docker:rw
+      - ${OPENCLAW_PROJECT_DIR:-/home/mauro/openclaw-mauro}/.venv-finanzas:/home/node/openclaw-mauro/.venv-finanzas:ro
+      - ${OPENCLAW_PROJECT_DIR:-/home/mauro/openclaw-mauro}/data:/home/node/openclaw-mauro/data:rw

@@ -1,0 +1,161 @@
+# Python — entornos virtuales y paquetes instalados
+.venv/
+.venv-*/
+venv/
+ENV/
+env/
+.Python
+pip-wheel-metadata/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Python — bytecode / caché
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Node / frontends
+node_modules/
+.npm/
+.pnpm-store/
+yarn.lock.bak
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Playwright (CLI local + browsers descargados)
+.playwright/
+.playwright-cli/
+playwright/.cache/
+**/ms-playwright/
+
+# Build / logs generados por herramientas
+dist/
+build/
+*.log
+logs/
+setup.log
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+
+# =============================================================================
+# Imágenes y media binaria (no subir a GitHub)
+# =============================================================================
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.webp
+*.heic
+*.heif
+*.bmp
+*.tiff
+*.tif
+*.ico
+*.raw
+*.avif
+content/CV/
+
+# =============================================================================
+# Secretos y credenciales (nunca versionar)
+# =============================================================================
+secrets/*
+!secrets/README.md
+data/secrets/
+*.pem
+*.key
+client_secret*.json
+*_token.json
+*_credentials.json
+gmail_credentials.json
+gmail_token.json
+linkedin_*_storage_state.json
+github_hl_miko_*
+.env
+.env.*
+!.env.example
+openclaw/.env
+openclaw/.env.*
+!openclaw/.env.example
+
+# Config con tokens locales (generar desde scripts/apply_* o copiar plantillas)
+data/config/openclaw.json
+data/config/auth-profile-secrets/
+data/auth-profile-secrets/
+
+# =============================================================================
+# Runtime OpenClaw — datos locales, sesiones, media entrante
+# =============================================================================
+data/*
+!data/support_findings.csv
+!data/config/
+data/config/*
+!data/config/extensions/
+data/config/extensions/*
+!data/config/extensions/channel-delegate-hook/
+!data/config/extensions/channel-delegate-hook/**
+!data/workspace/
+data/workspace/**/memory/
+data/workspace/**/*.csv
+data/workspace/**/*.bak*
+data/workspace/**/.git/
+data/workspace/_old.git/
+data/workspace/.openclaw/
+data/workspace/projects/
+data/workspace/**/mauro/
+data/inbox/
+data/config/media/
+data/config/whatsapp-auth/
+data/config/logs/
+data/config/cron/runs/
+data/config/sandbox/
+data/config/plugin-state/
+data/config/state/
+data/config/devices/
+data/config/telegram/
+data/config/identity/
+data/config/memory/
+data/config/tasks/
+data/config/tui/
+data/config/plugin-skills/
+data/config/workspace-attestations/
+data/config/extensions/whatsapp/
+data/**/*.db
+data/**/*.sqlite*
+data/**/*.sqlite3
+data/finanzas_movimientos.csv
+data/finanzas_*.json
+data/whatsapp_last_agent.json
+
+# Caché graphify / artefactos generados
+graphify-out/
+
+# Backups locales
+backups/
+*.py.bak*
+*.sh.bak*
+*.json.bak*
+Dockerfile.bak*
+**/*.bak*
+tmp-fix/
+tmp-fix2/
+tmp-fix3/
+tmp-deploy*/
+tmp-ig/
+
+# Clones locales de repos (hl_miko, etc.)
+repos/
+projects/
+
+# Workspace con .git anidado (sin submodule formal)
+data/workspace/pyme-chile/
+
+# Cursor (reglas sí; estado local no)
+.cursor/projects/

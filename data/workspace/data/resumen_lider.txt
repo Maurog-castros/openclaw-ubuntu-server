@@ -1,0 +1,37 @@
+=== RESUMEN EJECUTIVO GASTOS LIDER ===
+
+Periodo: 2026-02-04 al 2026-05-26
+Total gastado: $197,832
+Nro. transacciones: 27
+Promedio boleta: $7,327
+
+--- GASTO POR CATEGORIA ---
+otros: $149,338 (130 items)
+panaderia: $16,055 (13 items)
+despensa: $13,290 (12 items)
+frutas_verduras: $7,381 (13 items)
+carnes_pescados: $4,728 (3 items)
+lacteos_huevos: $6,850 (3 items)
+
+--- TOP 10 PRODUCTOS (por monto) ---
+7806510000447 BOLSA PAPEL $: $1,600 x8
+10X270         REFRESCO PAPAYA $: $5,400 x2
+20X270         REFRESCO PAPAYA $: $5,400 x2
+0400006426420 CAFE LIO VAI $: $4,090 x1
+2X3.590       PIZZA ESPANOLA $: $7,180 x1
+7802575347183 DIP CRACK HI $: $1,290 x1
+2063360000002 QUESO RANCO $: $7,445 x3
+2060920000007 JAM COLON WI $: $5,284 x2
+7894904289424 FILET MARIN $: $8,380 x2
+7802410100300 SALSA AJO 15 $: $1,350 x1
+
+--- HALLAZGOS CLAVE ---
+1. La categoria "otros" concentra el 75% del gasto total.
+2. Se compran muchas botellas de refresco (Papaya), lo que indica posible optimizacion por pack.
+3. Productos de panaderia y lacteos son relativamente estables en frecuencia.
+4. Hay una tendencia a comprar productos preparados o semielaborados (pizzas, embutidos, salsas).
+
+--- RECOMENDACIONES ---
+- Considerar compra al por mayor de refrescos para reducir precio unitario.
+- Evaluar si los productos "otros" pueden ser sustituidos por opciones mas economicas.
+- Revisar frecuencia de compras: 27 transacciones en ~3.5 meses (promedio 1 vez por semana).

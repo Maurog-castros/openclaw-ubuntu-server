@@ -1,0 +1,16 @@
+{
+  "despensa": [
+    "arroz",
+    "fideos",
+    "aceite",
+    "sal",
+    "atun"
+  ],
+  "refrigerado": [
+    "huevos",
+    "leche",
+    "queso",
+    "tomates"
+  ],
+  "updated_at": "2026-06-08T11:00:27.621964-04:00"
+}
