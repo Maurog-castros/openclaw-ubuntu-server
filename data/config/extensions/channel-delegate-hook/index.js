@@ -4,8 +4,9 @@ import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
 
 const execFileAsync = promisify(execFile);
 
-const RUN_PY = "/home/node/openclaw-mauro/scripts/run-finanzas-py.sh";
-const DELEGATE = "/home/node/openclaw-mauro/scripts/channel_delegate.py";
+const REPO_ROOT = "/home/node/openclaw-mauro";
+const RUN_WRAPPER = `${REPO_ROOT}/scripts/run-finanzas-py.sh`;
+const DELEGATE = `${REPO_ROOT}/scripts/channel_delegate.py`;
 const CHANNEL_PROVIDERS = new Set(["whatsapp", "telegram"]);
 
 function resolveConfig(api) {
@@ -35,17 +36,61 @@ function looksLikeMediaBody(body) {
   return /\[image\]|\[photo\]|\[media\]|\[audio\]|📷|🖼|🎤/i.test(body);
 }
 
-async function runChannelDelegate(text, hasMedia, timeoutMs) {
-  const args = [DELEGATE, "--text", text, "--json"];
+function extractWhatsAppPeer(sessionKey, channelId, body, ctx) {
+  const sk = String(sessionKey ?? "");
+  const fromSession = sk.match(/:whatsapp(?::[^:\s]+)*:(\+\d{8,15})(?:$|[:\s])/i);
+  if (fromSession) {
+    return fromSession[1];
+  }
+  const ch = String(channelId ?? "").trim();
+  const fromChannel = ch.match(/\+\d{8,15}/);
+  if (fromChannel) {
+    return fromChannel[0];
+  }
+  for (const key of ["peer", "from", "sender", "phone", "remoteJid"]) {
+    const value = String(ctx?.[key] ?? "");
+    const match = value.match(/\+\d{8,15}|(?:^|[^\d])(56\d{9,13})(?:$|[^\d])/);
+    if (match) {
+      return match[0].startsWith("+") ? match[0] : `+${match[1]}`;
+    }
+  }
+  const raw = String(body ?? "");
+  const fromBracket = raw.match(/\[WhatsApp\s+(\+\d{10,15})/i);
+  if (fromBracket) {
+    return fromBracket[1];
+  }
+  const fromLine = raw.match(/(\+\d{10,15}):\s/m);
+  if (fromLine) {
+    return fromLine[1];
+  }
+  const anyPhone = `${sk}\n${ch}\n${raw}`.match(/\+\d{8,15}/);
+  if (anyPhone) {
+    return anyPhone[0];
+  }
+  return "";
+}
+
+async function runChannelDelegate(text, hasMedia, timeoutMs, ctx) {
+  const args = [RUN_WRAPPER, DELEGATE, "--text", text, "--json"];
+  const sessionKey = String(ctx?.sessionKey ?? "");
+  const peer = extractWhatsAppPeer(sessionKey, ctx?.channelId, text, ctx);
+  if (sessionKey) {
+    args.push("--session-key", sessionKey);
+  }
+  if (peer) {
+    args.push("--peer", peer);
+  }
   if (hasMedia) {
     args.push("--has-media");
   }
   try {
-    const { stdout } = await execFileAsync(RUN_PY, args, {
+    const { stdout } = await execFileAsync("/bin/bash", args, {
       timeout: timeoutMs,
       maxBuffer: 10 * 1024 * 1024,
     });
-    return JSON.parse(stdout);
+    const result = JSON.parse(stdout);
+    result._peer = peer;
+    return result;
   } catch (err) {
     if (err && typeof err === "object" && "code" in err && err.code === 2) {
       const raw = String(err.stdout ?? "").trim();
@@ -79,13 +124,13 @@ export default definePluginEntry({
           return undefined;
         }
         try {
-          const result = await runChannelDelegate(text, looksLikeMediaBody(text), timeoutMs);
+          const result = await runChannelDelegate(text, looksLikeMediaBody(text), timeoutMs, ctx);
           const status = result?.status;
           const replyText = String(result.whatsapp_reply ?? result.reply ?? "").trim();
-          const blocked = status === "delegate_miss" || status === "skip" || status === "error";
-          if (replyText && !blocked) {
+          const blocked = !replyText || status === "delegate_miss" || status === "skip";
+          if (!blocked) {
             api.logger.info(
-              `channel-delegate-hook: handled status=${status ?? "implicit"} agent=${result.agent ?? "?"} session=${ctx.sessionKey ?? "?"}`,
+              `channel-delegate-hook: handled status=${status ?? "implicit"} agent=${result.agent ?? "?"} peer=${result._peer || "?"} session=${ctx.sessionKey ?? "?"}`,
             );
             return { handled: true, reply: { text: replyText } };
           }

@@ -3,9 +3,10 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 
 from vida_calendar_common import calendar_auth_hint, get_creds
 from vida_common import reply
@@ -23,15 +24,39 @@ def main() -> None:
         print(json.dumps(out, ensure_ascii=False, indent=2) if args.json else out["whatsapp_reply"])
         return
 
-    service = build("calendar", "v3", credentials=creds, cache_discovery=False)
-    now = datetime.utcnow().isoformat() + "Z"
-    end = (datetime.utcnow() + timedelta(days=args.days)).isoformat() + "Z"
-    events = (
-        service.events()
-        .list(calendarId="primary", timeMin=now, timeMax=end, maxResults=10, singleEvents=True, orderBy="startTime")
-        .execute()
-        .get("items", [])
-    )
+    try:
+        service = build("calendar", "v3", credentials=creds, cache_discovery=False)
+        now = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+        end = (datetime.now(UTC) + timedelta(days=args.days)).isoformat().replace("+00:00", "Z")
+        events = (
+            service.events()
+            .list(
+                calendarId="primary",
+                timeMin=now,
+                timeMax=end,
+                maxResults=10,
+                singleEvents=True,
+                orderBy="startTime",
+            )
+            .execute()
+            .get("items", [])
+        )
+    except HttpError as exc:
+        reason = ""
+        try:
+            detail = json.loads(exc.content.decode("utf-8"))
+            reason = detail.get("error", {}).get("status") or detail.get("error", {}).get("message", "")
+        except (UnicodeDecodeError, json.JSONDecodeError, AttributeError):
+            reason = str(exc)
+        if "accessNotConfigured" in str(exc) or "SERVICE_DISABLED" in reason:
+            out = reply(
+                "Fede: Calendar está autenticado, pero la Google Calendar API está deshabilitada "
+                "en el proyecto OAuth. Habilítala y reintento."
+            )
+        else:
+            out = reply(f"Fede: no pude leer Calendar ahora ({reason[:120]}).")
+        print(json.dumps(out, ensure_ascii=False, indent=2) if args.json else out["whatsapp_reply"])
+        return
 
     med_kw = ("medico", "médico", "doctor", "clinica", "clínica", "hospital", "dentista", "salud", "examen", "laboratorio")
     lines = ["*Próximas citas*"]

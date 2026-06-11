@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 from datetime import date
 from pathlib import Path
 from typing import Any
 
 ROOT = Path("/home/node/openclaw-mauro") if Path("/home/node/openclaw-mauro").exists() else Path(__file__).resolve().parent.parent
-JOBS_WS = ROOT / "data/workspace/jobs"
+JOBS_WS = Path(os.environ.get("OPENCLAW_JOBS_DATA", "")).expanduser() if os.environ.get("OPENCLAW_JOBS_DATA") else ROOT / "data/workspace/jobs"
 CONFIG_PATH = ROOT / "config/jobs/config.json"
 CV_INDEX = JOBS_WS / "cv_index.json"
 APPLICATIONS = JOBS_WS / "applications"

@@ -20,10 +20,17 @@ CSV_COLUMNS = [
     "match_score",
     "questions_answered",
     "notes",
+    "grade",
+    "recommendation",
+    "report_file",
+    "source",
+    "next_action_at",
 ]
 
 
 def csv_path(cfg: dict[str, Any] | None = None) -> Path:
+    if JOBS_WS != Path(__file__).resolve().parent.parent / "data/workspace/jobs":
+        return JOBS_WS / "applications.csv"
     cfg = cfg or load_config()
     raw = cfg.get("applications_csv") or "data/workspace/jobs/applications.csv"
     p = Path(raw)
@@ -36,6 +43,23 @@ def ensure_csv(path: Path | None = None) -> Path:
     if not path.exists():
         with path.open("w", encoding="utf-8", newline="") as f:
             csv.DictWriter(f, fieldnames=CSV_COLUMNS).writeheader()
+        return path
+    with path.open(encoding="utf-8", newline="") as f:
+        rows = list(csv.DictReader(f))
+        current = list(rows[0].keys()) if rows else []
+        if not current:
+            f.seek(0)
+            current = next(csv.reader(f), [])
+    if current and current != CSV_COLUMNS:
+        merged = list(dict.fromkeys(current + CSV_COLUMNS))
+        if merged != current:
+            tmp = path.with_suffix(path.suffix + ".tmp")
+            with tmp.open("w", encoding="utf-8", newline="") as f:
+                writer = csv.DictWriter(f, fieldnames=merged)
+                writer.writeheader()
+                for row in rows:
+                    writer.writerow(row)
+            tmp.replace(path)
     return path
 
 
@@ -49,9 +73,16 @@ def append_application(
     match_score: int | str = "",
     questions_answered: list[dict[str, str]] | None = None,
     notes: str = "",
+    grade: str = "",
+    recommendation: str = "",
+    report_file: str = "",
+    source: str = "",
+    next_action_at: str = "",
     cfg: dict[str, Any] | None = None,
 ) -> dict[str, str]:
     path = ensure_csv(csv_path(cfg))
+    with path.open(encoding="utf-8", newline="") as f:
+        fieldnames = (csv.DictReader(f).fieldnames or CSV_COLUMNS)
     row = {
         "applied_at": datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds"),
         "title": title[:200],
@@ -62,9 +93,14 @@ def append_application(
         "match_score": str(match_score),
         "questions_answered": json.dumps(questions_answered or [], ensure_ascii=False),
         "notes": notes[:500],
+        "grade": grade,
+        "recommendation": recommendation,
+        "report_file": report_file,
+        "source": source,
+        "next_action_at": next_action_at,
     }
     with path.open("a", encoding="utf-8", newline="") as f:
-        csv.DictWriter(f, fieldnames=CSV_COLUMNS).writerow(row)
+        csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore").writerow(row)
     return row
 
 
@@ -97,6 +133,9 @@ def format_report_whatsapp(rows: list[dict[str, str]]) -> str:
         status = row.get("status") or "?"
         url = row.get("job_url") or ""
         lines.append(f"• *{ts}* — {title}")
-        lines.append(f"  {status} | {url[:80]}")
+        grade = row.get("grade") or ""
+        reco = row.get("recommendation") or ""
+        detail = " | ".join(x for x in (status, grade, reco, url[:80]) if x)
+        lines.append(f"  {detail}")
     lines += ["", f"_CSV:_ `{csv_path()}`"]
     return "\n".join(lines)

@@ -5,8 +5,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
+import sys
 import time
 from pathlib import Path
 from typing import Any
@@ -17,9 +19,12 @@ if not ROOT.exists():
 
 PY = str(ROOT / ".venv-finanzas/bin/python")
 LINKEDIN_PY = str(ROOT / ".venv-linkedin-intel/bin/python")
-if not Path(PY).exists():
+if os.name == "nt":
+    PY = sys.executable
+    LINKEDIN_PY = sys.executable
+elif not Path(PY).exists():
     PY = "python3"
-if not Path(LINKEDIN_PY).exists():
+if os.name != "nt" and not Path(LINKEDIN_PY).exists():
     LINKEDIN_PY = PY
 SCR = str(ROOT / "scripts")
 
@@ -34,6 +39,10 @@ APPLY_RE = re.compile(r"\b(aplicar|postular|postula)\b", re.I)
 REPORT_RE = re.compile(
     r"\b(mis\s+postulaciones|postulaciones?\s+realizadas|historial\s+postul|"
     r"reporte\s+postul|donde\s+postul|vacantes?\s+postuladas?)\b",
+    re.I,
+)
+OPS_RE = re.compile(
+    r"\b(career\s*ops|evaluar|evalua|analiza|analizar|pipeline|oferta|jd|job\s+description)\b",
     re.I,
 )
 JOBS_PREFIX_RE = re.compile(r"^\s*/(?:jobs|postula)\b", re.I)
@@ -87,6 +96,14 @@ def main() -> None:
 
     if REPORT_RE.search(message):
         code, payload, _, _ = run_json([PY, f"{SCR}/jobs_report.py", "--json"])
+        payload.setdefault("agent", "jobs")
+        print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload.get("whatsapp_reply", ""))
+        return
+
+    if OPS_RE.search(message) or re.search(r"https?://\S+", message) or len(message) > 160:
+        code, payload, _, stderr = run_json([PY, f"{SCR}/jobs_ops.py", "--text", message, "--json"], timeout=240)
+        if code != 0 and not payload.get("whatsapp_reply"):
+            payload = {"status": "error", "agent": "jobs", "whatsapp_reply": f"Career ops fallo: {stderr[-500:]}"}
         payload.setdefault("agent", "jobs")
         print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload.get("whatsapp_reply", ""))
         return
