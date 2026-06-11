@@ -80,14 +80,27 @@ def summarize_latest() -> dict[str, Any]:
     repo = repo_root()
     branch_name = current_branch() or "?"
     status = run_git(repo, "status", "--short")
-    commits = run_git(repo, "log", "-5", "--oneline", "--decorate")
+    commits = run_git(
+        repo,
+        "log",
+        "-5",
+        "--date=format-local:%d-%m-%Y %H:%M",
+        "--pretty=format:%h%x09%ad%x09%d%x09%s",
+    )
     changed = [line for line in status.splitlines() if line.strip()]
     lines = [
         "HL-Go — último contexto",
         f"Rama: {branch_name}",
         "Commits:",
     ]
-    lines.extend(f"• {line[:110]}" for line in commits.splitlines()[:5])
+    for commit in commits.splitlines()[:5]:
+        parts = commit.split("\t", 3)
+        if len(parts) != 4:
+            lines.append(f"• {commit[:110]}")
+            continue
+        commit_hash, committed_at, refs, subject = parts
+        ref_text = f" {refs.strip()}" if refs.strip() else ""
+        lines.append(f"• {committed_at} {commit_hash}{ref_text} {subject}"[:110])
     if changed:
         lines.append(f"Cambios sin commit: {len(changed)} archivo(s).")
         lines.extend(f"• {line[:100]}" for line in changed[:5])
