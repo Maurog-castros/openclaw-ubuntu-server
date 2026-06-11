@@ -17,6 +17,13 @@
 - Gateway hook changes: run `node --check data/config/extensions/channel-delegate-hook/index.js` and restart only the affected container.
 - Destructive cleanup: verify absolute paths stay inside this repo, then delete only explicit candidates.
 
+## Agent performance
+
+- Use caveman-lite style for operational agents (`/fin`, `/jobs`, `/supp`): short, exact, no filler.
+- Do not use caveman full/ultra for `/care`; keep warm 250-character replies.
+- Use `scripts/graphify_repo_query.py` for code/architecture lookup before broad file searches.
+- Refresh graph index with `scripts/graphify_repo_refresh.sh`; install weekly cron with `scripts/install-graphify-cron.sh`.
+
 ## Commit discipline
 
 - Commit on the Ubuntu Server repo only unless Mauro explicitly asks for the Windows checkout.
