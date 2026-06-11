@@ -86,6 +86,7 @@ openclaw/.env.*
 !openclaw/.env.example
 
 # Config con tokens locales (generar desde scripts/apply_* o copiar plantillas)
+config/whatsapp_users.json
 data/config/openclaw.json
 data/config/auth-profile-secrets/
 data/auth-profile-secrets/
@@ -103,6 +104,7 @@ data/config/extensions/*
 !data/config/extensions/channel-delegate-hook/**
 !data/workspace/
 data/workspace/**/memory/
+data/workspace/*/DREAMS.md
 data/workspace/**/*.csv
 data/workspace/**/*.bak*
 data/workspace/**/.git/
@@ -133,6 +135,17 @@ data/**/*.sqlite3
 data/finanzas_movimientos.csv
 data/finanzas_*.json
 data/whatsapp_last_agent.json
+
+# Scratch/debug dejado por agentes: usar /tmp o scripts/ con tests si es durable.
+data/workspace/check_*.py
+data/workspace/test_*.py
+data/workspace/run_*.py
+data/workspace/*_fix.py
+data/workspace/data/*_registry.json
+data/workspace/data/*_state.json
+data/workspace/*/data/*_state.json
+data/workspace/*/data/selfcare_profile.json
+data/workspace/jobs/reports/
 
 # Caché graphify / artefactos generados
 graphify-out/

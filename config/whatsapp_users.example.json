@@ -1,0 +1,20 @@
+{
+  "tenants": {
+    "owner": {
+      "phones": ["+569XXXXXXXX"],
+      "name": "Owner",
+      "is_owner": true,
+      "data_root": "data",
+      "care_data": "data/workspace/care/data",
+      "allowed_agents": ["fin", "care", "supp", "intel", "jobs", "hlgo", "content"]
+    },
+    "guest_example": {
+      "phones": ["+569YYYYYYYY"],
+      "name": "Guest",
+      "is_owner": false,
+      "data_root": "data/users/guest_example",
+      "care_data": "data/users/guest_example/care",
+      "allowed_agents": ["fin", "care"]
+    }
+  }
+}
