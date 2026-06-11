@@ -26,6 +26,11 @@ from openclaw_message_router import (
     save_sticky_agent,
     strip_agent_prefix,
 )
+from channel_user_context import (
+    apply_user_env,
+    guest_agent_denied_message,
+    resolve_user_context,
+)
 from whatsapp_menu import MenuOption, finish_reply, resolve_menu_choice
 
 RUN_PY = ROOT / "scripts/run-finanzas-py.sh"
@@ -36,6 +41,7 @@ INBOUND_CANDIDATES = [
 ]
 
 CARE_RE = re.compile(r"^\s*/care\b", re.I)
+BROH_RE = re.compile(r"^\s*/broh\b", re.I)
 SUPP_RE = re.compile(r"^\s*/supp\b", re.I)
 INTEL_RE = re.compile(r"^\s*/intel\b", re.I)
 JOBS_RE = re.compile(r"^\s*/(?:jobs|postula)\b", re.I)
@@ -78,6 +84,7 @@ BOLETA_RE = re.compile(
 )
 IMAGE_EXT = {".jpg", ".jpeg", ".png", ".webp", ".heic"}
 FIN_PREFIX_RE = re.compile(r"^\s*/(?:fin|finanzas)\b\s*", re.I)
+GUEST_GREETING_RE = re.compile(r"^\s*(?:hola|buenas|hey|hi|hello)\b", re.I)
 
 
 def py_cmd(script: str, *args: str) -> list[str]:
@@ -115,6 +122,11 @@ def strip_fin_prefix(text: str) -> str:
 
 
 def resolve_inbound() -> Path:
+    import os
+
+    user_inbound = os.environ.get("OPENCLAW_USER_INBOUND_DIR", "").strip()
+    if user_inbound:
+        return Path(user_inbound)
     for candidate in INBOUND_CANDIDATES:
         if candidate.exists():
             return candidate
@@ -271,19 +283,30 @@ def run_session_reset() -> dict:
 
 
 def run_help() -> dict:
-    return {
-        "status": "ok",
-        "agent": "fin",
-        "whatsapp_reply": (
+    import os
+
+    if os.environ.get("OPENCLAW_USER_IS_OWNER") != "1":
+        name = os.environ.get("OPENCLAW_USER_NAME", "tu espacio")
+        text = (
+            f"Hola, *{name}*. Este es tu asistente personal (datos separados).\n\n"
+            "Escribe en lenguaje natural o usa:\n"
+            "• /fin — saldo, gastos, boletas, transferencias\n"
+            "• /care — diario, ánimo, salud\n"
+            "• Menú 1-4 al final de cada respuesta\n"
+            "• /new — reiniciar conversación\n"
+            "• /help — esta ayuda"
+        )
+    else:
+        text = (
             "Sin prefijo: intencion automatica o continuar el hilo del ultimo /agent.\n"
-            "Prefijos: /fin /care /supp /intel /jobs /hlgo /content\n"
-            "Tras /care (u otro), los mensajes siguientes van al mismo agente hasta /new, /reset o otro prefijo.\n"
+            "Prefijos: /fin /care /broh /supp /intel /jobs /hlgo /content\n"
+            "Tras /care (u otro), los mensajes siguientes van al mismo agente hasta /new, /reset u otro prefijo.\n"
             "/fin saldo — saldo Santander\n"
             "/fin ultimas boletas — listado\n"
             "/new o /reset — sesion limpia\n"
             "Foto + texto — registrar boleta o saldo Santander"
-        ),
-    }
+        )
+    return {"status": "ok", "agent": "fin", "whatsapp_reply": text}
 
 
 def run_status_cmd() -> dict:
@@ -357,6 +380,20 @@ def run_care_delegate(raw_text: str, has_media: bool, image_path: str | None) ->
         payload["status"] = "error"
     elif payload.get("whatsapp_reply"):
         payload.setdefault("status", "ok")
+    return payload
+
+
+def run_broh_delegate(raw_text: str) -> dict:
+    broh_text = raw_text if BROH_RE.search(raw_text) else f"/broh {raw_text}"
+    code, payload, _, stderr = run_json(py_cmd("broh_delegate.py", "--text", broh_text, "--json"), timeout=180)
+    if code != 0 and not payload.get("whatsapp_reply"):
+        payload = {
+            "status": "error",
+            "agent": "broh",
+            "whatsapp_reply": "Broh no respondio.",
+            "stderr": stderr[-800:],
+        }
+    payload.setdefault("agent", "broh")
     return payload
 
 
@@ -515,6 +552,17 @@ def dispatch_text(
     if RECENT_RECEIPTS_RE.search(text):
         return run_recent_receipts(parse_recent_receipts_limit(text))
 
+    try:
+        from finanzas_transfer_whatsapp import looks_like_transfer_email, process_transfer_email
+
+        if looks_like_transfer_email(text):
+            result = process_transfer_email(text)
+            if result.get("status") != "skip":
+                result.setdefault("agent", "fin")
+                return result
+    except ImportError:
+        pass
+
     if TRANSFERENCIAS_RE.search(text):
         return run_transferencias(text)
 
@@ -552,6 +600,32 @@ def dispatch_text(
     return {"status": "delegate_miss", "agent": "finanzas", "whatsapp_reply": ""}
 
 
+def run_guest_welcome(user_ctx) -> dict:
+    name = user_ctx.display_name or "amigo"
+    return {
+        "status": "ok",
+        "agent": "fin",
+        "whatsapp_reply": (
+            f"Hola, *{name}*. Este es tu asistente personal (datos solo tuyos).\n\n"
+            "Prueba:\n"
+            "• *1* — ver saldo\n"
+            "• *4* — últimas boletas\n"
+            "• */care* — diario y ánimo\n"
+            "• */help* — más opciones"
+        ),
+    }
+
+
+def _deny_agent(agent: str, user_ctx) -> dict | None:
+    if user_ctx.allows(agent):
+        return None
+    return {
+        "status": "ok",
+        "agent": "fin",
+        "whatsapp_reply": guest_agent_denied_message(agent),
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Router canal WhatsApp/Telegram (multi-agente).")
     parser.add_argument("--text", default="")
@@ -559,8 +633,13 @@ def main() -> None:
     parser.add_argument("--has-media", action="store_true")
     parser.add_argument("--image", default=None)
     parser.add_argument("--source", default="whatsapp_foto")
+    parser.add_argument("--peer", default="", help="E.164 remitente WhatsApp (+569...)")
+    parser.add_argument("--session-key", default="", help="sessionKey OpenClaw")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
+
+    user_ctx = resolve_user_context(peer=args.peer, session_key=args.session_key)
+    apply_user_env(user_ctx)
 
     raw_text = (args.text or "").strip()
     image_path = args.image or (str(latest_inbound_image()) if args.has_media else None)
@@ -572,13 +651,29 @@ def main() -> None:
         return
 
     if CARE_RE.search(raw_text):
+        denied = _deny_agent("care", user_ctx)
+        if denied:
+            emit(denied, as_json=args.json, agent="care", skip_menu=True)
+            return
         save_sticky_agent("care")
         emit(run_care_delegate(raw_text, has_media, image_path), as_json=args.json, agent="care", skip_menu=True)
+        return
+
+    if BROH_RE.search(raw_text):
+        denied = _deny_agent("broh", user_ctx)
+        if denied:
+            emit(denied, as_json=args.json, agent="broh", skip_menu=True)
+            return
+        save_sticky_agent("broh")
+        emit(run_broh_delegate(raw_text), as_json=args.json, agent="broh", skip_menu=True)
         return
 
     text = strip_fin_prefix(raw_text)
     if HELP_CMD_RE.search(text):
         emit(run_help(), as_json=args.json)
+        return
+    if GUEST_GREETING_RE.match(text) and not user_ctx.is_owner:
+        emit(run_guest_welcome(user_ctx), as_json=args.json)
         return
     if STATUS_CMD_RE.search(text):
         emit(run_status_cmd(), as_json=args.json)
@@ -590,8 +685,15 @@ def main() -> None:
         return
 
     agent = detect_agent(raw_text, has_media=has_media)
+    denied = _deny_agent(agent, user_ctx)
+    if denied:
+        emit(denied, as_json=args.json, agent="fin", skip_menu=True)
+        return
     if agent == "care":
         emit(run_care_delegate(raw_text, has_media, image_path), as_json=args.json, agent="care", skip_menu=True)
+        return
+    if agent == "broh":
+        emit(run_broh_delegate(raw_text), as_json=args.json, agent="broh", skip_menu=True)
         return
     if agent == "supp":
         emit(run_supp_delegate(raw_text), as_json=args.json, agent="supp")

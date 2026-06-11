@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import time
 from datetime import date
@@ -15,8 +16,16 @@ if not ROOT.exists():
 
 STICKY_STATE = ROOT / "data/whatsapp_last_agent.json"
 
+
+def sticky_state_path() -> Path:
+    override = os.environ.get("OPENCLAW_USER_STICKY_FILE", "").strip()
+    if override:
+        return Path(override)
+    return STICKY_STATE
+
 # --- Prefijos explícitos (máxima prioridad, manejados en channel_delegate) ---
 PREFIX_CARE = re.compile(r"^\s*/care\b", re.I)
+PREFIX_BROH = re.compile(r"^\s*/broh\b", re.I)
 PREFIX_SUPP = re.compile(r"^\s*/supp\b", re.I)
 PREFIX_INTEL = re.compile(r"^\s*/intel\b", re.I)
 PREFIX_JOBS = re.compile(r"^\s*/(?:jobs|postula)\b", re.I)
@@ -51,6 +60,12 @@ FIN_DEDUPE_RE = re.compile(
     r"\b(duplicad|mismo\s+monto|otra\s+vez|corrige|es\s+la\s+misma|misma\s+transacc)\b",
     re.I,
 )
+FIN_TRANSFER_EMAIL_RE = re.compile(
+    r"(mensajeria@santander|@santander\.cl|monto\s+transferido|"
+    r"comprobante\s+transferencia|notificaci[oó]n\s+de\s+transferencia|"
+    r"datos\s+de\s+origen|datos\s+del\s+ordenante)",
+    re.I,
+)
 FIN_INSTAGRAM_URL_RE = re.compile(r"instagram\.com/(?:p|reel|reels)/", re.I)
 
 # --- Care ---
@@ -64,6 +79,13 @@ CARE_RE = re.compile(
 )
 CARE_EXAM_MEDIA_RE = re.compile(
     r"\b(examen|laboratorio|orden|agenda|cita|toma)\b",
+    re.I,
+)
+
+# --- Broh ---
+BROH_RE = re.compile(
+    r"\b(broh|compa(?:ñero)?|perspectiva|me\s+siento\s+solo|solito|acompaña(?:me)?|"
+    r"reconocimiento|mirar\s+desde\s+fuera|continuidad|proceso\s+de\s+vida)\b",
     re.I,
 )
 
@@ -107,6 +129,8 @@ def explicit_prefix(text: str) -> Optional[str]:
     t = text or ""
     if PREFIX_CARE.search(t):
         return "care"
+    if PREFIX_BROH.search(t):
+        return "broh"
     if PREFIX_SUPP.search(t):
         return "supp"
     if PREFIX_INTEL.search(t):
@@ -122,14 +146,15 @@ def explicit_prefix(text: str) -> Optional[str]:
     return None
 
 
-STICKY_AGENTS = frozenset({"fin", "care", "supp", "intel", "jobs", "hlgo", "content"})
+STICKY_AGENTS = frozenset({"fin", "care", "broh", "supp", "intel", "jobs", "hlgo", "content"})
 
 
 def _load_sticky() -> tuple[Optional[str], float]:
-    if not STICKY_STATE.exists():
+    path = sticky_state_path()
+    if not path.exists():
         return None, 0.0
     try:
-        data = json.loads(STICKY_STATE.read_text(encoding="utf-8"))
+        data = json.loads(path.read_text(encoding="utf-8"))
         agent = data.get("agent")
         ts = float(data.get("updated_at_ts") or 0)
         if agent in STICKY_AGENTS:
@@ -142,23 +167,25 @@ def _load_sticky() -> tuple[Optional[str], float]:
 def save_sticky_agent(agent: str) -> None:
     if agent not in STICKY_AGENTS:
         return
-    STICKY_STATE.parent.mkdir(parents=True, exist_ok=True)
-    STICKY_STATE.write_text(
+    path = sticky_state_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
         json.dumps({"agent": agent, "updated_at_ts": time.time()}, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
 
 
 def clear_sticky_agent() -> None:
-    if STICKY_STATE.exists():
-        STICKY_STATE.unlink()
+    path = sticky_state_path()
+    if path.exists():
+        path.unlink()
 
 
 def score_agents(text: str, *, has_media: bool = False) -> dict[str, int]:
     t = (text or "").strip()
     lower = t.lower()
     scores: dict[str, int] = {
-        "fin": 0, "care": 0, "supp": 0, "intel": 0, "jobs": 0, "hlgo": 0, "content": 0,
+        "fin": 0, "care": 0, "broh": 0, "supp": 0, "intel": 0, "jobs": 0, "hlgo": 0, "content": 0,
     }
 
     if FIN_SALDO_RE.search(t):
@@ -171,11 +198,15 @@ def score_agents(text: str, *, has_media: bool = False) -> dict[str, int]:
         scores["fin"] += 3
     if FIN_DEDUPE_RE.search(t):
         scores["fin"] += 2
+    if len(t) >= 80 and FIN_TRANSFER_EMAIL_RE.search(t):
+        scores["fin"] += 6
 
     if CARE_RE.search(t):
         scores["care"] += 3
     if has_media and (CARE_EXAM_MEDIA_RE.search(t) or not t):
         scores["care"] += 2
+    if BROH_RE.search(t):
+        scores["broh"] += 4
 
     if SUPP_RE.search(t):
         scores["supp"] += 4
@@ -232,7 +263,7 @@ def detect_agent(
     if best_score > 0:
         tied = [a for a, s in scores.items() if s == best_score]
         if len(tied) > 1:
-            for preferred in ("content", "hlgo", "jobs", "supp", "intel", "care", "fin"):
+            for preferred in ("content", "hlgo", "jobs", "supp", "intel", "broh", "care", "fin"):
                 if preferred in tied:
                     best_agent = preferred
                     break
@@ -247,6 +278,8 @@ def strip_agent_prefix(text: str, agent: str) -> str:
         return PREFIX_FIN.sub("", t).strip()
     if agent == "care":
         return PREFIX_CARE.sub("", t).strip()
+    if agent == "broh":
+        return PREFIX_BROH.sub("", t).strip()
     if agent == "supp":
         return PREFIX_SUPP.sub("", t).strip()
     if agent == "intel":

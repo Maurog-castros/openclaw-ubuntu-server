@@ -21,7 +21,7 @@ CONFIG_CANDIDATES = (
 )
 
 PEER_SESSION_RE = re.compile(r"(?:^|:)whatsapp(?::[^:\s]+)*:(\+\d{8,15})(?:$|[:\s])", re.I)
-ALL_AGENTS = frozenset({"fin", "care", "supp", "intel", "jobs", "hlgo", "content"})
+ALL_AGENTS = frozenset({"fin", "care", "broh", "supp", "intel", "jobs", "hlgo", "content"})
 
 
 @dataclass(frozen=True)
@@ -200,6 +200,7 @@ def guest_agent_denied_message(agent: str) -> str:
         "intel": "radar de inteligencia",
         "jobs": "postulaciones",
         "hlgo": "HL-Go",
+        "broh": "compañero Broh",
         "content": "contenido Instagram",
     }
     label = labels.get(agent, agent)
