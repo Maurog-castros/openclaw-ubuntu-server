@@ -12,8 +12,14 @@ ROOT = Path("/home/node/openclaw-mauro")
 if not ROOT.exists():
     ROOT = Path(__file__).resolve().parent.parent
 WS = ROOT / "data/workspace/care"
-DATA = WS / "data"
 TZ = ZoneInfo("America/Santiago")
+
+
+def care_data() -> Path:
+    override = os.environ.get("OPENCLAW_USER_CARE_DATA", "").strip()
+    if override:
+        return Path(override)
+    return WS / "data"
 
 SECRET_DIRS = [
     ROOT / "secrets",
@@ -67,7 +73,7 @@ def reply(text: str, **extra) -> dict:
     return payload
 
 
-def truncate_whatsapp(text: str, max_len: int = 250) -> str:
+def truncate_whatsapp(text: str, max_len: int = 500) -> str:
     """Un mensaje WhatsApp; sin bloques largos ni citas pegadas."""
     cleaned = re.sub(r"\s+", " ", (text or "").strip())
     if len(cleaned) <= max_len:

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -18,6 +19,7 @@ RUN = SCR / "run-vida-py.sh"
 
 sys.path.insert(0, str(SCR))
 from vida_common import truncate_whatsapp
+from vida_selfcare import handle as handle_selfcare
 
 CARE_PREFIX = re.compile(r"^\s*/care\b\s*", re.I)
 IMAGE_EXT = {".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"}
@@ -31,7 +33,11 @@ DIARY_EXPLICIT_RE = re.compile(
     r"^\s*diario\b|"
     r"\banota(?:r|lo|la|me)?\s+en\s+(?:el\s+)?diario\b|"
     r"\ban[oó]talo\s+en\s+(?:el\s+)?diario\b|"
-    r"\bguarda(?:r|lo|la|me)?\s+en\s+(?:el\s+)?diario\b"
+    r"\bguarda(?:r|lo|la|me)?\s+en\s+(?:el\s+)?diario\b|"
+    r"\bagrega(?:r|lo|la|me)?(?:\s+esto)?\s+a\s+mi\s+diario\b|"
+    r"\bagrega(?:r|lo|la|me)?(?:\s+esto)?\s+(?:al|a\s+el)\s+diario\b|"
+    r"\bañade(?:r|lo|la|me)?(?:\s+esto)?\s+a\s+mi\s+diario\b|"
+    r"\bañade(?:r|lo|la|me)?(?:\s+esto)?\s+(?:al|a\s+el)\s+diario\b"
     r")",
     re.I,
 )
@@ -83,8 +89,16 @@ def run_json(cmd: list[str], timeout: int = 240) -> tuple[int, dict[str, Any], s
     return proc.returncode, payload, proc.stdout, proc.stderr
 
 
-def run_care_conversation(body: str, session_key: str = "agent:care:whatsapp:direct") -> dict:
-    """Conversación profunda vía agente care (psicólogo de confianza, ≤250 chars)."""
+def care_session_key() -> str:
+    peer = os.environ.get("OPENCLAW_USER_PEER", "").strip()
+    if peer:
+        return f"agent:care:whatsapp:direct:{peer}"
+    return "agent:care:whatsapp:direct"
+
+
+def run_care_conversation(body: str, session_key: str | None = None) -> dict:
+    """Conversación care breve, sin cortar orientación útil."""
+    session_key = session_key or care_session_key()
     cmd = [
         "openclaw",
         "agent",
@@ -141,8 +155,12 @@ def route(text: str, *, has_media: bool = False, image_path: str | None = None) 
         return run_script("vida_profile.py", *args)
 
     if DIARY_EXPLICIT_RE.search(body):
-        entry = DIARY_EXPLICIT_RE.sub("", body, count=1).strip()
+        entry = DIARY_EXPLICIT_RE.sub("", body, count=1).strip(" :：-")
         return run_script("vida_diary.py", "--text", entry or body)
+
+    selfcare = handle_selfcare(body)
+    if selfcare:
+        return selfcare
 
     if any(k in lower for k in ("medic", "pastilla", "farmaco", "fármaco")):
         return run_script("vida_meds.py")
