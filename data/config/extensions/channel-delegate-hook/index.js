@@ -36,23 +36,96 @@ function looksLikeMediaBody(body) {
   return /\[image\]|\[photo\]|\[media\]|\[audio\]|📷|🖼|🎤/i.test(body);
 }
 
-function extractWhatsAppPeer(sessionKey, channelId, body, ctx) {
+function normalizePhoneMatch(value) {
+  const raw = String(value ?? "");
+  const plus = raw.match(/\+\d{8,15}/);
+  if (plus) {
+    return plus[0];
+  }
+  const jid = raw.match(/(?:^|[^\d])(56\d{9,13})@/);
+  if (jid) {
+    return `+${jid[1]}`;
+  }
+  const plain = raw.match(/(?:^|[^\d])(56\d{9,13})(?:$|[^\d])/);
+  if (plain) {
+    return `+${plain[1]}`;
+  }
+  return "";
+}
+
+function extractFromObject(obj, depth = 0) {
+  if (!obj || depth > 3 || typeof obj !== "object") {
+    return "";
+  }
+  const preferred = [
+    "senderE164",
+    "from",
+    "peer",
+    "sender",
+    "senderId",
+    "senderJid",
+    "remoteJid",
+    "chatId",
+    "conversationId",
+    "participant",
+    "channelId",
+  ];
+  for (const key of preferred) {
+    const value = obj[key];
+    const direct = normalizePhoneMatch(value);
+    if (direct) {
+      return direct;
+    }
+    if (value && typeof value === "object") {
+      const nested = extractFromObject(value, depth + 1);
+      if (nested) {
+        return nested;
+      }
+    }
+  }
+  return "";
+}
+
+function extractTelegramPeer(ctx, event) {
+  for (const source of [event, ctx]) {
+    if (!source || typeof source !== "object") {
+      continue;
+    }
+    for (const key of ["senderId", "from", "chatId", "channelId", "peer"]) {
+      const value = String(source[key] ?? "");
+      const match = value.match(/telegram:(\d{5,})|^(\d{5,})$/);
+      if (match) {
+        return `telegram:${match[1] || match[2]}`;
+      }
+    }
+  }
+  return "";
+}
+
+function extractChannelPeer(sessionKey, channelId, body, ctx, event) {
+  const provider = String(ctx?.messageProvider ?? event?.messageProvider ?? "").toLowerCase();
+  if (provider === "telegram") {
+    const telegramPeer = extractTelegramPeer(ctx, event);
+    if (telegramPeer) {
+      return telegramPeer;
+    }
+  }
   const sk = String(sessionKey ?? "");
   const fromSession = sk.match(/:whatsapp(?::[^:\s]+)*:(\+\d{8,15})(?:$|[:\s])/i);
   if (fromSession) {
     return fromSession[1];
   }
-  const ch = String(channelId ?? "").trim();
-  const fromChannel = ch.match(/\+\d{8,15}/);
-  if (fromChannel) {
-    return fromChannel[0];
+  const fromEvent = extractFromObject(event);
+  if (fromEvent) {
+    return fromEvent;
   }
-  for (const key of ["peer", "from", "sender", "phone", "remoteJid"]) {
-    const value = String(ctx?.[key] ?? "");
-    const match = value.match(/\+\d{8,15}|(?:^|[^\d])(56\d{9,13})(?:$|[^\d])/);
-    if (match) {
-      return match[0].startsWith("+") ? match[0] : `+${match[1]}`;
-    }
+  const fromCtx = extractFromObject(ctx);
+  if (fromCtx) {
+    return fromCtx;
+  }
+  const fromChannel = normalizePhoneMatch(channelId);
+  if (fromChannel) {
+    return fromChannel;
   }
   const raw = String(body ?? "");
   const fromBracket = raw.match(/\[WhatsApp\s+(\+\d{10,15})/i);
@@ -63,17 +136,17 @@ function extractWhatsAppPeer(sessionKey, channelId, body, ctx) {
   if (fromLine) {
     return fromLine[1];
   }
-  const anyPhone = `${sk}\n${ch}\n${raw}`.match(/\+\d{8,15}/);
+  const anyPhone = normalizePhoneMatch(`${sk}\n${channelId ?? ""}\n${raw}`);
   if (anyPhone) {
-    return anyPhone[0];
+    return anyPhone;
   }
   return "";
 }
 
-async function runChannelDelegate(text, hasMedia, timeoutMs, ctx) {
+async function runChannelDelegate(text, hasMedia, timeoutMs, ctx, event) {
   const args = [RUN_WRAPPER, DELEGATE, "--text", text, "--json"];
   const sessionKey = String(ctx?.sessionKey ?? "");
-  const peer = extractWhatsAppPeer(sessionKey, ctx?.channelId, text, ctx);
+  const peer = extractChannelPeer(sessionKey, ctx?.channelId, text, ctx, event);
   if (sessionKey) {
     args.push("--session-key", sessionKey);
   }
@@ -124,7 +197,7 @@ export default definePluginEntry({
           return undefined;
         }
         try {
-          const result = await runChannelDelegate(text, looksLikeMediaBody(text), timeoutMs, ctx);
+          const result = await runChannelDelegate(text, looksLikeMediaBody(text), timeoutMs, ctx, event);
           const status = result?.status;
           const replyText = String(result.whatsapp_reply ?? result.reply ?? "").trim();
           const blocked = !replyText || status === "delegate_miss" || status === "skip";

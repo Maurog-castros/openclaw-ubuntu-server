@@ -8,8 +8,10 @@ mkdir -p /home/node/workspace /home/node/repos
 if [ -d "/home/node/workspace/hl_miko" ] && [ ! -L "/home/node/workspace/hl_miko" ]; then
   rm -rf /home/node/workspace/hl_miko
 fi
-ln -sfn "$CANON" /home/node/workspace/hl_miko
-ln -sfn "$CANON" /home/node/repos/hl_miko
+ln -sfn "$CANON" /home/node/workspace/hl_miko || true
+if [ -w /home/node/repos ]; then
+  ln -sfn "$CANON" /home/node/repos/hl_miko || true
+fi
 
 if [ -f "$GIT_CRED_SRC" ] && [ -d "$CANON/.git" ]; then
   cp "$GIT_CRED_SRC" "$GIT_CRED_USE"

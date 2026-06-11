@@ -35,6 +35,7 @@ BRANCH_RE = re.compile(
 SETUP_RE = re.compile(r"\b(setup|init)\b", re.I)
 VALIDATE_RE = re.compile(r"\b(validar?|qa|playwright|smoke|probar|test)\b", re.I)
 STATUS_RE = re.compile(r"\b(status|estado|info|contexto)\b", re.I)
+SUMMARY_RE = re.compile(r"\b(resumen|ultimo|último|ultimos|últimos|que\s+hay|novedades)\b", re.I)
 
 
 def run_json(cmd: list[str], timeout: int = 300) -> tuple[int, dict[str, Any], str, str]:
@@ -62,6 +63,44 @@ def run_hl_agent(message: str, session_key: str) -> tuple[int, str, str, str]:
     if not reply:
         reply = str(payload.get("whatsapp_reply") or "").strip()
     return code, reply, stdout, stderr
+
+
+def run_git(repo: Path, *args: str, timeout: int = 30) -> str:
+    proc = subprocess.run(
+        ["git", "-C", str(repo), *args],
+        text=True,
+        capture_output=True,
+        timeout=timeout,
+        check=False,
+    )
+    return (proc.stdout or proc.stderr or "").strip()
+
+
+def summarize_latest() -> dict[str, Any]:
+    repo = repo_root()
+    branch_name = current_branch() or "?"
+    status = run_git(repo, "status", "--short")
+    commits = run_git(repo, "log", "-5", "--oneline", "--decorate")
+    changed = [line for line in status.splitlines() if line.strip()]
+    lines = [
+        "HL-Go — último contexto",
+        f"Rama: {branch_name}",
+        "Commits:",
+    ]
+    lines.extend(f"• {line[:110]}" for line in commits.splitlines()[:5])
+    if changed:
+        lines.append(f"Cambios sin commit: {len(changed)} archivo(s).")
+        lines.extend(f"• {line[:100]}" for line in changed[:5])
+    else:
+        lines.append("Working tree limpio.")
+    return {
+        "status": "ok",
+        "agent": "hlgo",
+        "repo": str(repo),
+        "branch": branch_name,
+        "dirty_count": len(changed),
+        "whatsapp_reply": "\n".join(lines),
+    }
 
 
 def main() -> None:
@@ -195,6 +234,10 @@ def main() -> None:
         )
         payload.setdefault("agent", "hlgo")
         print(json.dumps(payload, ensure_ascii=False))
+        return
+
+    if SUMMARY_RE.search(message):
+        print(json.dumps(summarize_latest(), ensure_ascii=False))
         return
 
     agent_msg = message if message else "status HL-Go"
