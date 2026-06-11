@@ -20,6 +20,11 @@ from vida_common import ROOT, now_local, truncate_whatsapp
 BROH_PREFIX = re.compile(r"^\s*/broh\b\s*", re.I)
 ADD_MEMORY_RE = re.compile(r"\b(recuerda|recordar|guarda|registr(?:a|ar)|anota)\b", re.I)
 STATUS_RE = re.compile(r"\b(status|estado|contexto|historias|memoria)\b", re.I)
+GREETING_RE = re.compile(r"^\s*(hola|buenas|como estas|cómo estás|que tal|qué tal)\??\s*$", re.I)
+EXPLAIN_RE = re.compile(r"\b(que significa|qué significa|no entend[ií]|explica|a que te refieres|a qué te refieres)\b", re.I)
+FEEDBACK_RE = re.compile(r"\b(wtf|no puedes decir otra cosa|otra cosa|muy repetitivo|repetitivo|no me sirve|mal)\b", re.I)
+LONELY_RE = re.compile(r"\b(solito|solo|me siento solo|me siento solito|acompaña)\b", re.I)
+SMALL_TALK_MAX_WORDS = 8
 STORY_KEYS = {
     "tinnitus": re.compile(r"\b(tinnitus|oido|oído|zumbido|sonido)\b", re.I),
     "career_transition": re.compile(r"\b(trabajo|postul|entrevista|linkedin|cv|empleo|jobs)\b", re.I),
@@ -234,9 +239,25 @@ def observations(limit: int = 3) -> list[Evidence]:
         except json.JSONDecodeError:
             continue
         text = str(row.get("text") or "").strip()
-        if text:
+        if text and useful_observation(text):
             out.append(Evidence("memoria", text[:160]))
     return out
+
+
+def useful_observation(text: str) -> bool:
+    cleaned = re.sub(r"\s+", " ", text or "").strip()
+    if len(cleaned.split()) <= SMALL_TALK_MAX_WORDS:
+        return False
+    if GREETING_RE.search(cleaned) or EXPLAIN_RE.search(cleaned) or FEEDBACK_RE.search(cleaned):
+        return False
+    return True
+
+
+def should_store_conversation(text: str) -> bool:
+    cleaned = re.sub(r"\s+", " ", text or "").strip()
+    if not useful_observation(cleaned):
+        return False
+    return detect_story(cleaned) is not None or len(cleaned) >= 90
 
 
 def gather_evidence() -> list[Evidence]:
@@ -258,12 +279,43 @@ def gather_evidence() -> list[Evidence]:
 def status_reply() -> dict[str, Any]:
     stories = ensure_seed_stories()
     lines = ["Broh: tengo estas historias vivas:"]
-    lines.extend(f"* {item['id']}: {item['summary'][:95]}" for item in stories[:6])
+    lines.extend(f"* {item['id']}: {item['summary'][:120]}" for item in stories[:4])
     evidence = gather_evidence()[:3]
     if evidence:
         lines.append("Últimas señales:")
-        lines.extend(f"* {item.label}: {item.text[:95]}" for item in evidence)
+        lines.extend(f"* {item.label}: {item.text[:110]}" for item in evidence)
     return reply("\n".join(lines))
+
+
+def casual_reply(text: str) -> str | None:
+    if FEEDBACK_RE.search(text):
+        return (
+            "Broh:\n"
+            "Sí, tienes razón. Me fui en modo resumen de evidencia y soné como plantilla.\n"
+            "Versión simple: estoy aquí contigo. Puedo hablar más normal, tirar una talla suave, "
+            "o ayudarte a ordenar lo que tienes en la cabeza."
+        )
+    if EXPLAIN_RE.search(text):
+        return (
+            "Broh:\n"
+            "Quise decir esto: aunque hoy se sienta raro o lento, no estás parado. "
+            "Has seguido haciendo cosas concretas: salud, pega, OpenClaw, ideas.\n"
+            "Pero sí, lo dije medio solemne."
+        )
+    if GREETING_RE.search(text):
+        return (
+            "Broh:\n"
+            "Aquí, atento. No tengo un 'estado de ánimo' real, pero estoy para acompañarte un rato.\n"
+            "¿Quieres que conversemos liviano o prefieres que miremos algo que te esté pesando?"
+        )
+    if LONELY_RE.search(text):
+        return (
+            "Broh:\n"
+            "Te leo. No voy a llenarte de frases bonitas.\n"
+            "Quedémonos en algo simple: no tienes que resolver la vida ahora. Podemos conversar un rato, "
+            "ordenar una idea, o simplemente bajar un cambio."
+        )
+    return None
 
 
 def build_perspective(user_text: str = "") -> str:
@@ -271,7 +323,7 @@ def build_perspective(user_text: str = "") -> str:
     story_id = detect_story(user_text) or random.choice([item["id"] for item in stories])
     story = next((item for item in stories if item.get("id") == story_id), stories[0])
     evidence = gather_evidence()
-    if user_text and user_text != "pulso proactivo":
+    if user_text != "pulso proactivo" and should_store_conversation(user_text):
         append_observation("conversation", user_text, story_id=story_id)
 
     lines = ["Broh:"]
@@ -332,6 +384,8 @@ def main() -> None:
         out = add_story_note(text)
     elif STATUS_RE.search(text):
         out = status_reply()
+    elif casual := casual_reply(text):
+        out = reply(casual)
     else:
         out = reply(build_perspective(text))
 
