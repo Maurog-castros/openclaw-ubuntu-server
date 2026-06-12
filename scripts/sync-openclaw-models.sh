@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="/home/mauro/openclaw-mauro"
+ROOT="${OPENCLAW_ROOT:-/home/mauro/Dev/openclaw-mauro}"
+if [[ ! -d "$ROOT" ]]; then
+  ROOT="/home/mauro/openclaw-mauro"
+fi
 OPENCLAW_DIR="$ROOT/openclaw"
 CONFIG_JSON="$ROOT/data/config/openclaw.json"
 LITELLM_CONFIG="$OPENCLAW_DIR/litellm-config.yaml"
@@ -34,7 +37,9 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
-ROOT = Path("/home/mauro/openclaw-mauro")
+ROOT = Path(os.environ.get("OPENCLAW_ROOT", "/home/mauro/Dev/openclaw-mauro"))
+if not ROOT.exists():
+    ROOT = Path("/home/mauro/openclaw-mauro")
 OPENCLAW_DIR = ROOT / "openclaw"
 ENV_FILE = OPENCLAW_DIR / ".env"
 CONFIG_JSON = ROOT / "data/config/openclaw.json"
@@ -77,6 +82,14 @@ def pick_model(models: list[str], needles: tuple[str, ...]) -> str | None:
     return models[0] if models else None
 
 
+def pick_optional_model(models: list[str], needles: tuple[str, ...]) -> str | None:
+    for needle in needles:
+        for model_id in models:
+            if needle in model_id.lower():
+                return model_id
+    return None
+
+
 def backup(path: Path) -> None:
     if not path.exists():
         return
@@ -86,11 +99,11 @@ def backup(path: Path) -> None:
 
 def write_litellm(env: dict[str, str], text_model: str, vision_model: str | None, embedding_model: str | None) -> list[str]:
     aliases: list[tuple[str, str, int]] = [
-        ("openclaw-remote", text_model, 60),
-        ("openclaw-remote-coder", text_model, 60),
+        ("openclaw-remote", text_model, 240),
+        ("openclaw-remote-coder", text_model, 240),
     ]
     if vision_model:
-        aliases.append(("openclaw-remote-vision", vision_model, 60))
+        aliases.append(("openclaw-remote-vision", vision_model, 240))
     if embedding_model:
         aliases.append(("openclaw-remote-embed", embedding_model, 45))
 
@@ -116,7 +129,7 @@ def write_litellm(env: dict[str, str], text_model: str, vision_model: str | None
         [
             "litellm_settings:",
             "  num_retries: 3",
-            "  request_timeout: 90",
+            "  request_timeout: 240",
             "  fallbacks:",
             f"    - openclaw-remote: [{', '.join(fallbacks)}]",
             "    - openclaw-remote-coder: [openclaw-remote]",
@@ -195,7 +208,7 @@ def write_openclaw_config(aliases: list[str], selected: dict[str, str | None]) -
             "baseUrl": remote_provider.get("baseUrl", "http://litellm:4000/v1"),
             "apiKey": remote_provider.get("apiKey", "sk-openclaw-local"),
             "api": remote_provider.get("api", "openai-completions"),
-            "timeoutSeconds": remote_provider.get("timeoutSeconds", 60),
+            "timeoutSeconds": 240,
             "models": provider_models,
         }
     }
@@ -296,8 +309,8 @@ def main() -> None:
     chat_models = [model_id for model_id in upstream if not is_embedding(model_id)]
     embedding_models = [model_id for model_id in upstream if is_embedding(model_id)]
 
-    text_model = pick_model(chat_models, ("coder", "instruct", "qwen", "llama"))
-    vision_model = pick_model(chat_models, ("vl", "vision", "multimodal"))
+    text_model = pick_model(chat_models, ("qwen3-coder-next-mlx@6bit", "qwen3-coder-next-mlx", "coder", "instruct", "qwen", "llama"))
+    vision_model = pick_optional_model(chat_models, ("vl", "vision", "multimodal")) or text_model
     embedding_model = pick_model(embedding_models, ("embed", "embedding"))
 
     if not text_model:
