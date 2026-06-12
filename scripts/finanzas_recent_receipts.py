@@ -176,10 +176,23 @@ def build_summary(
     return "\n".join(lines)
 
 
+def filter_by_merchant(receipts: List[Dict[str, Any]], merchant: str) -> List[Dict[str, Any]]:
+    needle = (merchant or "").strip().lower()
+    if not needle:
+        return receipts
+    return [
+        receipt
+        for receipt in receipts
+        if needle in str(receipt.get("store") or "").lower()
+        or needle in str(receipt.get("source") or "").lower()
+    ]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Boletas procesadas recientes.")
     parser.add_argument("--csv", default=DEFAULT_UNIFIED_CSV)
     parser.add_argument("--limit", type=int, default=10)
+    parser.add_argument("--merchant", default="")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
 
@@ -196,8 +209,23 @@ def main() -> None:
 
     rows = load_all_rows(csv_path)
     observations = load_observaciones(resolve_data_path(DEFAULT_OBSERVACIONES))
-    receipts = group_receipts(rows)
+    receipts = filter_by_merchant(group_receipts(rows), args.merchant)
     limit = max(args.limit, 1)
+    if not receipts:
+        if args.merchant:
+            summary = f"No encontré boletas registradas para {args.merchant}."
+        else:
+            summary = "Aún no tienes boletas registradas.\nEnvía una foto de boleta o escribe */fin* para empezar."
+        payload = {
+            "status": "ok",
+            "receipt_count": 0,
+            "shown": 0,
+            "receipts": [],
+            "summary": summary,
+            "whatsapp_reply": summary,
+        }
+        print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else summary)
+        return
     summary = build_summary(receipts, limit=limit, observations=observations)
     payload = {
         "status": "ok",

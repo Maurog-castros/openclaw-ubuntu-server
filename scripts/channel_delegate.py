@@ -48,12 +48,13 @@ JOBS_RE = re.compile(r"^\s*/(?:jobs|postula)\b", re.I)
 HLGO_RE = re.compile(r"^\s*/(?:hlgo|hl-go|hl)\b", re.I)
 CONTENT_RE = re.compile(r"^\s*/content\b|instagram\.com/(?:p|reel)/", re.I)
 RECENT_RECEIPTS_RE = re.compile(
-    r"\b(ultim(?:as|os)|recientes|procesad(?:as|os)|historial)\b.*\b(boleta?s?|ticket?s?|recibos?)\b"
-    r"|\b(boleta?s?|ticket?s?|recibos?)\b.*\b(ultim(?:as|os)|recientes|procesad(?:as|os))\b"
-    r"|\bcuales?\s+(?:son\s+)?(?:las?\s+)?ultim(?:as|os)\b",
+    r"\b(ultim(?:a|o|as|os)|recientes|procesad(?:a|o|as|os)|historial)\b.*\b(boleta?s?|ticket?s?|recibos?)\b"
+    r"|\b(boleta?s?|ticket?s?|recibos?)\b.*\b(ultim(?:a|o|as|os)|recientes|procesad(?:a|o|as|os))\b"
+    r"|\bcuales?\s+(?:son\s+)?(?:las?\s+)?ultim(?:a|o|as|os)\b",
     re.I,
 )
-RECENT_RECEIPTS_LIMIT_RE = re.compile(r"\b(\d{1,2})\s*(?:ultim(?:as|os))?\s*boleta", re.I)
+RECENT_RECEIPTS_LIMIT_RE = re.compile(r"\b(\d{1,2})\s*(?:ultim(?:a|o|as|os))?\s*boleta", re.I)
+LIDER_RE = re.compile(r"\bl[ií]der\b", re.I)
 NEW_RESET_RE = re.compile(r"^\s*/(?:new|reset)\b", re.I)
 HELP_CMD_RE = re.compile(r"^\s*/help\b", re.I)
 STATUS_CMD_RE = re.compile(r"^\s*/status\b", re.I)
@@ -258,6 +259,8 @@ def parse_recent_receipts_limit(text: str, default: int = 10) -> int:
     m2 = re.search(r"\b(\d{1,2})\s+boleta", text or "", re.I)
     if m2:
         return max(1, min(int(m2.group(1)), 20))
+    if re.search(r"\bultim(?:a|o)\b", text or "", re.I):
+        return 1
     return default
 
 
@@ -445,8 +448,11 @@ def run_content_delegate(text: str) -> dict:
     return payload
 
 
-def run_recent_receipts(limit: int = 10) -> dict:
-    code, payload, _, stderr = run_json(py_cmd("finanzas_recent_receipts.py", "--limit", str(limit), "--json"))
+def run_recent_receipts(limit: int = 10, *, merchant: str = "") -> dict:
+    cmd = py_cmd("finanzas_recent_receipts.py", "--limit", str(limit), "--json")
+    if merchant:
+        cmd.extend(["--merchant", merchant])
+    code, payload, _, stderr = run_json(cmd)
     if code != 0 and not payload.get("whatsapp_reply"):
         return {"status": "error", "agent": "fin", "whatsapp_reply": "No pude listar boletas recientes.", "stderr": stderr[-800:]}
     payload.setdefault("agent", "fin")
@@ -550,7 +556,8 @@ def dispatch_text(
         return payload
 
     if RECENT_RECEIPTS_RE.search(text):
-        return run_recent_receipts(parse_recent_receipts_limit(text))
+        merchant = "lider" if LIDER_RE.search(text) else ""
+        return run_recent_receipts(parse_recent_receipts_limit(text), merchant=merchant)
 
     try:
         from finanzas_transfer_whatsapp import looks_like_transfer_email, process_transfer_email
