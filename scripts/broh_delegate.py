@@ -21,9 +21,15 @@ BROH_PREFIX = re.compile(r"^\s*/broh\b\s*", re.I)
 ADD_MEMORY_RE = re.compile(r"\b(recuerda|recordar|guarda|registr(?:a|ar)|anota)\b", re.I)
 STATUS_RE = re.compile(r"\b(status|estado|contexto|historias|memoria)\b", re.I)
 GREETING_RE = re.compile(r"^\s*(hola|buenas|como estas|cómo estás|que tal|qué tal)\??\s*$", re.I)
+CHECKIN_RE = re.compile(r"\b(c[oó]mo va|como vamos|qué onda|que onda|todo bien|como andai|cómo andai)\b", re.I)
+MOTIVATION_RE = re.compile(r"\b(motiva(?:dor|me|ción|cion)|motiviador|motivador|[aá]nimo|dime algo bueno|levantar el [aá]nimo)\b", re.I)
 EXPLAIN_RE = re.compile(r"\b(que significa|qué significa|no entend[ií]|explica|a que te refieres|a qué te refieres)\b", re.I)
 FEEDBACK_RE = re.compile(r"\b(wtf|no puedes decir otra cosa|otra cosa|muy repetitivo|repetitivo|no me sirve|mal)\b", re.I)
 LONELY_RE = re.compile(r"\b(solito|solo|me siento solo|me siento solito|acompaña)\b", re.I)
+NOISY_MEMORY_RE = re.compile(
+    r"(\[image\]|\[telegram\b|<media:|inbound_event_kind|message_id|sender_id|chat_id|description:)",
+    re.I,
+)
 SMALL_TALK_MAX_WORDS = 8
 STORY_KEYS = {
     "tinnitus": re.compile(r"\b(tinnitus|oido|oído|zumbido|sonido)\b", re.I),
@@ -246,6 +252,8 @@ def observations(limit: int = 3) -> list[Evidence]:
 
 def useful_observation(text: str) -> bool:
     cleaned = re.sub(r"\s+", " ", text or "").strip()
+    if NOISY_MEMORY_RE.search(cleaned):
+        return False
     if len(cleaned.split()) <= SMALL_TALK_MAX_WORDS:
         return False
     if GREETING_RE.search(cleaned) or EXPLAIN_RE.search(cleaned) or FEEDBACK_RE.search(cleaned):
@@ -255,6 +263,8 @@ def useful_observation(text: str) -> bool:
 
 def should_store_conversation(text: str) -> bool:
     cleaned = re.sub(r"\s+", " ", text or "").strip()
+    if NOISY_MEMORY_RE.search(cleaned):
+        return False
     if not useful_observation(cleaned):
         return False
     return detect_story(cleaned) is not None or len(cleaned) >= 90
@@ -307,6 +317,20 @@ def casual_reply(text: str) -> str | None:
             "Broh:\n"
             "Aquí, atento. No tengo un 'estado de ánimo' real, pero estoy para acompañarte un rato.\n"
             "¿Quieres que conversemos liviano o prefieres que miremos algo que te esté pesando?"
+        )
+    if CHECKIN_RE.search(text):
+        return (
+            "Broh:\n"
+            "Va. Medio tarde, pero va.\n"
+            "Te veo metido en mil frentes: agentes, pega, salud, ideas. Si quieres, hoy no hacemos informe; "
+            "solo elegimos una cosa chica para dejar mejor encaminada."
+        )
+    if MOTIVATION_RE.search(text):
+        return (
+            "Broh:\n"
+            "Algo motivador, pero sin humo: incluso cuando estás cansado, sigues construyendo criterio. "
+            "No solo estás usando IA; estás armando un sistema propio alrededor de ella.\n"
+            "Eso no es poca cosa."
         )
     if LONELY_RE.search(text):
         return (
