@@ -129,6 +129,7 @@ def build_summary(
     *,
     limit: int,
     observations: Dict[str, Dict[str, str]],
+    full_detail: bool = False,
 ) -> str:
     if not receipts:
         return "No hay boletas procesadas en el CSV unificado."
@@ -160,16 +161,17 @@ def build_summary(
         elif items:
             show_amounts = should_show_item_amounts(items, total)
             if not show_amounts:
-                products = ", ".join(i.get("product") or "item" for i in items[:6])
+                product_items = items if full_detail else items[:6]
+                products = ", ".join(i.get("product") or "item" for i in product_items)
                 lines.append(f"   - {products}")
-                if len(items) > 6:
+                if not full_detail and len(items) > 6:
                     lines.append(f"   ... +{len(items) - 6} items")
             else:
-                preview = items[:4]
+                preview = items if full_detail else items[:4]
                 for item in preview:
                     amt = format_item_amount(item, ticket_total=total, items_count=len(items))
                     lines.append(f"   - {item.get('product') or 'item'} — {fmt_clp(amt)}")
-                if len(items) > 4:
+                if not full_detail and len(items) > 4:
                     lines.append(f"   ... +{len(items) - 4} items")
     if len(receipts) > limit:
         lines.append(f"(Total registradas: {len(receipts)}; mostrando {limit})")
@@ -193,6 +195,7 @@ def main() -> None:
     parser.add_argument("--csv", default=DEFAULT_UNIFIED_CSV)
     parser.add_argument("--limit", type=int, default=10)
     parser.add_argument("--merchant", default="")
+    parser.add_argument("--full-detail", action="store_true")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
 
@@ -226,7 +229,7 @@ def main() -> None:
         }
         print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else summary)
         return
-    summary = build_summary(receipts, limit=limit, observations=observations)
+    summary = build_summary(receipts, limit=limit, observations=observations, full_detail=args.full_detail)
     payload = {
         "status": "ok",
         "receipt_count": len(receipts),

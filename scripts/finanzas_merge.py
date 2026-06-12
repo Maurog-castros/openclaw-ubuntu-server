@@ -15,7 +15,6 @@ from finanzas_common import (
     DEFAULT_CARTOLA_CSV,
     DEFAULT_LIDER_CSV,
     DEFAULT_TRANSFERENCIAS_CSV,
-    DEFAULT_SANTANDER_APP_CSV,
     DEFAULT_UNIFIED_CSV,
     DEFAULT_VISION_CSV,
     merge_all_sources,
@@ -29,7 +28,6 @@ def main() -> None:
     parser.add_argument("--vision", default=DEFAULT_VISION_CSV)
     parser.add_argument("--transferencias", default=DEFAULT_TRANSFERENCIAS_CSV)
     parser.add_argument("--cartola", default=DEFAULT_CARTOLA_CSV)
-    parser.add_argument("--santander-app", default=DEFAULT_SANTANDER_APP_CSV)
     parser.add_argument("--owner-rut", default="", help="RUT propio para clasificar entradas/salidas.")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
@@ -41,7 +39,6 @@ def main() -> None:
         transferencias_csv=Path(args.transferencias),
         owner_rut=args.owner_rut,
         cartola_csv=Path(args.cartola),
-        santander_app_csv=Path(args.santander_app),
     )
 
     if args.json:
@@ -52,7 +49,6 @@ def main() -> None:
         print(f"Vision: {stats['vision']} filas")
         print(f"Transferencias: {stats['transferencias']} filas")
         print(f"Cartola: {stats['cartola']} filas")
-        print(f"Santander app: {stats.get('santander_app', 0)} filas")
         print(f"Total unificado (deduplicado): {stats['unified']} filas")
 
 

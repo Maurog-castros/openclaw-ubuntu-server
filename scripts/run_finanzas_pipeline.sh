@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
-ROOT="/home/mauro/openclaw-mauro"
+ROOT="${OPENCLAW_ROOT:-/home/mauro/Dev/openclaw-mauro}"
+if [[ ! -d "$ROOT" ]]; then
+  ROOT="/home/mauro/openclaw-mauro"
+fi
 cd "$ROOT"
 PY="${ROOT}/.venv-finanzas/bin/python"
 if [[ ! -x "$PY" ]]; then

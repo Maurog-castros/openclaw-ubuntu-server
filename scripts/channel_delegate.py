@@ -54,6 +54,10 @@ RECENT_RECEIPTS_RE = re.compile(
     re.I,
 )
 RECENT_RECEIPTS_LIMIT_RE = re.compile(r"\b(\d{1,2})\s*(?:ultim(?:a|o|as|os))?\s*boleta", re.I)
+RECEIPT_FULL_DETAIL_RE = re.compile(
+    r"\b(detalle\s+completo|detall(?:e|ada|ado)|complet(?:a|o)|todos?\s+los\s+(?:productos|items|ítems))\b",
+    re.I,
+)
 LIDER_RE = re.compile(r"\bl[ií]der\b", re.I)
 NEW_RESET_RE = re.compile(r"^\s*/(?:new|reset)\b", re.I)
 HELP_CMD_RE = re.compile(r"^\s*/help\b", re.I)
@@ -448,10 +452,12 @@ def run_content_delegate(text: str) -> dict:
     return payload
 
 
-def run_recent_receipts(limit: int = 10, *, merchant: str = "") -> dict:
+def run_recent_receipts(limit: int = 10, *, merchant: str = "", full_detail: bool = False) -> dict:
     cmd = py_cmd("finanzas_recent_receipts.py", "--limit", str(limit), "--json")
     if merchant:
         cmd.extend(["--merchant", merchant])
+    if full_detail:
+        cmd.append("--full-detail")
     code, payload, _, stderr = run_json(cmd)
     if code != 0 and not payload.get("whatsapp_reply"):
         return {"status": "error", "agent": "fin", "whatsapp_reply": "No pude listar boletas recientes.", "stderr": stderr[-800:]}
@@ -557,7 +563,8 @@ def dispatch_text(
 
     if RECENT_RECEIPTS_RE.search(text):
         merchant = "lider" if LIDER_RE.search(text) else ""
-        return run_recent_receipts(parse_recent_receipts_limit(text), merchant=merchant)
+        full_detail = bool(RECEIPT_FULL_DETAIL_RE.search(text))
+        return run_recent_receipts(parse_recent_receipts_limit(text), merchant=merchant, full_detail=full_detail)
 
     try:
         from finanzas_transfer_whatsapp import looks_like_transfer_email, process_transfer_email

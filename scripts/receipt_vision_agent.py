@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from dotenv import load_dotenv
-from openai import OpenAI
+from openai import BadRequestError, OpenAI
 
 _SCRIPTS_DIR = Path(__file__).resolve().parent
 if str(_SCRIPTS_DIR) not in sys.path:
@@ -42,6 +42,10 @@ from finanzas_common import (
     seed_registry_from_csvs,
 )
 from finanzas_receipt_caption import enrich_receipt_from_caption, looks_like_bank_screenshot
+
+
+class VisionModelUnsupportedError(RuntimeError):
+    """Raised when the configured model rejects image inputs."""
 
 load_dotenv()
 
@@ -209,11 +213,17 @@ def call_vision_model(
                 {"role": "user", "content": RECEIPT_RETRY_PROMPT},
             ]
         )
-    response = client.chat.completions.create(
-        model=model,
-        messages=messages,
-        temperature=0.05,
-    )
+    try:
+        response = client.chat.completions.create(
+            model=model,
+            messages=messages,
+            temperature=0.05,
+        )
+    except BadRequestError as exc:
+        message = str(exc)
+        if "does not support image" in message or "contain images" in message:
+            raise VisionModelUnsupportedError(f"Modelo no soporta imagenes: {model}") from exc
+        raise
     return response.choices[0].message.content or ""
 
 
@@ -391,7 +401,16 @@ def process_image_file(
             {"status": "skipped", "reason": "duplicate_image", "image_hash": image_hash},
         )
 
-    receipt = extract_receipt_from_image(image_path, model=model)
+    try:
+        receipt = extract_receipt_from_image(image_path, model=model)
+    except VisionModelUnsupportedError as exc:
+        return {
+            "status": "skipped",
+            "reason": "vision_model_unsupported",
+            "image_hash": image_hash,
+            "model": model,
+            "message": str(exc),
+        }
     if user_caption:
         receipt = enrich_receipt_from_caption(receipt, user_caption)
     if looks_like_bank_screenshot(receipt):
@@ -568,12 +587,12 @@ def main() -> None:
     parser.add_argument("--json", action="store_true", help="Imprime resultado en JSON.")
     args = parser.parse_args()
 
+    processed_dir = Path(args.processed_dir) if args.processed_dir else None
     common_kwargs = {
         "output_csv": Path(args.output),
         "state_file": Path(args.state),
         "registry_file": Path(args.registry),
         "model": args.model,
-        "processed_dir": Path(args.processed_dir) if args.processed_dir else None,
         "merge_unified": args.merge,
         "unified_csv": Path(args.unified_output),
         "lider_csv": Path(args.lider_input),
@@ -586,6 +605,7 @@ def main() -> None:
             Path(args.image),
             source=args.source,
             source_ref=args.source_ref,
+            processed_dir=processed_dir,
             user_caption=args.user_caption or "",
             **common_kwargs,
         )
@@ -615,7 +635,7 @@ def main() -> None:
 
     results = process_inbox_folder(
         Path(args.inbox),
-        Path(args.processed_dir),
+        processed_dir or Path(args.processed_dir),
         source=args.source,
         source_ref=args.source_ref,
         **common_kwargs,
