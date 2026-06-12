@@ -3,10 +3,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 from pathlib import Path
 
-from vida_common import DATA, ROOT, load_json, now_local, reply, truncate_whatsapp
+from vida_common import ROOT, care_data, load_json, now_local, reply, truncate_whatsapp
 
 SCR = ROOT / "scripts"
 RUN = SCR / "run-vida-py.sh"
@@ -27,10 +28,10 @@ def main() -> None:
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
 
-    profile = load_json(DATA / "profile.json", {})
+    profile = load_json(care_data() / "profile.json", {})
     day = now_local().strftime("%Y-%m-%d")
 
-    name = profile.get("name", "Mauro")
+    name = profile.get("name") or os.environ.get("OPENCLAW_USER_NAME", "amigo")
     if args.text:
         body = truncate_whatsapp(
             f"Gracias por contarlo, {name}. ¿Qué crees que más te está pesando hoy?"

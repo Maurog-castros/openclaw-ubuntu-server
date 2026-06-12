@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Instala cron diario Jobs: buscar + postular 3 vacantes + WhatsApp (09:00).
+# Pausado por defecto: usar uninstall-jobs-cron.sh. Reactivar solo si jobs funciona bien.
 set -euo pipefail
 
 REPO="${OPENCLAW_REPO:-/home/mauro/openclaw-mauro}"

@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import os
 import re
 from datetime import datetime
 from pathlib import Path
@@ -92,12 +93,23 @@ def repo_root() -> Path:
     return _REPO_ROOT
 
 
+def user_data_root() -> Path:
+    """Raíz de datos del usuario activo (multi-tenant WhatsApp)."""
+    override = os.environ.get("OPENCLAW_USER_DATA_ROOT", "").strip()
+    if override:
+        return Path(override)
+    return repo_root() / "data"
+
+
 def resolve_data_path(path: str | Path) -> Path:
-    """Rutas data/... relativas al repo, no al cwd del agente."""
+    """Rutas data/... relativas al repo o al data_root del usuario."""
     candidate = Path(path)
     if candidate.is_absolute():
         return candidate
-    return repo_root() / candidate
+    text = str(path).replace("\\", "/")
+    if text.startswith("data/"):
+        return user_data_root() / text[5:]
+    return repo_root() / text
 
 
 def load_merchant_aliases(path: Path) -> List[Dict[str, Any]]:

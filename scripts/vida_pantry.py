@@ -5,7 +5,7 @@ import argparse
 import json
 import re
 
-from vida_common import DATA, load_json, now_local, reply, save_json
+from vida_common import care_data, load_json, now_local, reply, save_json
 
 MEAL_IDEAS = [
     ("huevos", "huevos", "revuelto con queso"),
@@ -52,10 +52,10 @@ def main() -> None:
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
 
-    pantry = load_json(DATA / "pantry.json", {"despensa": [], "refrigerado": []})
+    pantry = load_json(care_data() / "pantry.json", {"despensa": [], "refrigerado": []})
     if args.mode == "update" or args.text:
         update_pantry(args.text, pantry)
-        save_json(DATA / "pantry.json", pantry)
+        save_json(care_data() / "pantry.json", pantry)
 
     ideas = suggest(pantry)
     desp = ", ".join(pantry.get("despensa") or []) or "(vacía)"

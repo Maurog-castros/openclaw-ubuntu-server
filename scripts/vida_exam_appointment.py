@@ -7,7 +7,7 @@ from pathlib import Path
 
 from vida_calendar_common import calendar_auth_hint
 from vida_calendar_create import build_description, create_event, format_exams_list
-from vida_common import DATA, ROOT, now_local, reply, save_json
+from vida_common import ROOT, care_data, now_local, reply, save_json
 from vida_exam_vision import DEFAULT_VISION_MODEL, apply_text_hints, call_vision
 
 IMAGE_EXT = {".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"}
@@ -40,7 +40,7 @@ def resolve_image(explicit: str | None) -> Path | None:
 
 def append_diary(note: str) -> None:
     day = now_local().strftime("%Y-%m-%d")
-    path = DATA / "diary" / f"{day}.md"
+    path = care_data() / "diary" / f"{day}.md"
     path.parent.mkdir(parents=True, exist_ok=True)
     stamp = now_local().strftime("%H:%M")
     line = f"- [{stamp}] {note}\n"
@@ -51,7 +51,7 @@ def append_diary(note: str) -> None:
 
 
 def save_appointment_record(record: dict) -> None:
-    reg_path = DATA / "appointments.json"
+    reg_path = care_data() / "appointments.json"
     reg = {"items": []}
     if reg_path.exists():
         reg = json.loads(reg_path.read_text(encoding="utf-8"))

@@ -12,6 +12,17 @@ from typing import Any, Dict, List, Optional
 _REPO = Path(__file__).resolve().parent.parent
 DEFAULT_MENU_STATE = _REPO / "data/whatsapp_last_menu.json"
 
+
+def menu_state_path(path: Path | None = None) -> Path:
+    if path is not None:
+        return path
+    import os
+
+    override = os.environ.get("OPENCLAW_USER_MENU_FILE", "").strip()
+    if override:
+        return Path(override)
+    return DEFAULT_MENU_STATE
+
 MENU_CHOICE_RE = re.compile(r"^[1-5]$")
 EMOJI_NUM = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"]
 
@@ -33,14 +44,19 @@ def _current_month() -> str:
 
 
 def fin_menu_options() -> List[MenuOption]:
+    import os
+
     month = _current_month()
-    return [
+    options = [
         MenuOption("1", "💰", "Ver saldo", "text", "como va mi saldo"),
         MenuOption("2", "💸", "Transferencias recientes", "script", "finanzas_transferencias_report.py|--limit|5"),
         MenuOption("3", "📊", f"Gastos {month}", "monthly", month),
         MenuOption("4", "🧾", "Ultimas boletas", "script", "finanzas_recent_receipts.py|--limit|5"),
         MenuOption("5", "🛠", "Soporte tecnico", "supp", "status"),
     ]
+    if os.environ.get("OPENCLAW_USER_IS_OWNER") != "1":
+        options = [opt for opt in options if opt.kind != "supp"]
+    return options
 
 
 def supp_menu_options() -> List[MenuOption]:
@@ -52,24 +68,26 @@ def supp_menu_options() -> List[MenuOption]:
     ]
 
 
-def load_menu_state(path: Path = DEFAULT_MENU_STATE) -> Dict[str, Any]:
-    if not path.exists():
+def load_menu_state(path: Path | None = None) -> Dict[str, Any]:
+    resolved = menu_state_path(path)
+    if not resolved.exists():
         return {}
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        return json.loads(resolved.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
         return {}
 
 
-def save_menu_state(agent: str, options: List[MenuOption], path: Path = DEFAULT_MENU_STATE) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    data = load_menu_state(path)
+def save_menu_state(agent: str, options: List[MenuOption], path: Path | None = None) -> None:
+    resolved = menu_state_path(path)
+    resolved.parent.mkdir(parents=True, exist_ok=True)
+    data = load_menu_state(resolved)
     data["default"] = {
         "agent": agent,
         "updated_at": datetime.now().isoformat(timespec="seconds"),
         "options": [o.to_dict() for o in options],
     }
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    resolved.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
 def build_menu_footer(agent: str) -> str:
@@ -82,7 +100,7 @@ def build_menu_footer(agent: str) -> str:
     return "\n".join(lines)
 
 
-def resolve_menu_choice(text: str, path: Path = DEFAULT_MENU_STATE) -> Optional[MenuOption]:
+def resolve_menu_choice(text: str, path: Path | None = None) -> Optional[MenuOption]:
     t = (text or "").strip()
     if not MENU_CHOICE_RE.match(t):
         return None

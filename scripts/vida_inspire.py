@@ -6,7 +6,7 @@ import json
 import random
 from pathlib import Path
 
-from vida_common import DATA, load_json, reply
+from vida_common import care_data, load_json, reply
 
 QUOTES = {
     "estoico": [
@@ -57,7 +57,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
-    profile = load_json(DATA / "profile.json", {})
+    profile = load_json(care_data() / "profile.json", {})
     author, text = pick_quote(profile)
     out = reply(f"*{author}:* {text}")
     print(json.dumps(out, ensure_ascii=False, indent=2) if args.json else out["whatsapp_reply"])

@@ -4,7 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 
-from vida_common import DATA, now_local, reply
+from vida_common import care_data, now_local, reply
 
 
 def main() -> None:
@@ -14,7 +14,7 @@ def main() -> None:
     args = ap.parse_args()
 
     day = now_local().strftime("%Y-%m-%d")
-    path = DATA / "diary" / f"{day}.md"
+    path = care_data() / "diary" / f"{day}.md"
     path.parent.mkdir(parents=True, exist_ok=True)
     stamp = now_local().strftime("%H:%M")
     line = f"- [{stamp}] {args.text.strip()}\n"

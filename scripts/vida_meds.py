@@ -5,7 +5,7 @@ import argparse
 import json
 from datetime import datetime, timedelta
 
-from vida_common import DATA, TZ, load_json, now_local, reply
+from vida_common import TZ, care_data, load_json, now_local, reply
 
 
 def parse_hhmm(value: str) -> datetime:
@@ -19,7 +19,7 @@ def main() -> None:
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
 
-    data = load_json(DATA / "medications.json", {"items": []})
+    data = load_json(care_data() / "medications.json", {"items": []})
     items = data.get("items") or []
     if not items:
         out = reply("No hay medicamentos configurados. Edita data/medications.json.")

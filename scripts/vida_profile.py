@@ -4,7 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 
-from vida_common import DATA, load_json, save_json, reply
+from vida_common import care_data, load_json, save_json, reply
 
 QUESTIONS = [
     ("q_energy", "¿En qué momento del día sueles tener más energía: mañana, tarde o noche?"),
@@ -23,7 +23,7 @@ def main() -> None:
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
 
-    profile = load_json(DATA / "profile.json", {})
+    profile = load_json(care_data() / "profile.json", {})
     answers = profile.setdefault("answers", {})
 
     if args.answer and profile.get("last_question_id"):
@@ -45,7 +45,7 @@ def main() -> None:
     if not pending:
         profile["onboarding_complete"] = True
         profile["last_question_id"] = None
-        save_json(DATA / "profile.json", profile)
+        save_json(care_data() / "profile.json", profile)
         out = reply("Perfil listo. A partir de ahora adapto tono, preguntas y citas a lo que me contaste.")
     else:
         qid, question = QUESTIONS[len(answers) % len(QUESTIONS)]
@@ -54,7 +54,7 @@ def main() -> None:
                 if qid not in answers:
                     break
         profile["last_question_id"] = qid
-        save_json(DATA / "profile.json", profile)
+        save_json(care_data() / "profile.json", profile)
         n = len(answers) + 1
         total = len(QUESTIONS)
         out = reply(f"Pregunta {n}/{total}: {question}")

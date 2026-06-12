@@ -21,6 +21,7 @@ Solo si `delegate_miss` (exit 2): usa tools/scripts del agente que corresponda.
 
 Prefijos: `/fin` `/care` `/supp` `/intel` `/content` `/hlgo` (`/hl`) `/jobs` — el router deriva.
 `/hlgo` NO es carpeta git; repo: `/home/node/.openclaw/workspace/projects/hl_miko`.
+Catálogo agentes: `_catalog/agents/README.md`.
 <!-- END_CHANNEL_DELEGATE -->
 
 ## Estilo

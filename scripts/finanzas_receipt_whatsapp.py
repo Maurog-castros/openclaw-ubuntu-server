@@ -14,10 +14,21 @@ _REPO_ROOT = _SCRIPTS_DIR.parent
 if str(_SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPTS_DIR))
 
-DEFAULT_INBOUND = _REPO_ROOT / "data/config/media/inbound"
-DEFAULT_UNIFIED = _REPO_ROOT / "data/finanzas_movimientos.csv"
-DEFAULT_VISION_CSV = _REPO_ROOT / "data/receipts_vision.csv"
-DEFAULT_REGISTRY = _REPO_ROOT / "data/receipts_registry.json"
+import os
+
+from finanzas_common import (
+    DEFAULT_RECEIPTS_REGISTRY,
+    DEFAULT_UNIFIED_CSV,
+    DEFAULT_VISION_CSV,
+    resolve_data_path,
+)
+
+
+def _inbound_dir() -> Path:
+    override = os.environ.get("OPENCLAW_USER_INBOUND_DIR", "").strip()
+    if override:
+        return Path(override)
+    return _REPO_ROOT / "data/config/media/inbound"
 
 
 def format_whatsapp_reply(result: Dict[str, Any]) -> str:
@@ -104,7 +115,7 @@ def main() -> None:
     parser.add_argument("--image", help="Ruta explicita a imagen (opcional).")
     parser.add_argument(
         "--inbound-dir",
-        default=str(DEFAULT_INBOUND),
+        default="",
         help="Carpeta media inbound (default: data/config/media/inbound).",
     )
     parser.add_argument(
@@ -138,11 +149,11 @@ def main() -> None:
         args.source,
         "--merge" if args.merge else "",
         "--unified-output",
-        str(DEFAULT_UNIFIED),
+        str(resolve_data_path(DEFAULT_UNIFIED_CSV)),
         "--output",
-        str(DEFAULT_VISION_CSV),
+        str(resolve_data_path(DEFAULT_VISION_CSV)),
         "--registry",
-        str(DEFAULT_REGISTRY),
+        str(resolve_data_path(DEFAULT_RECEIPTS_REGISTRY)),
         "--lider-input",
         str(_REPO_ROOT / "data/lider_receipts.csv"),
         "--transferencias-input",
@@ -155,7 +166,8 @@ def main() -> None:
     if args.image:
         cmd.extend(["--image", args.image])
     else:
-        cmd.extend(["--latest-inbound", "--inbound-dir", args.inbound_dir])
+        inbound = args.inbound_dir or str(_inbound_dir())
+        cmd.extend(["--latest-inbound", "--inbound-dir", inbound])
 
     proc = subprocess.run(cmd, capture_output=True, text=True, timeout=180, cwd=str(_REPO_ROOT))
     raw = (proc.stdout or proc.stderr or "").strip()

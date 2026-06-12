@@ -18,10 +18,11 @@ KNOWN_JOBS: Dict[str, tuple[str, str]] = {
     "gmail_watch_agent.py": ("Cada 15 min", "Watch Gmail (transferencias, etc.)"),
     "support_watch.py": ("Cada 5 min", "Scan logs + auto-fix /supp"),
     "sync-openclaw-models.sh": ("03:17 diario", "Sync modelos OpenClaw"),
-    "run-intel-daily-radar-whatsapp.sh": ("08:30 diario", "Radar intel diario"),
+    "run-intel-daily-radar-whatsapp.sh": ("08:30 diario", "Radar intel HN/Reddit/GitHub"),
+    "run-intel-chile-daily-whatsapp.sh": ("09:00 y 19:00", "Intel Daily Chile (reporte completo)"),
     "run-intel-linkedin-scan.sh": ("Cada 12 h", "Scout LinkedIn"),
     "run-intel-consolidated-cron.sh": ("06:15 y 18:15", "Reporte intel consolidado"),
-    "run-jobs-daily-auto-whatsapp.sh": ("09:00 diario", "Jobs: buscar + postular 3 vacantes + WhatsApp"),
+    "run-jobs-daily-auto-whatsapp.sh": ("(desactivado)", "Jobs LinkedIn — cron pausado"),
 }
 
 SCRIPT_RE = re.compile(r"([\w.-]+\.(?:py|sh))")
