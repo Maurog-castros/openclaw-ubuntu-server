@@ -1,0 +1,28 @@
+{
+  "job_id": "4425136303",
+  "discovered_at": "2026-06-19T18:04:46-04:00",
+  "analyzed_at": "2026-06-19T18:38:02-04:00",
+  "title": "Solutions Architect (Remote)",
+  "company": "Hire Feed",
+  "location": "Chile (En remoto)",
+  "description": "Job Title: Solutions Architect (Remote)\nWork Mode: Fully Remote\nSchedule: Flexible (up to 40 hours per week, based on project availability)\n\n\n\n\nRole Overview:\n\nWe are looking for software engineers across Latin America to join a paid remote AI training program. In this role, you will review and evaluate AI-generated code, rate AI responses for accuracy and quality, and write coding challenges to help improve AI model performance. This is a flexible, remote opportunity well-suited for software engineers seeking project-based, asynchronous work. No prior AI experience required.\n\n\n\n\nKey Responsibilities\n\nReview and evaluate code written by AI models for accuracy, efficiency, and best practices\nRate AI responses across key dimensions including correctness, instruction-following, and quality\nWrite original computer science questions and coding challenges to test AI capabilities\nIdentify bugs, errors, and inconsistencies in AI-generated code using structured guidelines\nProvide clear, constructive, and structured written feedback to improve AI responses\nFollow project guidelines, quality standards, and confidentiality requirements\n\n\n\n\nQualifications\n\nSoftware engineering experience — junior, mid-level, or senior welcome\nProficiency in one or more of the following: Python, Java, JavaScript, TypeScript, C++, Swift, or Rust\nStrong attention to detail, analytical thinking, and problem-solving skills\nBackground in full stack, backend, frontend, mobile, or any engineering discipline\n\n\n\n\nEligibility Requirements\n\nCandidates must be legally authorised to work in one of the following locations:\nArgentina, Bolivia, Brazil, Belize, Chile, Colombia, Costa Rica, Dominican Republic, Dominica, Ecuador, El Salvador, Guatemala, Honduras, Mexico, Nicaragua, Panama, Paraguay, Peru, Puerto Rico, Trinidad and Tobago, Uruguay, Venezuela\n\n\n\n\nCompensation\n\nEarn up to $34 USD/hr — core project rate with additional performance incentives averaging 7.5% on top\nPayments issued weekly via supported payout platforms (e.g., PayPal or AirTM)\n\n\n\n\nWork Arrangement\n\nFully remote and asynchronous\nFlexible workload depending on project availability\nFree access to leading AI tools worth $200+/month included\n\n\n\n\nEqual Opportunity Statement Selection decisions are based solely on skills, qualifications, and project requirements. We are committed to inclusive and fair engagement practices and consider all qualified applicants without regard to legally protected characteristics.\n\n\n\n\nReady to put your coding skills to work on AI? Apply now — interviews begin within days of application.",
+  "workplace": "remote",
+  "easy_apply": false,
+  "job_url": "https://www.linkedin.com/jobs/view/4425136303",
+  "vacancy_score": 3.3,
+  "best_cv": {
+    "file": "CV_MauricioCastro-IaC-022026.pdf",
+    "path": "/home/mauro/Dev/openclaw-mauro/content/CV/CV_MauricioCastro-IaC-022026.pdf",
+    "score": 9.4,
+    "matched_keywords": "rds; cost; python; availability; typescript; java",
+    "missing_keywords": "",
+    "chars": 5206
+  },
+  "best_cv_score": 9.4,
+  "generated_cv": "/home/mauro/Dev/openclaw-mauro/data/workspace/jobs/vacancies/4425136303/CV_Mauricio_Castro_4425136303-adapted.docx",
+  "ranking_csv": "/home/mauro/Dev/openclaw-mauro/data/workspace/jobs/vacancies/4425136303/cv-cv-ranking.csv",
+  "decision_status": "pending_approval",
+  "decision_at": "",
+  "applied_at": "",
+  "analysis_report": "/home/mauro/Dev/openclaw-mauro/data/workspace/jobs/vacancies/4425136303/analysis.md"
+}

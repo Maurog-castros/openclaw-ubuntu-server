@@ -1,0 +1,91 @@
+# Líder Técnico de Integraciones – Apigee Lead
+
+Empresa: Hitss Chile
+Job ID: 4426824247
+URL: https://www.linkedin.com/jobs/view/4426824247
+Nota vacante: 3.4/10
+Mejor CV: CV_MauricioCastro_040626.pdf (6.34/10)
+CV adaptado: /home/mauro/Dev/openclaw-mauro/data/workspace/jobs/vacancies/4426824247/CV_Mauricio_Castro_4426824247-adapted.docx
+Estado: pending_approval
+
+Aprobar: /jobs aprobar 4426824247
+Descartar: /jobs descartar 4426824247
+Postular: /jobs postular 4426824247
+
+## JD
+
+🚀 En HITSS buscamos un/a Líder Técnico de Integraciones – Apigee Lead
+
+Si te apasiona liderar arquitecturas de integración, diseñar ecosistemas de APIs de alto impacto y participar en proyectos estratégicos dentro de entornos complejos, esta oportunidad puede ser para ti.
+
+🎯 ¿Cuál será tu misión?
+
+Liderar técnicamente la definición, diseño e implementación de arquitecturas de integración basadas en Google Apigee, asegurando la construcción de soluciones escalables, seguras y alineadas a los requerimientos del negocio, especialmente en procesos críticos del mundo Retail.
+
+💻 Principales responsabilidades
+
+• Liderar el diseño y evolución de arquitecturas de APIs utilizando Google Apigee.
+
+• Definir estándares, lineamientos y mejores prácticas de integración y gobierno de APIs.
+
+• Diseñar y validar soluciones basadas en microservicios para desacoplar procesos y lógicas de negocio complejas.
+
+• Implementar y supervisar mecanismos de seguridad corporativa para APIs y servicios.
+
+• Gestionar la configuración y administración de API Products dentro del Developer Portal de Apigee.
+
+• Participar activamente en instancias de Discovery junto a arquitectos de negocio y equipos de integración SAP.
+
+• Asegurar el correcto funcionamiento de integraciones asociadas a procesos críticos de negocio.
+
+• Guiar técnicamente a equipos de desarrollo e integración, apoyando la toma de decisiones de arquitectura.
+
+• Colaborar con equipos multidisciplinarios para garantizar soluciones robustas y alineadas a los objetivos del proyecto.
+
+🧠 ¿Qué buscamos?
+
+• Título profesional en Ingeniería Informática, Ingeniería Civil Informática, Ingeniería en Computación o carrera afín.
+
+• Al menos 6 años de experiencia en arquitectura de APIs e integraciones empresariales.
+
+• Experiencia comprobada trabajando con Google Apigee.
+
+• Experiencia en diseño y desarrollo de microservicios utilizando NodeJS.
+
+• Conocimiento avanzado en seguridad de APIs y estándares corporativos.
+
+• Experiencia en integración de procesos críticos relacionados con ventas, tesorería y maestros de productos.
+
+• Experiencia colaborando con equipos de arquitectura de negocio e integración SAP.
+
+• Conocimientos en gobierno y administración de APIs.
+
+⭐ Deseables
+
+• Experiencia en proyectos de Retail de gran escala.
+
+• Conocimientos en arquitecturas orientadas a eventos y plataformas de integración empresarial.
+
+• Experiencia liderando equipos técnicos y células de desarrollo.
+
+• Conocimientos de prácticas DevOps y automatización de despliegues.
+
+🌟 Perfil que buscamos
+
+• Liderazgo técnico
+
+• Pensamiento estratégico
+
+• Capacidad analítica y de resolución de problemas
+
+• Comunicación efectiva
+
+• Orientación a resultados
+
+• Trabajo colaborativo
+
+• Capacidad de toma de decisiones
+
+📍 Modalidad presencial – Santiago
+
+📩 Si buscas liderar iniciativas de integración de alto impacto y participar en proyectos estratégicos dentro de un entorno desafiante, ¡queremos conocerte!

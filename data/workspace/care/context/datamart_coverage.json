@@ -1,9 +1,9 @@
 {
   "user_name": "Mauro",
   "earliest_date": "2018-05-25",
-  "latest_date": "2026-06-17",
-  "days_in_db": 2528,
-  "calendar_days_in_range": 2946,
+  "latest_date": "2026-06-19",
+  "days_in_db": 2530,
+  "calendar_days_in_range": 2948,
   "missing_dates_in_range": [
     "2018-09-10",
     "2018-09-11",

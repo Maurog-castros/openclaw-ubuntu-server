@@ -1,15 +1,11 @@
 #!/usr/bin/env bash
-# Instala cron diario Jobs recommended CSV (08:30).
 set -euo pipefail
-
 REPO="${OPENCLAW_REPO:-/home/mauro/Dev/openclaw-mauro}"
-SCHEDULE="${JOBS_RECOMMENDED_CRON_SCHEDULE:-30 8 * * *}"
-CRON_CMD="$SCHEDULE cd $REPO && bash scripts/run-jobs-recommended-daily.sh # openclaw-jobs-recommended-daily"
-
+SCRAPE="${JOBS_RECOMMENDED_SCRAPE_SCHEDULE:-30 8 * * *} cd $REPO && bash scripts/run-jobs-recommended-daily.sh # openclaw-jobs-recommended-scrape"
+ANALYZE="${JOBS_RECOMMENDED_ANALYZE_SCHEDULE:-40 8 * * *} cd $REPO && bash scripts/run-jobs-recommended-analysis.sh # openclaw-jobs-recommended-analysis"
+REPORT="${JOBS_RECOMMENDED_REPORT_SCHEDULE:-50 8 * * *} cd $REPO && bash scripts/run-jobs-recommended-report.sh # openclaw-jobs-recommended-report"
 current="$(crontab -l 2>/dev/null || true)"
-filtered="$(printf '%s\n' "$current" | grep -v 'run-jobs-recommended-daily.sh' | grep -v 'openclaw-jobs-recommended-daily' || true)"
-printf '%s\n%s\n' "$filtered" "$CRON_CMD" | sed '/^$/d' | crontab -
-
+filtered="$(printf '%s\n' "$current" | grep -v 'openclaw-jobs-recommended' | grep -v 'run-jobs-recommended-' || true)"
+printf '%s\n%s\n%s\n%s\n' "$filtered" "$SCRAPE" "$ANALYZE" "$REPORT" | sed '/^$/d' | crontab -
 echo "Cron Jobs recommended instalado:"
-echo "  $CRON_CMD"
-crontab -l | grep -E 'jobs-recommended|openclaw-jobs-recommended' || true
+crontab -l | grep 'openclaw-jobs-recommended'

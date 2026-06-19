@@ -1,0 +1,28 @@
+{
+  "job_id": "4426824247",
+  "discovered_at": "2026-06-19T18:04:46-04:00",
+  "analyzed_at": "2026-06-19T18:37:51-04:00",
+  "title": "Líder Técnico de Integraciones – Apigee Lead",
+  "company": "Hitss Chile",
+  "location": "Gran Santiago, Región Metropolitana de Santiago, Chile (Presencial)",
+  "description": "🚀 En HITSS buscamos un/a Líder Técnico de Integraciones – Apigee Lead\n\nSi te apasiona liderar arquitecturas de integración, diseñar ecosistemas de APIs de alto impacto y participar en proyectos estratégicos dentro de entornos complejos, esta oportunidad puede ser para ti.\n\n🎯 ¿Cuál será tu misión?\n\nLiderar técnicamente la definición, diseño e implementación de arquitecturas de integración basadas en Google Apigee, asegurando la construcción de soluciones escalables, seguras y alineadas a los requerimientos del negocio, especialmente en procesos críticos del mundo Retail.\n\n💻 Principales responsabilidades\n\n• Liderar el diseño y evolución de arquitecturas de APIs utilizando Google Apigee.\n\n• Definir estándares, lineamientos y mejores prácticas de integración y gobierno de APIs.\n\n• Diseñar y validar soluciones basadas en microservicios para desacoplar procesos y lógicas de negocio complejas.\n\n• Implementar y supervisar mecanismos de seguridad corporativa para APIs y servicios.\n\n• Gestionar la configuración y administración de API Products dentro del Developer Portal de Apigee.\n\n• Participar activamente en instancias de Discovery junto a arquitectos de negocio y equipos de integración SAP.\n\n• Asegurar el correcto funcionamiento de integraciones asociadas a procesos críticos de negocio.\n\n• Guiar técnicamente a equipos de desarrollo e integración, apoyando la toma de decisiones de arquitectura.\n\n• Colaborar con equipos multidisciplinarios para garantizar soluciones robustas y alineadas a los objetivos del proyecto.\n\n🧠 ¿Qué buscamos?\n\n• Título profesional en Ingeniería Informática, Ingeniería Civil Informática, Ingeniería en Computación o carrera afín.\n\n• Al menos 6 años de experiencia en arquitectura de APIs e integraciones empresariales.\n\n• Experiencia comprobada trabajando con Google Apigee.\n\n• Experiencia en diseño y desarrollo de microservicios utilizando NodeJS.\n\n• Conocimiento avanzado en seguridad de APIs y estándares corporativos.\n\n• Experiencia en integración de procesos críticos relacionados con ventas, tesorería y maestros de productos.\n\n• Experiencia colaborando con equipos de arquitectura de negocio e integración SAP.\n\n• Conocimientos en gobierno y administración de APIs.\n\n⭐ Deseables\n\n• Experiencia en proyectos de Retail de gran escala.\n\n• Conocimientos en arquitecturas orientadas a eventos y plataformas de integración empresarial.\n\n• Experiencia liderando equipos técnicos y células de desarrollo.\n\n• Conocimientos de prácticas DevOps y automatización de despliegues.\n\n🌟 Perfil que buscamos\n\n• Liderazgo técnico\n\n• Pensamiento estratégico\n\n• Capacidad analítica y de resolución de problemas\n\n• Comunicación efectiva\n\n• Orientación a resultados\n\n• Trabajo colaborativo\n\n• Capacidad de toma de decisiones\n\n📍 Modalidad presencial – Santiago\n\n📩 Si buscas liderar iniciativas de integración de alto impacto y participar en proyectos estratégicos dentro de un entorno desafiante, ¡queremos conocerte!",
+  "workplace": "onsite",
+  "easy_apply": true,
+  "job_url": "https://www.linkedin.com/jobs/view/4426824247",
+  "vacancy_score": 3.4,
+  "best_cv": {
+    "file": "CV_MauricioCastro_040626.pdf",
+    "path": "/home/mauro/Dev/openclaw-mauro/content/CV/CV_MauricioCastro_040626.pdf",
+    "score": 6.34,
+    "matched_keywords": "api; microservicios; arquitectura; integración",
+    "missing_keywords": "apigee; sap",
+    "chars": 2999
+  },
+  "best_cv_score": 6.34,
+  "generated_cv": "/home/mauro/Dev/openclaw-mauro/data/workspace/jobs/vacancies/4426824247/CV_Mauricio_Castro_4426824247-adapted.docx",
+  "ranking_csv": "/home/mauro/Dev/openclaw-mauro/data/workspace/jobs/vacancies/4426824247/cv-cv-ranking.csv",
+  "decision_status": "pending_approval",
+  "decision_at": "",
+  "applied_at": "",
+  "analysis_report": "/home/mauro/Dev/openclaw-mauro/data/workspace/jobs/vacancies/4426824247/analysis.md"
+}

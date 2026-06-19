@@ -31,6 +31,7 @@ SCR = str(ROOT / "scripts")
 INDEX_RE = re.compile(r"\b(index(?:ar)?\s+cv|cv\s+index|actualizar\s+cv)\b", re.I)
 SEARCH_RE = re.compile(r"\b(buscar\s+linkedin|linkedin\s+jobs|vacantes?\s+linkedin|refresh\s+jobs)\b", re.I)
 RECOMMENDED_RE = re.compile(r"\b(recommended|recomendad[oa]s?|jymbii|jobs\s+home)\b", re.I)
+DECISION_RE = re.compile(r"\b(aprobar|approve|descartar|discard|estado|status)\b", re.I)
 MATCH_RE = re.compile(
     r"\b(vacantes?|match|oportunidades?\s+laboral|trabajos?\s+para\s+mi|"
     r"que\s+puedo\s+postular|buscar\s+empleo|ofertas?\s+devops)\b",
@@ -98,6 +99,21 @@ def main() -> None:
     if REPORT_RE.search(message):
         code, payload, _, _ = run_json([PY, f"{SCR}/jobs_report.py", "--json"])
         payload.setdefault("agent", "jobs")
+        print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload.get("whatsapp_reply", ""))
+        return
+
+    decision = DECISION_RE.search(message)
+    if decision:
+        action_map = {"approve": "aprobar", "discard": "descartar", "status": "estado"}
+        action = action_map.get(decision.group(1).lower(), decision.group(1).lower())
+        job_match = re.search(r"\b\d{8,12}\b", message)
+        cmd = [PY, f"{SCR}/jobs_approval.py", action]
+        if job_match:
+            cmd.append(job_match.group(0))
+        cmd.append("--json")
+        _, payload, _, stderr = run_json(cmd, timeout=60)
+        if not payload.get("whatsapp_reply"):
+            payload = {"status": "error", "agent": "jobs", "whatsapp_reply": f"Decision Jobs fallo: {stderr[-400:]}"}
         print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload.get("whatsapp_reply", ""))
         return
 

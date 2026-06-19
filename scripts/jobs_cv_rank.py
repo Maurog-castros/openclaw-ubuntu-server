@@ -58,6 +58,13 @@ KEYWORD_WEIGHTS = {
     "resilience": 1.0,
     "availability": 1.0,
     "incident": 0.9,
+    "apigee": 1.6, "api": 1.0, "microservices": 1.3, "microservicios": 1.3,
+    "node.js": 1.2, "typescript": 1.1, "angular": 1.0, ".net": 1.2,
+    "c#": 1.1, "java": 1.0, "kotlin": 1.0, "gcp": 1.2,
+    "sql": 1.2, "etl": 1.4, "data engineer": 1.6, "big data": 1.2,
+    "cybersecurity": 1.5, "ciberseguridad": 1.5, "pentesting": 1.6,
+    "devsecops": 1.3, "architecture": 1.1, "arquitectura": 1.1,
+    "ddd": 1.2, "rest": 1.0, "integration": 1.1, "integración": 1.1, "sap": 1.0,
 }
 
 GENERIC_STOPWORDS = {
@@ -108,7 +115,12 @@ def extract_docx_text(path: Path) -> str:
 
 def extract_cv_text(path: Path) -> str:
     if path.suffix.lower() == ".pdf":
-        return extract_pdf_text(path)
+        try:
+            return extract_pdf_text(path)
+        except RuntimeError:
+            import subprocess
+            proc = subprocess.run(["pdftotext", str(path), "-"], text=True, capture_output=True, timeout=60, check=False)
+            return clean_text(proc.stdout)
     if path.suffix.lower() == ".docx":
         return extract_docx_text(path)
     return ""
@@ -132,6 +144,16 @@ def list_all_cv_files() -> list[Path]:
 
 def infer_role(job_text: str) -> str:
     low = job_text.lower()
+    if "data engineer" in low or "ingeniería de datos" in low:
+        return "Senior Data Engineer"
+    if "ciberseguridad" in low or "cybersecurity" in low or "pentesting" in low:
+        return "Senior DevSecOps / Cybersecurity Engineer"
+    if "apigee" in low or "arquitecturas de integración" in low:
+        return "Technical Lead - API Integration"
+    if "líder técnico" in low or "technical lead" in low:
+        return "Senior Technical Lead"
+    if "ingeniero de software" in low or "software engineer" in low:
+        return "Senior Software Engineer"
     if "cloud engineer" in low:
         return "Senior AWS Cloud Engineer"
     if "sre" in low:
@@ -177,6 +199,9 @@ def score_cv(cv_text: str, job_text: str) -> dict[str, Any]:
     hits = [kw for kw in kws if kw in low]
     hit_score = sum(KEYWORD_WEIGHTS.get(kw, 0.7) for kw in hits)
     score = min(10.0, 10.0 * hit_score / total)
+    # 9.5+ requires broad evidence, not perfect overlap on a tiny keyword set.
+    if len(kws) < 12 or len(hits) < 12:
+        score = min(score, 9.4)
     missing = [kw for kw in kws if kw not in hits]
     return {
         "score": round(score, 2),
@@ -264,6 +289,7 @@ def minimal_docx(path: Path, paragraphs: list[str]) -> None:
 def generate_adapted_cv(job_text: str, out_dir: Path, slug: str) -> Path:
     role = infer_role(job_text)
     company = infer_company(job_text)
+    ats_keywords = ", ".join(job_keywords(job_text)[:32])
     path = out_dir / f"CV_Mauricio_Castro_{slug}.docx"
     p = [
         paragraph_xml(f"Mauricio Castro - {role}", bold=True, size=32),
@@ -295,7 +321,7 @@ def generate_adapted_cv(job_text: str, out_dir: Path, slug: str) -> Path:
         bullet_xml("Modernizacion hacia arquitectura distribuida con observabilidad y automatizacion operacional."),
         paragraph_xml("Keywords ATS", bold=True, size=26),
         paragraph_xml(
-            "AWS, EKS, ECS, Lambda, CloudWatch, IAM, VPC, S3, RDS, DocumentDB, CloudFormation, Terraform, Docker, Kubernetes, Helm, GitHub Actions, Jenkins, CI/CD, GitOps, Linux, Bash, Python, FinOps, Observability, Prometheus, Grafana, Datadog, Cloud Security, SRE, Incident Response.",
+            ats_keywords or "Cloud, DevOps, Software Architecture, Automation, Security, Observability",
             size=21,
         ),
     ]

@@ -7,12 +7,14 @@ import argparse
 import json
 import re
 import time
+from pathlib import Path
 from typing import Any
 from jobs_common import load_config, pick_best_cv, vacancy_title
 from jobs_linkedin_browser import ensure_login, launch_browser, new_context
 from jobs_llm_answers import answer_field
 from jobs_match import load_cv_index
 from jobs_registry_csv import already_applied, append_application
+from jobs_approval import require_approved, save_job
 
 
 def _click_first(page, selectors: list[str]) -> bool:
@@ -100,6 +102,11 @@ def _fill_fields(
                 continue
             if loc.input_value():
                 continue
+            if any(term in label.lower() for term in (
+                "salary", "sueldo", "renta", "compensation", "visa",
+                "autorización", "autorizacion", "authorization", "relocation",
+            )):
+                raise RuntimeError(f"Pregunta requiere aprobacion humana: {label}")
             ans = answer_field(
                 label,
                 field_type="select" if options else "text",
@@ -132,12 +139,14 @@ def _upload_cv(modal, cv_path: str) -> bool:
     return False
 
 
-def _advance_modal(page) -> str:
+def _advance_modal(page, *, dry_run: bool = False) -> str:
     modal = _modal_root(page)
     for text in ("Enviar solicitud", "Submit application", "Submit", "Enviar", "Review", "Revisar", "Siguiente", "Next"):
         try:
             btn = modal.get_by_role("button", name=re.compile(f"^{re.escape(text)}$", re.I)).first
             if btn.count() and btn.is_visible() and not btn.is_disabled():
+                if dry_run and text in ("Enviar solicitud", "Submit application", "Submit", "Enviar"):
+                    return "review_only"
                 btn.click(timeout=5000)
                 time.sleep(1.2)
                 return text.lower()
@@ -201,9 +210,13 @@ def apply_job_url(
                 )
                 if cv_path:
                     _upload_cv(modal, cv_path)
-                action = _advance_modal(page)
+                if page.locator('iframe[src*="captcha"], [class*="captcha"]').count():
+                    raise RuntimeError("CAPTCHA detectado; requiere intervencion humana.")
+                action = _advance_modal(page, dry_run=dry_run)
+                if action == "review_only":
+                    break
                 if "submit" in action or "enviar" in action:
-                    submitted = not dry_run
+                    submitted = True
                     time.sleep(2)
                     break
                 if not action:
@@ -270,10 +283,18 @@ def main() -> None:
         else:
             vacancy = resolve_vacancy("", args.index if args.index else None)
         job_url = resolve_job_url(vacancy)
+        job_id_match = re.search(r"/jobs/view/(\d+)", job_url)
+        if not job_id_match:
+            raise ValueError("No pude resolver job_id LinkedIn.")
+        approved_job = require_approved(job_id_match.group(1))
+        vacancy = {**vacancy, **approved_job, "text": approved_job.get("description", "")}
         cv_index = load_cv_index()
         if not cv_index:
             raise RuntimeError("Indexa CVs primero: jobs_cv_index.py --json")
         cv = pick_best_cv(vacancy.get("text", ""), cv_index) or cv_index[0]
+        generated = approved_job.get("generated_cv") or ""
+        if generated and Path(generated).exists():
+            cv = {"filename": Path(generated).name, "path": generated, "excerpt": vacancy.get("text", "")[:1500]}
         result = apply_job_url(
             job_url,
             vacancy,
@@ -281,6 +302,10 @@ def main() -> None:
             headless=not args.headed,
             dry_run=args.dry_run,
         )
+        if result["status"] == "applied":
+            approved_job["decision_status"] = "applied"
+            approved_job["applied_at"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
+            save_job(approved_job)
         icon = "✅" if result["status"] == "applied" else "⚠️"
         payload = {
             "status": "ok" if result["status"] in {"applied", "dry_run", "skipped"} else "error",
