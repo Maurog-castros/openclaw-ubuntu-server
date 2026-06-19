@@ -20,12 +20,14 @@ if str(SCR) not in sys.path:
 
 from openclaw_message_router import (
     clear_sticky_agent,
+    current_sticky_agent,
     detect_agent,
     explicit_prefix,
     parse_month_from_text,
     save_sticky_agent,
     strip_agent_prefix,
 )
+from broh_delegate import route_broh_message
 from channel_user_context import (
     apply_user_env,
     guest_agent_denied_message,
@@ -47,6 +49,7 @@ INTEL_RE = re.compile(r"^\s*/intel\b", re.I)
 JOBS_RE = re.compile(r"^\s*/(?:jobs|postula)\b", re.I)
 HLGO_RE = re.compile(r"^\s*/(?:hlgo|hl-go|hl)\b", re.I)
 CONTENT_RE = re.compile(r"^\s*/content\b|instagram\.com/(?:p|reel)/", re.I)
+PYME_RE = re.compile(r"^\s*/(?:pyme(?:-chile)?|pymechile)\b", re.I)
 RECENT_RECEIPTS_RE = re.compile(
     r"\b(ultim(?:a|o|as|os)|recientes|procesad(?:a|o|as|os)|historial)\b.*\b(boleta?s?|ticket?s?|recibos?)\b"
     r"|\b(boleta?s?|ticket?s?|recibos?)\b.*\b(ultim(?:a|o|as|os)|recientes|procesad(?:a|o|as|os))\b"
@@ -306,7 +309,7 @@ def run_help() -> dict:
     else:
         text = (
             "Sin prefijo: intencion automatica o continuar el hilo del ultimo /agent.\n"
-            "Prefijos: /fin /care /broh /supp /intel /jobs /hlgo /content\n"
+            "Prefijos: /fin /care /broh /supp /intel /jobs /hlgo /content /pyme (/PymeChile)\n"
             "Tras /care (u otro), los mensajes siguientes van al mismo agente hasta /new, /reset u otro prefijo.\n"
             "/fin saldo — saldo Santander\n"
             "/fin ultimas boletas — listado\n"
@@ -390,17 +393,13 @@ def run_care_delegate(raw_text: str, has_media: bool, image_path: str | None) ->
     return payload
 
 
-def run_broh_delegate(raw_text: str) -> dict:
-    broh_text = raw_text if BROH_RE.search(raw_text) else f"/broh {raw_text}"
-    code, payload, _, stderr = run_json(py_cmd("broh_delegate.py", "--text", broh_text, "--json"), timeout=180)
-    if code != 0 and not payload.get("whatsapp_reply"):
-        payload = {
-            "status": "error",
-            "agent": "broh",
-            "whatsapp_reply": "Broh no respondio.",
-            "stderr": stderr[-800:],
-        }
+def run_broh_delegate(raw_text: str, session_key: str = "", peer: str = "") -> dict:
+    sticky = current_sticky_agent() == "broh"
+    payload = route_broh_message(raw_text, session_key, sticky=sticky, peer=peer)
     payload.setdefault("agent", "broh")
+    if not payload.get("whatsapp_reply") and payload.get("status") != "delegate_miss":
+        payload["whatsapp_reply"] = "Broh no respondio."
+        payload["status"] = "error"
     return payload
 
 
@@ -451,6 +450,61 @@ def run_content_delegate(text: str) -> dict:
     payload.setdefault("agent", "content")
     return payload
 
+def run_jenki_delegate(raw_text: str, session_key: str = "", peer: str = "") -> dict:
+    jenki_text = raw_text if re.match(r"^\s*/jenki\b", raw_text or "", re.I) else f"/jenki {raw_text}"
+    jenki_session_key = session_key
+    if session_key:
+        parts = session_key.split(":", 3)
+        if len(parts) >= 2 and parts[0] == "agent":
+            parts[1] = "jenki"
+            jenki_session_key = ":".join(parts)
+    elif peer:
+        jenki_session_key = f"agent:jenki:whatsapp:{peer}"
+    cmd = ["docker", "exec", "openclaw-openclaw-gateway-1", "openclaw", "agent", "--local", "--agent", "jenki", "--message", jenki_text, "--json"]
+    if jenki_session_key:
+        cmd.extend(["--session-key", jenki_session_key])
+    code, payload, stdout, stderr = run_json(cmd, timeout=300)
+    reply = ""
+    for item in payload.get("payloads") or []:
+        if isinstance(item, dict) and item.get("text"):
+            reply = str(item["text"]).strip()
+            break
+    if not reply:
+        reply = str(payload.get("whatsapp_reply") or payload.get("summary") or "").strip()
+    if code != 0 and not reply:
+        return {"status": "error", "agent": "jenki", "whatsapp_reply": stderr[-800:] or "Jenki no respondio."}
+    return {"status": "ok", "agent": "jenki", "whatsapp_reply": reply or "Jenki no respondio."}
+
+
+
+def run_pyme_chile_delegate(raw_text: str, session_key: str = "", peer: str = "") -> dict:
+    body = strip_agent_prefix(raw_text, "pyme-chile") if PYME_RE.search(raw_text or "") else (raw_text or "")
+    message = body.strip() or "hola"
+    pyme_session_key = session_key
+    if session_key:
+        parts = session_key.split(":", 3)
+        if len(parts) >= 2 and parts[0] == "agent":
+            parts[1] = "pyme-chile"
+            pyme_session_key = ":".join(parts)
+    elif peer:
+        pyme_session_key = f"agent:pyme-chile:whatsapp:{peer}"
+    cmd = [
+        "docker", "exec", "openclaw-openclaw-gateway-1", "openclaw", "agent",
+        "--local", "--agent", "pyme-chile", "--message", message, "--json",
+    ]
+    if pyme_session_key:
+        cmd.extend(["--session-key", pyme_session_key])
+    code, payload, stdout, stderr = run_json(cmd, timeout=300)
+    reply = ""
+    for item in payload.get("payloads") or []:
+        if isinstance(item, dict) and item.get("text"):
+            reply = str(item["text"]).strip()
+            break
+    if not reply:
+        reply = str(payload.get("whatsapp_reply") or payload.get("summary") or "").strip()
+    if code != 0 and not reply:
+        return {"status": "error", "agent": "pyme-chile", "whatsapp_reply": stderr[-800:] or "PymeChile no respondio."}
+    return {"status": "ok", "agent": "pyme-chile", "whatsapp_reply": reply or "PymeChile no respondio."}
 
 def run_recent_receipts(limit: int = 10, *, merchant: str = "", full_detail: bool = False) -> dict:
     cmd = py_cmd("finanzas_recent_receipts.py", "--limit", str(limit), "--json")
@@ -656,7 +710,8 @@ def main() -> None:
     apply_user_env(user_ctx)
 
     raw_text = (args.text or "").strip()
-    image_path = args.image or (str(latest_inbound_image()) if args.has_media else None)
+    _latest_img = latest_inbound_image() if args.has_media else None
+    image_path = args.image or (str(_latest_img) if _latest_img else None)
     has_media = args.has_media or bool(image_path)
 
     if NEW_RESET_RE.search(raw_text):
@@ -679,7 +734,7 @@ def main() -> None:
             emit(denied, as_json=args.json, agent="broh", skip_menu=True)
             return
         save_sticky_agent("broh")
-        emit(run_broh_delegate(raw_text), as_json=args.json, agent="broh", skip_menu=True)
+        emit(run_broh_delegate(raw_text, args.session_key, args.peer), as_json=args.json, agent="broh", skip_menu=True)
         return
 
     text = strip_fin_prefix(raw_text)
@@ -707,7 +762,7 @@ def main() -> None:
         emit(run_care_delegate(raw_text, has_media, image_path), as_json=args.json, agent="care", skip_menu=True)
         return
     if agent == "broh":
-        emit(run_broh_delegate(raw_text), as_json=args.json, agent="broh", skip_menu=True)
+        emit(run_broh_delegate(raw_text, args.session_key, args.peer), as_json=args.json, agent="broh", skip_menu=True)
         return
     if agent == "supp":
         emit(run_supp_delegate(raw_text), as_json=args.json, agent="supp")
@@ -734,11 +789,27 @@ def main() -> None:
             result.setdefault("status", "ok")
         emit(result, as_json=args.json, agent="fin", skip_menu=True)
         return
+    if agent == "jenki":
+        emit(
+            run_jenki_delegate(strip_agent_prefix(raw_text, "jenki") or raw_text, args.session_key, args.peer),
+            as_json=args.json,
+            agent="jenki",
+            skip_menu=True,
+        )
+        return
     if agent == "content":
         emit(
             run_content_delegate(strip_agent_prefix(raw_text, "content") or raw_text),
             as_json=args.json,
             agent="fin",
+            skip_menu=True,
+        )
+        return
+    if agent == "pyme-chile":
+        emit(
+            run_pyme_chile_delegate(raw_text, args.session_key, args.peer),
+            as_json=args.json,
+            agent="pyme-chile",
             skip_menu=True,
         )
         return

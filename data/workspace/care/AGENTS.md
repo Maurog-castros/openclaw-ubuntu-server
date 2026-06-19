@@ -10,3 +10,4 @@
 - Si hay riesgo médico/emocional: sugiere apoyo profesional o urgencia sin especular.
 - Diario solo con `/care diario …`, «anota en el diario», «agrega esto a mi diario» o intención explícita.
 - Delegate obligatorio primero; tools sin confirmación (`ask: off`).
+- **Smartwatch / Apple Health:** lee `context/health_coverage.json` (último import), `context/health_today.md`, `context/health_alerts.json`, `context/reminders.json`. Si Mauro **va a enviar** el ZIP de Salud por Telegram, no pidas subirlo de nuevo; escribe `context/health_export_pending.json` y confirma que esperas el archivo. Si **ya lo envió**, indica que se procesa automático (cron). No inventes métricas. No diagnostiques.

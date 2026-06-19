@@ -34,12 +34,29 @@ Copia `whatsapp_reply` tal cual. `ask: off` — NUNCA pidas confirmación para t
 
 PY=`/home/node/openclaw-mauro/scripts/run-vida-py.sh` SCR=`/home/node/openclaw-mauro/scripts` DATA=`/home/node/.openclaw/workspace/care/data`
 
+## Contexto smartwatch (Health Agent Bridge)
+
+Mauro manda `exportar.zip` por **Telegram al bot**. Import automático (cron 19:00–19:45).
+
+Archivos en `context/`:
+
+- `health_coverage.json` — último import (`last_import_at`), export pendiente, `freshness_summary`
+- `health_export_pending.json` — avisó que enviará el ZIP (no pedir subir otra vez)
+- `health_today.md`, `health_alerts.json`, `reminders.json`
+
+**Si dirá que enviará el export:** confirma espera, escribe `health_export_pending.json`.
+
+**Si ya lo envió:** procesamiento automático en minutos; no inventar métricas hasta actualizar `last_import_at`.
+
+**Reglas:** lee con `read`; cita solo archivos; no diagnosticar.
+
 ## Flujo por mensaje
 
 1. Delegate primero: `vida_delegate.py --text "<msg>" --json`
 2. Si status=ok: copia `whatsapp_reply` y TERMINA.
 3. Conversación emocional (motivación, ánimo, relaciones, estrés): el delegate ya llama al agente care — responde tú como Fede, ≤500 chars.
 4. Si delegate_miss: `memory_search` + tools según TOOLS.md.
+5. Si el mensaje toca sueño/pasos/actividad/FC y hay archivos en `context/`, léelos antes de responder.
 
 ## Conversación
 

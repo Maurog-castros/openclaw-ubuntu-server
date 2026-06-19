@@ -14,6 +14,8 @@ apt-get install -y xfwm4 xfdesktop4 dbus-x11 >/dev/null
 cat > "$USER_HOME/.xsessionrc" <<'EOF'
 export XDG_SESSION_TYPE=x11
 export GDK_BACKEND=x11
+export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
 EOF
 chown "$USER_NAME:$USER_NAME" "$USER_HOME/.xsessionrc"
 
@@ -22,14 +24,14 @@ chown "$USER_NAME:$USER_NAME" "$USER_HOME/.xsession"
 
 cat > /etc/xrdp/startwm.sh <<'EOF'
 #!/bin/sh
-unset DBUS_SESSION_BUS_ADDRESS
-unset XDG_RUNTIME_DIR
 if [ -r /etc/default/locale ]; then
   . /etc/default/locale
   export LANG LANGUAGE
 fi
 export XDG_SESSION_TYPE=x11
 export GDK_BACKEND=x11
+export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
 exec startxfce4
 EOF
 chmod +x /etc/xrdp/startwm.sh

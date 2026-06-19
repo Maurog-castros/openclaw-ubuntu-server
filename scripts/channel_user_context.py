@@ -21,7 +21,7 @@ CONFIG_CANDIDATES = (
 )
 
 PEER_SESSION_RE = re.compile(r"(?:^|:)whatsapp(?::[^:\s]+)*:(\+\d{8,15})(?:$|[:\s])", re.I)
-ALL_AGENTS = frozenset({"fin", "care", "broh", "supp", "intel", "jobs", "hlgo", "content"})
+ALL_AGENTS = frozenset({"fin", "care", "broh", "supp", "intel", "jobs", "hlgo", "content", "jenki", "pyme-chile"})
 
 
 @dataclass(frozen=True)

@@ -21,6 +21,12 @@ if [ -f "$GIT_CRED_SRC" ] && [ -d "$CANON/.git" ]; then
   git -C "$CANON" config --local user.email "me@maurocastro.cl"
 fi
 
+# Asegurar permisos de la llave SSH de exec (host.docker.internal); la imagen la trae 0650
+if [ -d /home/node/.ssh ]; then
+  chmod 700 /home/node/.ssh 2>/dev/null || true
+  chmod 600 /home/node/.ssh/openclaw_host_ed25519 /home/node/.ssh/config 2>/dev/null || true
+fi
+
 . /opt/openclaw-scripts/ensure-bun.sh
 
 exec tini -s -- "$@"

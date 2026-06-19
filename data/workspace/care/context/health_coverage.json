@@ -1,0 +1,17 @@
+{
+  "user_name": "Mauro",
+  "timezone": "America/Santiago",
+  "last_import_at": "2026-06-17T11:41:12.143365-04:00",
+  "last_metric_date": "2026-06-17",
+  "last_imported_days": 15,
+  "last_export_source": "telegram",
+  "last_export_filename": "exportar.zip",
+  "last_telegram_file": "doc_12bb5dde76cb_exportar.zip",
+  "last_telegram_sync_at": "2026-06-17T11:39:08-0400",
+  "export_pending": false,
+  "export_pending_details": {},
+  "hours_since_import": 0.0,
+  "data_stale": false,
+  "freshness_summary": "Ultimo import hace 0.0 h. Datos recientes.",
+  "agent_instructions": "Si export_pending es true, Mauro ya aviso que enviara el ZIP: no pidas subirlo de nuevo. Si pregunta cuando fue el ultimo sync, usa last_import_at y freshness_summary. Si dice que ya lo envio, indica que el servidor lo procesa automaticamente en minutos."
+}

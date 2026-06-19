@@ -30,6 +30,7 @@ SCR = str(ROOT / "scripts")
 
 INDEX_RE = re.compile(r"\b(index(?:ar)?\s+cv|cv\s+index|actualizar\s+cv)\b", re.I)
 SEARCH_RE = re.compile(r"\b(buscar\s+linkedin|linkedin\s+jobs|vacantes?\s+linkedin|refresh\s+jobs)\b", re.I)
+RECOMMENDED_RE = re.compile(r"\b(recommended|recomendad[oa]s?|jymbii|jobs\s+home)\b", re.I)
 MATCH_RE = re.compile(
     r"\b(vacantes?|match|oportunidades?\s+laboral|trabajos?\s+para\s+mi|"
     r"que\s+puedo\s+postular|buscar\s+empleo|ofertas?\s+devops)\b",
@@ -119,9 +120,10 @@ def main() -> None:
         print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload.get("whatsapp_reply", ""))
         return
 
-    if SEARCH_RE.search(message) or (MATCH_RE.search(message) and "linkedin" in message.lower()):
+    if RECOMMENDED_RE.search(message) or SEARCH_RE.search(message) or (MATCH_RE.search(message) and "linkedin" in message.lower()):
+        script = "jobs_linkedin_recommended.py" if RECOMMENDED_RE.search(message) else "jobs_linkedin_search.py"
         code, payload, _, stderr = run_json(
-            [LINKEDIN_PY, f"{SCR}/jobs_linkedin_search.py", "--json"],
+            [LINKEDIN_PY, f"{SCR}/{script}", "--json"],
             timeout=600,
         )
         if code != 0 and not payload.get("whatsapp_reply"):

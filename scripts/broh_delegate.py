@@ -395,25 +395,182 @@ def truncate_broh(text: str, max_len: int = 500) -> str:
     return cut.rstrip(".,;:- ") + "..."
 
 
+STRUCTURED_CMD_RE = re.compile(
+    r"^\s*/broh\b\s+(?:status|estado|contexto|historias|memoria|"
+    r"recuerda|recordar|guarda|registr(?:a|ar)|anota|pulse|care)\b",
+    re.I,
+)
+PULSE_CMD_RE = re.compile(r"\bpulse\b", re.I)
+CARE_BRIDGE_RE = re.compile(r"\bcare\b", re.I)
+
+
+BROH_SESSION_RE = re.compile(r"agent:broh:", re.I)
+WHATSAPP_PEER_SESSION_RE = re.compile(
+    r"(?:^|:)whatsapp(?::[^:\s]+)*:(\+\d{8,15})(?:$|[:\s])", re.I
+)
+
+
+def resolve_broh_session_key(session_key: str = "", peer: str = "") -> str:
+    """Map main/whatsapp session keys to agent:broh:* (required by openclaw agent CLI)."""
+    sk = (session_key or "").strip()
+    if sk and BROH_SESSION_RE.search(sk):
+        return sk
+    if sk:
+        wa = WHATSAPP_PEER_SESSION_RE.search(sk)
+        if wa:
+            return f"agent:broh:whatsapp:{wa.group(1)}"
+        tg = re.search(r":telegram:(\d{5,})", sk)
+        if tg:
+            return f"agent:broh:telegram:{tg.group(1)}"
+        rewritten = re.sub(r"^agent:[^:]+:", "agent:broh:", sk, count=1)
+        if rewritten != sk:
+            return rewritten
+    phone = (peer or "").strip()
+    if phone.startswith("telegram:"):
+        return f"agent:broh:{phone}"
+    if phone.startswith("+"):
+        return f"agent:broh:whatsapp:{phone}"
+    return "agent:broh:whatsapp"
+
+
+def log_broh_route(route: str, reason: str, **extra: Any) -> None:
+    parts = [f"route={route}", f"reason={reason}"]
+    for key, value in extra.items():
+        parts.append(f"{key}={value}")
+    print(" ".join(parts), file=sys.stderr)
+
+
+def is_structured_command(text: str) -> bool:
+    return bool(STRUCTURED_CMD_RE.search(text or ""))
+
+
+def extract_agent_text(payload: dict[str, Any]) -> str:
+    for item in payload.get("payloads") or []:
+        if isinstance(item, dict) and item.get("text"):
+            return str(item["text"]).strip()
+    return str(payload.get("whatsapp_reply") or payload.get("text") or "").strip()
+
+
+def run_json_cmd(cmd: list[str], timeout: int = 180) -> tuple[int, dict[str, Any], str, str]:
+    proc = subprocess.run(cmd, cwd=str(ROOT), text=True, capture_output=True, timeout=timeout, check=False)
+    payload: dict[str, Any] = {}
+    if proc.stdout.strip():
+        try:
+            payload = json.loads(proc.stdout)
+        except json.JSONDecodeError:
+            payload = {"whatsapp_reply": proc.stdout.strip()}
+    return proc.returncode, payload, proc.stdout, proc.stderr
+
+
+def memory_context_brief(limit: int = 4) -> str:
+    lines = [f"- {item.label}: {item.text}" for item in gather_evidence()[:limit]]
+    if not lines:
+        return ""
+    return "Contexto reciente (usar con sutileza, no repetir literal):\n" + "\n".join(lines) + "\n\n"
+
+
+def build_llm_prompt(user_text: str) -> str:
+    body = BROH_PREFIX.sub("", user_text or "").strip() or (user_text or "").strip()
+    instructions = (
+        "Responde como Broh: cercano, directo, sobrio, chileno neutro. "
+        "Usa memoria y diario solo como contexto; no los repitas literalmente salvo que sea util. "
+        "Evita sonar filosofico si el usuario lo senala. "
+        "Si el usuario da feedback sobre tu estilo, ajusta el tono de inmediato. "
+        "Breve, humano y contextual. Empieza con Broh: si encaja.\n\n"
+    )
+    return instructions + memory_context_brief() + f"Mensaje de Mauro: {body}"
+
+
+def maybe_store_conversation(user_text: str) -> None:
+    body = BROH_PREFIX.sub("", user_text or "").strip() or (user_text or "").strip()
+    if body and should_store_conversation(body):
+        append_observation("conversation", body, story_id=detect_story(body))
+
+
+def handle_structured(text: str) -> dict[str, Any]:
+    body = BROH_PREFIX.sub("", text or "").strip()
+    ensure_seed_stories()
+    if PULSE_CMD_RE.search(body):
+        code, payload, _, stderr = run_json_cmd(
+            [sys.executable, str(ROOT / "scripts/broh_pulse.py"), "--dry-run", "--json"],
+            timeout=120,
+        )
+        if code != 0 and not payload.get("message"):
+            return reply(f"Broh: pulse no disponible. {stderr[-200:]}")
+        msg = payload.get("message") or payload.get("reason") or "pulse listo"
+        return reply(f"Broh: pulso proactivo — {msg}")
+    if CARE_BRIDGE_RE.search(body):
+        return reply(
+            "Broh: para salud, diario, medicamentos y animo usa /care. "
+            "Aqui sigo para compania y perspectiva narrativa."
+        )
+    if ADD_MEMORY_RE.search(text):
+        return add_story_note(text)
+    if STATUS_RE.search(body):
+        return status_reply()
+    return reply("Broh: comando no reconocido. Prueba /broh status o /broh recuerda ...")
+
+
+def run_broh_llm(raw_text: str, session_key: str = "", peer: str = "") -> dict[str, Any]:
+    maybe_store_conversation(raw_text)
+    message = build_llm_prompt(raw_text)
+    sk = resolve_broh_session_key(session_key, peer)
+    code, payload, _, stderr = run_json_cmd(
+        [
+            "openclaw",
+            "agent",
+            "--local",
+            "--agent",
+            "broh",
+            "--session-key",
+            sk,
+            "--message",
+            message,
+            "--json",
+        ],
+        timeout=180,
+    )
+    reply_text = extract_agent_text(payload)
+    if code != 0 or not reply_text:
+        return {
+            "status": "error",
+            "agent": "broh",
+            "route": "broh_llm",
+            "whatsapp_reply": f"Broh: no pude responder ahora. {(stderr or '')[-250:]}",
+        }
+    return reply(reply_text, route="broh_llm")
+
+
+def route_broh_message(raw_text: str, session_key: str = "", *, sticky: bool = False, peer: str = "") -> dict[str, Any]:
+    if is_structured_command(raw_text):
+        log_broh_route("broh_delegate", "explicit_structured_command", sticky=sticky)
+        out = handle_structured(raw_text)
+        out["route"] = "broh_delegate"
+        return out
+    log_broh_route("broh_llm", "conversational", sticky=sticky)
+    return run_broh_llm(raw_text, session_key, peer)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Broh companion delegate.")
     parser.add_argument("--text", required=True)
+    parser.add_argument("--session-key", default="")
+    parser.add_argument("--peer", default="")
+    parser.add_argument("--structured-only", action="store_true")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
 
-    text = BROH_PREFIX.sub("", args.text or "").strip()
     ensure_seed_stories()
-
-    if ADD_MEMORY_RE.search(text):
-        out = add_story_note(text)
-    elif STATUS_RE.search(text):
-        out = status_reply()
-    elif casual := casual_reply(text):
-        out = reply(casual)
+    if args.structured_only:
+        if is_structured_command(args.text):
+            out = handle_structured(args.text)
+            out["route"] = "broh_delegate"
+        else:
+            out = {"status": "delegate_miss", "agent": "broh", "whatsapp_reply": ""}
     else:
-        out = reply(build_perspective(text))
+        out = route_broh_message(args.text, args.session_key, peer=args.peer)
 
-    print(json.dumps(out, ensure_ascii=False, indent=2) if args.json else out["whatsapp_reply"])
+    print(json.dumps(out, ensure_ascii=False, indent=2) if args.json else out.get("whatsapp_reply", ""))
 
 
 if __name__ == "__main__":

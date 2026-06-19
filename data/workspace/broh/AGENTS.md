@@ -6,10 +6,10 @@
 
 ## Flujo
 
-1. Leer señales recientes solo del usuario actual.
-2. Priorizar `stories.json`, `observations.jsonl`, diario `/care`, jobs y commits recientes.
-3. Responder como `Broh:` con evidencia breve y una perspectiva concreta.
-4. Guardar notas si el usuario dice `recuerda`, `guarda`, `registra` o `anota`.
+1. **Comandos estructurados** (`/broh status`, `/broh recuerda`, `/broh pulse`, `/broh care`): `broh_delegate.py` determinístico.
+2. **Conversación** (incl. sticky broh): agente LLM broh con memoria/diario como contexto breve.
+3. El LLM no repite evidencias como plantilla; responde natural y contextual.
+4. Guardar notas solo vía `/broh recuerda` o cuando el delegate detecte señal larga relevante.
 
 ## Comandos
 

@@ -130,6 +130,24 @@ def run_care_conversation(body: str, session_key: str | None = None) -> dict:
     return {"status": "ok", "whatsapp_reply": truncate_whatsapp(reply)}
 
 
+def health_export_ack() -> dict:
+    """Acuse cuando llega media que no es imagen (ej. export.zip de Apple Health).
+
+    El pipeline real (repo sync-smartwatch-xiaomi, cron download-sync) lee el ZIP
+    desde el cache de Telegram de Hermes y lo importa al contexto de care. Aquí solo
+    confirmamos recepción para no enrutar el archivo a la ruta de foto de examen.
+    """
+    return {
+        "status": "ok",
+        "whatsapp_reply": truncate_whatsapp(
+            "Recibí tu archivo. Si es el export de Apple Health (exportar.zip), lo importo "
+            "automáticamente y reviso tus métricas; te aviso cuando esté listo. "
+            "Si era una foto de examen u orden, reenvíala como imagen y dime «examen». "
+            "¿Cómo te sientes hoy?"
+        ),
+    }
+
+
 def should_process_exam_photo(text: str, has_media: bool, image_path: str | None) -> bool:
     if has_media or image_path:
         return True
@@ -142,9 +160,14 @@ def route(text: str, *, has_media: bool = False, image_path: str | None = None) 
     lower = body.lower()
 
     if should_process_exam_photo(text, has_media, image_path):
-        img = image_path or (str(latest_inbound_image()) if has_media else None)
+        latest = latest_inbound_image() if has_media else None
+        img = image_path or (str(latest) if latest else None)
         if img:
             return run_script("vida_exam_appointment.py", "--image", img, "--text", body or text)
+        if has_media:
+            # Media presente pero sin imagen reciente: no es foto de examen.
+            # Caso típico: export de Apple Health (exportar.zip) por Telegram.
+            return health_export_ack()
 
     if not body:
         return run_script("vida_checkin.py")
@@ -196,7 +219,8 @@ def main() -> None:
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
 
-    image_path = args.image or (str(latest_inbound_image()) if args.has_media else None)
+    latest = latest_inbound_image() if args.has_media else None
+    image_path = args.image or (str(latest) if latest else None)
     payload = route(args.text, has_media=args.has_media, image_path=image_path)
     payload["agent"] = "care"
     if args.json:

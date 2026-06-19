@@ -1,33 +1,33 @@
 # Hacker News Top 20
-- [Show HN: FablePool – pool money behind a prompt, and Fable builds it in public](https://fablepool.com) — score:231 comments:129
-- [Show HN: Homebrew 6.0.0](https://brew.sh/2026/06/11/homebrew-6.0.0/) — score:954 comments:232
-- [If you are asking for human attention, demonstrate human effort](https://tombedor.dev/human-attention-and-human-effort/) — score:226 comments:53
-- [Nobody ever gets credit for fixing problems that never happened (2002) [pdf]](https://web.mit.edu/nelsonr/www/Repenning=Sterman_CMR_su01_.pdf) — score:23 comments:0
-- [MiMo Code is now released and open-source](https://mimo.xiaomi.com/mimocode) — score:424 comments:234
-- [A greyscale iPhone setup that works in everyday life](https://www.fabianhemmert.com/opinions/a-greyscale-iphone-setup-that-works-in-everyday-life) — score:19 comments:9
-- [Anthropic apologizes for invisible Claude Fable guardrails](https://www.theverge.com/ai-artificial-intelligence/948280/anthropic-claude-fable-invisible-distillation-guardrail) — score:305 comments:293
-- [A jacket that harvests drinking water from the air](https://news.utexas.edu/2026/06/11/this-jacket-pulls-drinking-water-from-thin-air/) — score:30 comments:11
-- [Petition to Withdraw Canada's Bill C-22](https://www.ourcommons.ca/petitions/en/Petition/Sign/e-7416) — score:351 comments:120
-- [Emacs appearances in pop culture](https://ianyepan.github.io/posts/emacs-in-pop-culture/) — score:250 comments:68
-- [Software is made between commits](https://zed.dev/blog/introducing-deltadb) — score:194 comments:140
-- [Ear Training Practice](https://tonedear.com/) — score:146 comments:77
-- [The RCE that AMD wouldn't fix](https://mrbruh.com/amd2/) — score:222 comments:98
-- [Making a vintage LLM from scratch](https://crlf.link/log/entries/260525-1/) — score:15 comments:2
-- [macOS 27 Beta breaks the ability to boot Asahi Linux](https://www.phoronix.com/news/macOS-27-Beta-Breaks-Asahi) — score:236 comments:101
-- [Show HN: Boo – Screen-style terminal multiplexer built on libghostty](https://github.com/coder/boo) — score:46 comments:18
-- [Babel-USB: USB drive with every file](https://github.com/p2r3/babel-usb) — score:23 comments:9
-- [Claude Fable 5: mid-tier results on coding tasks](https://www.endorlabs.com/learn/claude-fable-5-mythos-grade-hype) — score:224 comments:95
-- [Lines of code got a better publicist](https://curlewis.co.nz/posts/lines-of-code-got-a-better-publicist/) — score:352 comments:246
-- [Developer gets Half-Life running at 30 FPS on a Nokia N95](https://www.tomshardware.com/video-games/handheld-gaming/developer-gets-half-life-running-at-30-fps-on-a-2007-nokia-n95) — score:215 comments:67
+- [Lore – Open source version control system designed for scalability](https://lore.org/) — score:988 comments:539
+- [Taxonomy of the Occlupanida (parasitoids on bread bag tags)](https://www.horg.com/horg/?page_id=921) — score:62 comments:10
+- [US holds off blacklisting DeepSeek, more than 100 firms deemed security risks](https://www.reuters.com/world/china/us-holds-off-blacklisting-chinas-deepseek-more-than-100-firms-deemed-security-2026-06-17/) — score:363 comments:389
+- [Storied Colors – a catalogue of named colors](https://storiedcolors.com/) — score:96 comments:21
+- [Midjourney Medical](https://www.midjourney.com/medical) — score:5 comments:2
+- [Leaked financial docs show OpenAI is losing billions of dollars a year](https://arstechnica.com/ai/2026/06/leaked-financial-docs-show-openai-is-losing-billions-of-dollars-a-year/) — score:318 comments:237
+- [Midjourney Ultrasonic CT Scanner](https://www.midjourney.com/medical/blogpost) — score:4 comments:1
+- [Clojure Hosted on Go](https://github.com/glojurelang/glojure) — score:26 comments:2
+- [U.S. science is in chaos](https://www.scientificamerican.com/article/americas-compact-between-science-and-politics-is-broken/) — score:682 comments:812
+- [How we run Firecracker VMs inside EC2 and start browsers in less than 1s](https://browser-use.com/posts/firecracker-browser-infra) — score:209 comments:138
+- [Loreline – Tools for writing interactive fiction](https://loreline.app/en/) — score:70 comments:9
+- [Launch HN: Adam (YC W25) – Open-Source AI CAD](https://github.com/Adam-CAD/CADAM) — score:158 comments:82
+- [Show HN: We built an 8-bit CPU as 2nd year EE students](https://github.com/c0rRupT9/STEPLA-1) — score:27 comments:5
+- [Show HN: An 8-bit live gamecast for baseball](https://ribbie.tv/watch) — score:204 comments:112
+- [Tesco moving 40k server workloads off VMware amid Broadcom's abusive conduct](https://arstechnica.com/information-technology/2026/06/tesco-moving-40000-server-workloads-off-vmware-amid-broadcoms-abusive-conduct/) — score:168 comments:91
+- [RFC 10008: The new HTTP Query Method](https://www.rfc-editor.org/info/rfc10008/) — score:321 comments:143
+- [Volkswagen started blocking GrapheneOS users](https://discuss.grapheneos.org/d/35949-volkswagen-app?page=3) — score:491 comments:338
+- [A robot is sprinting towards you. Do you want it running on Claude or Grok?](https://openrouter.ai/blog/insights/royale-last-agent-standing/) — score:174 comments:147
+- [Why thinking out loud with someone beats thinking alone](https://www.thesignalist.io/s/the-dialogue-dividend/) — score:167 comments:87
+- [How Madrid built its metro cheaply](https://worksinprogress.co/issue/how-madrid-built-its-metro-cheaply/) — score:22 comments:0
 
 ## Reddit r/devops r/sre r/MachineLearning
 
 ### r/devops
-- [Weekly Self Promotion Thread](https://www.reddit.com/r/devops/comments/1tzzwdr/weekly_self_promotion_thread/)
-- [Are DevOps interviews becoming more like AWS trivia quizzes than real engineering discussions?](https://www.reddit.com/r/devops/comments/1u39wx3/are_devops_interviews_becoming_more_like_aws/)
-- [Are any of the AI tools actually worth learning?](https://www.reddit.com/r/devops/comments/1u3670t/are_any_of_the_ai_tools_actually_worth_learning/)
-- [Wrote up how OTel fleet management works under the hood with OpAMP Supervisor](https://www.reddit.com/r/devops/comments/1u2y6dw/wrote_up_how_otel_fleet_management_works_under/)
-- [How do you catch deploy-unsafe migrations before they hit prod?](https://www.reddit.com/r/devops/comments/1u38aug/how_do_you_catch_deployunsafe_migrations_before/)
+- [Weekly Self Promotion Thread](https://www.reddit.com/r/devops/comments/1u68lsg/weekly_self_promotion_thread/)
+- [Was my DevOps internship poorly managed, or are my expectations unrealistic?](https://www.reddit.com/r/devops/comments/1u8hbqy/was_my_devops_internship_poorly_managed_or_are_my/)
+- [Can We Stop Reinventing Problems DevOps Already Solved?](https://www.reddit.com/r/devops/comments/1u7r3jl/can_we_stop_reinventing_problems_devops_already/)
+- [DevOps tools to be up to date](https://www.reddit.com/r/devops/comments/1u8e8f3/devops_tools_to_be_up_to_date/)
+- [Looking for risk and mitigation strategies regarding data engineer pain points discussion.](https://www.reddit.com/r/devops/comments/1u8bfx4/looking_for_risk_and_mitigation_strategies/)
 
 ### r/sre
 - Sin datos RSS disponibles hoy
@@ -66,34 +66,34 @@
 
         <a class=) — trending daily
 - [/sponsors/explore](https://github.com/sponsors/explore) — trending daily
-- [/apple/container](https://github.com/apple/container) — trending daily
-- [/addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) — trending daily
-- [/maziyarpanahi/openmed](https://github.com/maziyarpanahi/openmed) — trending daily
-- [/phuryn/pm-skills](https://github.com/phuryn/pm-skills) — trending daily
-- [/NVIDIA/SkillSpector](https://github.com/NVIDIA/SkillSpector) — trending daily
-- [/sponsors/soxoj](https://github.com/sponsors/soxoj) — trending daily
-- [/soxoj/maigret](https://github.com/soxoj/maigret) — trending daily
+- [/DeusData/codebase-memory-mcp](https://github.com/DeusData/codebase-memory-mcp) — trending daily
 - [/apps/dependabot](https://github.com/apps/dependabot) — trending daily
-- [/apps/copilot-swe-agent](https://github.com/apps/copilot-swe-agent) — trending daily
+- [/n0-computer/iroh](https://github.com/n0-computer/iroh) — trending daily
+- [/Panniantong/Agent-Reach](https://github.com/Panniantong/Agent-Reach) — trending daily
+- [/meshery/meshery](https://github.com/meshery/meshery) — trending daily
+- [/sponsors/obra](https://github.com/sponsors/obra) — trending daily
+- [/obra/superpowers](https://github.com/obra/superpowers) — trending daily
+- [/google-research/timesfm](https://github.com/google-research/timesfm) — trending daily
+- [/sponsors/RocketChat](https://github.com/sponsors/RocketChat) — trending daily
 
 ## GitHub Topics (DevOps/MLOps/Observability/K8s)
 
 ### topic:devops
-- trimstray/the-book-of-secret-knowledge — ⭐227853 — A collection of inspiring lists, manuals, cheatsheets, blogs, hacks, one-liners, cli/web tools and more.
-- bregman-arie/devops-exercises — ⭐82729 — Linux, Jenkins, AWS, SRE, Prometheus, Docker, Python, Ansible, Git, Kubernetes, Terraform, OpenStack, SQL, NoSQL, Azure, GCP, DNS, Elastic, Network, Virtualization. DevOps Interview Questions
-- netdata/netdata — ⭐79123 — The fastest path to AI-powered full stack observability, even for lean teams.
+- trimstray/the-book-of-secret-knowledge — ⭐228860 — A collection of inspiring lists, manuals, cheatsheets, blogs, hacks, one-liners, cli/web tools and more.
+- bregman-arie/devops-exercises — ⭐82802 — Linux, Jenkins, AWS, SRE, Prometheus, Docker, Python, Ansible, Git, Kubernetes, Terraform, OpenStack, SQL, NoSQL, Azure, GCP, DNS, Elastic, Network, Virtualization. DevOps Interview Questions
+- netdata/netdata — ⭐79252 — The fastest path to AI-powered full stack observability, even for lean teams.
 
 ### topic:mlops
-- GokuMohandas/Made-With-ML — ⭐47983 — Learn how to develop, deploy and iterate on production-grade ML applications.
-- apache/airflow — ⭐45782 — Apache Airflow - A platform to programmatically author, schedule, and monitor workflows
-- qdrant/qdrant — ⭐32041 — Qdrant - High-performance, massive-scale Vector Database and Vector Search Engine for the next generation of AI. Also available in the cloud https://cloud.qdrant.io/
+- GokuMohandas/Made-With-ML — ⭐48203 — Learn how to develop, deploy and iterate on production-grade ML applications.
+- apache/airflow — ⭐45851 — Apache Airflow - A platform to programmatically author, schedule, and monitor workflows
+- qdrant/qdrant — ⭐32412 — Qdrant - High-performance, massive-scale Vector Database and Vector Search Engine for the next generation of AI. Also available in the cloud https://cloud.qdrant.io/
 
 ### topic:observability
-- netdata/netdata — ⭐79123 — The fastest path to AI-powered full stack observability, even for lean teams.
-- langfuse/langfuse — ⭐28930 — 🪢 Open source AI engineering platform: LLM evals, observability, metrics, prompt management, playground, datasets. Integrates with OpenTelemetry, LangChain, OpenAI SDK, LiteLLM, and more. 🍊YC W23 
-- SigNoz/signoz — ⭐27294 — SigNoz is an open-source observability platform native to OpenTelemetry with logs, traces and metrics in a single application. An open-source alternative to DataDog, NewRelic, etc. 🔥 🖥.   👉  Open source Application Performance Monitoring (APM) & Observability tool
+- netdata/netdata — ⭐79252 — The fastest path to AI-powered full stack observability, even for lean teams.
+- langfuse/langfuse — ⭐29291 — 🪢 Open source AI engineering platform: LLM evals, observability, metrics, prompt management, playground, datasets. Integrates with OpenTelemetry, LangChain, OpenAI SDK, LiteLLM, and more. 🍊YC W23 
+- SigNoz/signoz — ⭐27371 — SigNoz is an open-source observability platform native to OpenTelemetry with logs, traces and metrics in a single application. An open-source alternative to DataDog, NewRelic, etc. 🔥 🖥.   👉  Open source Application Performance Monitoring (APM) & Observability tool
 
 ### topic:kubernetes
-- kubernetes/kubernetes — ⭐122932 — Production-Grade Container Scheduling and Management
-- bregman-arie/devops-exercises — ⭐82729 — Linux, Jenkins, AWS, SRE, Prometheus, Docker, Python, Ansible, Git, Kubernetes, Terraform, OpenStack, SQL, NoSQL, Azure, GCP, DNS, Elastic, Network, Virtualization. DevOps Interview Questions
-- netdata/netdata — ⭐79123 — The fastest path to AI-powered full stack observability, even for lean teams.
+- kubernetes/kubernetes — ⭐123070 — Production-Grade Container Scheduling and Management
+- bregman-arie/devops-exercises — ⭐82802 — Linux, Jenkins, AWS, SRE, Prometheus, Docker, Python, Ansible, Git, Kubernetes, Terraform, OpenStack, SQL, NoSQL, Azure, GCP, DNS, Elastic, Network, Virtualization. DevOps Interview Questions
+- netdata/netdata — ⭐79252 — The fastest path to AI-powered full stack observability, even for lean teams.

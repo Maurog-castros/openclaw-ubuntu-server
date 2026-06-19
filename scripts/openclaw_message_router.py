@@ -30,7 +30,9 @@ PREFIX_SUPP = re.compile(r"^\s*/supp\b", re.I)
 PREFIX_INTEL = re.compile(r"^\s*/intel\b", re.I)
 PREFIX_JOBS = re.compile(r"^\s*/(?:jobs|postula)\b", re.I)
 PREFIX_HLGO = re.compile(r"^\s*/(?:hlgo|hl-go|hl)\b", re.I)
+PREFIX_JENKI = re.compile(r"^\s*/jenki\b", re.I)
 PREFIX_CONTENT = re.compile(r"^\s*/content\b", re.I)
+PREFIX_PYME = re.compile(r"^\s*/(?:pyme(?:-chile)?|pymechile)\b", re.I)
 PREFIX_FIN = re.compile(r"^\s*/(?:fin|finanzas)\b", re.I)
 
 # --- Finanzas (default) ---
@@ -139,14 +141,18 @@ def explicit_prefix(text: str) -> Optional[str]:
         return "jobs"
     if PREFIX_HLGO.search(t):
         return "hlgo"
+    if PREFIX_JENKI.search(t):
+        return "jenki"
     if PREFIX_CONTENT.search(t):
         return "content"
+    if PREFIX_PYME.search(t):
+        return "pyme-chile"
     if PREFIX_FIN.search(t):
         return "fin"
     return None
 
 
-STICKY_AGENTS = frozenset({"fin", "care", "broh", "supp", "intel", "jobs", "hlgo", "content"})
+STICKY_AGENTS = frozenset({"fin", "care", "broh", "supp", "intel", "jobs", "hlgo", "content", "jenki", "pyme-chile"})
 
 
 def _load_sticky() -> tuple[Optional[str], float]:
@@ -162,6 +168,11 @@ def _load_sticky() -> tuple[Optional[str], float]:
     except (json.JSONDecodeError, TypeError, ValueError):
         pass
     return None, 0.0
+
+
+def current_sticky_agent() -> Optional[str]:
+    sticky, _ = _load_sticky()
+    return sticky
 
 
 def save_sticky_agent(agent: str) -> None:
@@ -185,7 +196,7 @@ def score_agents(text: str, *, has_media: bool = False) -> dict[str, int]:
     t = (text or "").strip()
     lower = t.lower()
     scores: dict[str, int] = {
-        "fin": 0, "care": 0, "broh": 0, "supp": 0, "intel": 0, "jobs": 0, "hlgo": 0, "content": 0,
+        "fin": 0, "care": 0, "broh": 0, "supp": 0, "intel": 0, "jobs": 0, "hlgo": 0, "content": 0, "jenki": 0, "pyme-chile": 0,
     }
 
     if FIN_SALDO_RE.search(t):
@@ -219,9 +230,14 @@ def score_agents(text: str, *, has_media: bool = False) -> dict[str, int]:
         scores["jobs"] += 5
     if HLGO_RE.search(t):
         scores["hlgo"] += 6
+    if re.search(r"\b(jenkins|jenki|pipeline|ci/cd|terraform|minikube|aws|ubuntu)\b", t, re.I):
+        scores["jenki"] += 6
 
     if CONTENT_URL_RE.search(t) or CONTENT_FOLLOWUP_RE.search(t):
         scores["content"] += 5
+
+    if PREFIX_PYME.search(t) or re.search(r"\b(sercotec|corfo|fosis|chileatiende|pyme|capital\s+semilla|ferias?\s+libres?)\b", t, re.I):
+        scores["pyme-chile"] += 6
 
     # Foto sin texto: fin (boleta/saldo) salvo keywords care
     if has_media and len(t) < 40:
@@ -263,7 +279,7 @@ def detect_agent(
     if best_score > 0:
         tied = [a for a, s in scores.items() if s == best_score]
         if len(tied) > 1:
-            for preferred in ("content", "hlgo", "jobs", "supp", "intel", "broh", "care", "fin"):
+            for preferred in ("pyme-chile", "content", "hlgo", "jobs", "jenki", "supp", "intel", "broh", "care", "fin"):
                 if preferred in tied:
                     best_agent = preferred
                     break
@@ -290,6 +306,10 @@ def strip_agent_prefix(text: str, agent: str) -> str:
         return PREFIX_HLGO.sub("", t).strip()
     if agent == "content":
         return PREFIX_CONTENT.sub("", t).strip()
+    if agent == "jenki":
+        return PREFIX_JENKI.sub("", t).strip()
+    if agent == "pyme-chile":
+        return PREFIX_PYME.sub("", t).strip()
     return t.strip()
 
 

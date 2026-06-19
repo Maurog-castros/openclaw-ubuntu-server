@@ -32,6 +32,35 @@ function shouldHandle(ctx, agentId) {
   return sessionKey.includes(":whatsapp:") || sessionKey.includes(":telegram:");
 }
 
+function isTelegramGroupSession(sessionKey) {
+  const sk = String(sessionKey ?? "").toLowerCase();
+  return sk.includes(":telegram:group:");
+}
+
+function extractDelegateText(cleanedBody, msgCtx) {
+  const cleaned = String(cleanedBody ?? "").trim();
+  if (cleaned) {
+    return cleaned;
+  }
+  if (!msgCtx || typeof msgCtx !== "object") {
+    return "";
+  }
+  for (const key of [
+    "BodyForCommands",
+    "CommandBody",
+    "RawBody",
+    "BodyStripped",
+    "BodyForAgent",
+    "Body",
+  ]) {
+    const value = String(msgCtx[key] ?? "").trim();
+    if (value) {
+      return value;
+    }
+  }
+  return "";
+}
+
 function looksLikeMediaBody(body) {
   return /\[image\]|\[photo\]|\[media\]|\[audio\]|📷|🖼|🎤/i.test(body);
 }
@@ -211,6 +240,66 @@ export default definePluginEntry({
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
           api.logger.warn(`channel-delegate-hook failed: ${message}`);
+          return undefined;
+        }
+      },
+      { priority: 200, timeoutMs },
+    );
+
+    api.on(
+      "reply_dispatch",
+      async (event, dispatchCtx) => {
+        const sessionKey = String(event.sessionKey ?? event.ctx?.SessionKey ?? "");
+        if (!sessionKey.toLowerCase().includes("agent:main:")) {
+          return undefined;
+        }
+        if (!isTelegramGroupSession(sessionKey)) {
+          return undefined;
+        }
+        if (event.sendPolicy === "deny") {
+          return undefined;
+        }
+        const text = extractDelegateText("", event.ctx).trim();
+        if (!text) {
+          return undefined;
+        }
+        const hookCtx = {
+          agentId,
+          sessionKey,
+          sessionId: event.ctx?.SessionId,
+          messageProvider: "telegram",
+          trigger: "user",
+          channelId: event.originatingTo ?? event.ctx?.To,
+        };
+        try {
+          const result = await runChannelDelegate(
+            text,
+            looksLikeMediaBody(text),
+            timeoutMs,
+            hookCtx,
+            event.ctx,
+          );
+          const status = result?.status;
+          const replyText = String(result.whatsapp_reply ?? result.reply ?? "").trim();
+          const blocked = !replyText || status === "delegate_miss" || status === "skip";
+          if (blocked) {
+            return undefined;
+          }
+          await dispatchCtx.onReplyStart?.();
+          dispatchCtx.dispatcher.sendFinalReply({ text: replyText });
+          dispatchCtx.recordProcessed("completed");
+          dispatchCtx.markIdle("channel-delegate-hook");
+          api.logger.info(
+            `channel-delegate-hook: reply_dispatch handled status=${status ?? "implicit"} agent=${result.agent ?? "?"} peer=${result._peer || "?"} session=${sessionKey}`,
+          );
+          return {
+            handled: true,
+            queuedFinal: true,
+            counts: { tool: 0, block: 0, final: 1 },
+          };
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          api.logger.warn(`channel-delegate-hook reply_dispatch failed: ${message}`);
           return undefined;
         }
       },

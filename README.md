@@ -303,6 +303,18 @@ cd openclaw && docker compose up -d
 
 ---
 
+## Capa de modelos y Mission Control
+
+La capa de inferencia (chat via `ia.iamiko.cl`, embeddings locales con Ollama) y el dashboard **Mission Control** estan documentados en detalle en **[docs/MODEL-LAYER-AND-MISSION-CONTROL.md](docs/MODEL-LAYER-AND-MISSION-CONTROL.md)**.
+
+- **Fuente unica de verdad**: `data/config/` (con symlink `~/.openclaw` apuntando ahi). Sin configs paralelas ni agentes duplicados.
+- **Chat**: agentes -> LiteLLM local -> `https://ia.iamiko.cl/v1` (modelo `auto`; key en `IAMIKO_API_KEY` del `.env`).
+- **Fallback de chat**: si ia.iamiko.cl cae, LiteLLM reintenta en **OpenRouter** (`openrouter/auto`, key `OPENROUTER_API_KEY`).
+- **Embeddings**: container `openclaw-embeddings` (Ollama `nomic-embed-text`, 768 dims) + watchdog `autoheal`.
+- **Mission Control**: dashboard en `http://192.168.1.12:3030` (montaje read-only sobre la config; 13 agentes sincronizados).
+
+---
+
 ## Autor
 
 **Mauro Castro** — DevOps · Cloud · IA aplicada  

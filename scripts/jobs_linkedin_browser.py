@@ -22,6 +22,28 @@ def storage_state_path(cfg: dict[str, Any] | None = None) -> Path:
     return p if p.is_absolute() else ROOT / raw
 
 
+def credentials_env_path() -> Path:
+    return ROOT / "data/secrets/.env"
+
+
+def load_linkedin_credentials(path: Path | None = None) -> tuple[str, str] | None:
+    path = path or credentials_env_path()
+    if not path.exists():
+        return None
+    values: dict[str, str] = {}
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        values[key.strip()] = value.strip().strip('"').strip("'")
+    email = values.get("linkedin_account_email") or values.get("LINKEDIN_EMAIL")
+    password = values.get("linkedin_account_passwd") or values.get("LINKEDIN_PASSWORD")
+    if not email or not password:
+        return None
+    return email, password
+
+
 def launch_browser(playwright: Any, *, headless: bool) -> Any:
     chrome_paths = [
         "/usr/bin/google-chrome",
@@ -66,12 +88,33 @@ def is_logged_in(page: Any) -> bool:
 
 
 def ensure_login(page: Any, cfg: dict[str, Any] | None = None) -> None:
+    cfg = cfg or load_config()
     page.goto("https://www.linkedin.com/feed/", wait_until="domcontentloaded", timeout=90000)
     time.sleep(2)
     if is_logged_in(page):
         return
+    credentials = load_linkedin_credentials()
+    if credentials:
+        email, password = credentials
+        page.goto("https://www.linkedin.com/login", wait_until="domcontentloaded", timeout=90000)
+        try:
+            page.wait_for_selector("input#username, input[name='session_key']", timeout=15000)
+            page.fill("input#username, input[name='session_key']", email)
+            page.fill("input#password, input[name='session_password']", password)
+        except Exception as exc:
+            raise RuntimeError(
+                "LinkedIn no mostro formulario de login en headless; probable checkpoint/bloqueo. "
+                "Ejecuta login manual headed."
+            ) from exc
+        page.click("button[type='submit']")
+        page.wait_for_load_state("domcontentloaded", timeout=90000)
+        time.sleep(4)
+        if is_logged_in(page):
+            storage_state_path(cfg).parent.mkdir(parents=True, exist_ok=True)
+            page.context.storage_state(path=str(storage_state_path(cfg)))
+            return
     raise RuntimeError(
-        "Sin sesion LinkedIn personal. Ejecuta: "
+        "Sin sesion LinkedIn personal o checkpoint/2FA pendiente. Ejecuta: "
         ".venv-linkedin-intel/bin/python scripts/jobs_linkedin_login.py login --headed"
     )
 
