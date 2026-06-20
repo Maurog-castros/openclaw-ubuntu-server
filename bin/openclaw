@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+SCRIPT="$(readlink -f "${BASH_SOURCE[0]}")"
+REPO="$(cd "$(dirname "$SCRIPT")/.." && pwd)"
+exec python3 "$REPO/scripts/openclaw_cli.py" exec "$@"

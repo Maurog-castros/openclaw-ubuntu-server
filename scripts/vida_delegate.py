@@ -18,6 +18,7 @@ SCR = ROOT / "scripts"
 RUN = SCR / "run-vida-py.sh"
 
 sys.path.insert(0, str(SCR))
+from openclaw_cli import openclaw_argv
 from vida_common import truncate_whatsapp
 from vida_selfcare import handle as handle_selfcare
 
@@ -99,8 +100,7 @@ def care_session_key() -> str:
 def run_care_conversation(body: str, session_key: str | None = None) -> dict:
     """Conversación care breve, sin cortar orientación útil."""
     session_key = session_key or care_session_key()
-    cmd = [
-        "openclaw",
+    cmd = openclaw_argv(
         "agent",
         "--local",
         "--agent",
@@ -110,7 +110,7 @@ def run_care_conversation(body: str, session_key: str | None = None) -> dict:
         "--message",
         body,
         "--json",
-    ]
+    )
     code, payload, _, stderr = run_json(cmd, timeout=180)
     reply = ""
     for item in payload.get("payloads") or []:

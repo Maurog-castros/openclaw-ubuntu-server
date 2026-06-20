@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from vida_common import ROOT, now_local, truncate_whatsapp
+from openclaw_cli import openclaw_argv
 
 BROH_PREFIX = re.compile(r"^\s*/broh\b\s*", re.I)
 ADD_MEMORY_RE = re.compile(r"\b(recuerda|recordar|guarda|registr(?:a|ar)|anota)\b", re.I)
@@ -516,8 +517,7 @@ def run_broh_llm(raw_text: str, session_key: str = "", peer: str = "") -> dict[s
     message = build_llm_prompt(raw_text)
     sk = resolve_broh_session_key(session_key, peer)
     code, payload, _, stderr = run_json_cmd(
-        [
-            "openclaw",
+        openclaw_argv(
             "agent",
             "--local",
             "--agent",
@@ -527,7 +527,7 @@ def run_broh_llm(raw_text: str, session_key: str = "", peer: str = "") -> dict[s
             "--message",
             message,
             "--json",
-        ],
+        ),
         timeout=180,
     )
     reply_text = extract_agent_text(payload)

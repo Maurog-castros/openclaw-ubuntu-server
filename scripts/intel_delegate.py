@@ -32,6 +32,7 @@ YOUTUBE_URL_RE = re.compile(r"(?:youtube\.com|youtu\.be)", re.I)
 if str(SCR) not in sys.path:
     sys.path.insert(0, str(SCR))
 from intel_youtube import extract_video_id, load_active_session  # noqa: E402
+from openclaw_cli import openclaw_argv  # noqa: E402
 
 
 def extract_text(payload: dict[str, Any]) -> str:
@@ -134,10 +135,10 @@ def run_linkedin_summary() -> dict[str, Any]:
 
 
 def run_intel(message: str, session_key: str) -> tuple[int, str, str, str]:
-    cmd = [
-        "openclaw", "agent", "--local", "--agent", "intel",
+    cmd = openclaw_argv(
+        "agent", "--local", "--agent", "intel",
         "--session-key", session_key, "--message", message, "--json",
-    ]
+    )
     code, payload, stdout, stderr = run_json(cmd, timeout=180)
     return code, extract_text(payload), stdout, stderr
 

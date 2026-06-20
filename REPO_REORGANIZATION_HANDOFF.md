@@ -39,8 +39,12 @@ Completado (2026-06-20, shell Ubuntu `/home/mauro/Dev/openclaw-mauro`):
 Pendiente fuera de alcance de esta fase:
 
 - Retirar enlaces legacy cuando `git grep`, crontab y Docker dejen de usarlos.
-- `channel_delegate` requiere binario `openclaw` en PATH (falla preexistente).
 - Auditar y migrar referencias legacy en scripts/config hacia rutas `runtime/`.
+
+Resuelto post-fase-1:
+
+- `openclaw` en PATH via `bin/openclaw` → gateway Docker; delegates usan
+  `scripts/openclaw_cli.py` (`OPENCLAW_BIN` / `OPENCLAW_GATEWAY_CONTAINER` opcionales).
 
 ## Reglas canonicas de esta fase
 
@@ -159,7 +163,7 @@ git status --short
 | `py_compile` jobs | OK |
 | `jobs_cv_index.py` (handoff venv) | OK — 20 PDF (`7ea7659` + shebang fix) |
 | `test_jobs_profile.py` | OK (4 tests) |
-| `channel_delegate /jobs ayuda` | FAIL preexistente: `FileNotFoundError: openclaw` |
+| `channel_delegate /jobs ayuda` | OK — `openclaw_cli.py` + gateway Docker |
 | Crontab sin cambios | OK (`diff` exit 0) |
 | Permisos runtime | `750` cv-library/logs, `700` secrets, archivos `600` |
 | Gmail modify activo | OK — scope `gmail.modify` en token activo; legacy solo `readonly` |

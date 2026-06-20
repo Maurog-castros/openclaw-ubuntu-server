@@ -13,6 +13,9 @@ import time
 from pathlib import Path
 from typing import Any
 
+from jobs_profile import get_profile, list_profiles, parse_profile_from_text
+from openclaw_cli import openclaw_argv
+
 ROOT = Path("/home/node/openclaw-mauro")
 if not ROOT.exists():
     ROOT = Path(__file__).resolve().parent.parent
@@ -55,10 +58,23 @@ OPS_RE = re.compile(
     re.I,
 )
 JOBS_PREFIX_RE = re.compile(r"^\s*/(?:jobs|postula)\b", re.I)
+PROFILES_RE = re.compile(r"\b(perfiles\s+jobs|listar\s+perfiles|jobs\s+perfiles)\b", re.I)
 
 
-def run_json(cmd: list[str], timeout: int = 600) -> tuple[int, dict[str, Any], str, str]:
-    proc = subprocess.run(cmd, cwd=str(ROOT), text=True, capture_output=True, timeout=timeout, check=False)
+def run_json(
+    cmd: list[str],
+    timeout: int = 600,
+    env: dict[str, str] | None = None,
+) -> tuple[int, dict[str, Any], str, str]:
+    proc = subprocess.run(
+        cmd,
+        cwd=str(ROOT),
+        text=True,
+        capture_output=True,
+        timeout=timeout,
+        check=False,
+        env=env,
+    )
     payload: dict[str, Any] = {}
     if proc.stdout.strip():
         try:
@@ -68,11 +84,19 @@ def run_json(cmd: list[str], timeout: int = 600) -> tuple[int, dict[str, Any], s
     return proc.returncode, payload, proc.stdout, proc.stderr
 
 
+def laborum_browser_env() -> dict[str, str]:
+    env = os.environ.copy()
+    env.setdefault("DISPLAY", ":11.0")
+    env.setdefault("XAUTHORITY", "/home/mauro/.Xauthority")
+    env.setdefault("DBUS_SESSION_BUS_ADDRESS", "unix:path=/run/user/1000/bus")
+    return env
+
+
 def run_intel(message: str, session_key: str) -> tuple[int, str, str, str]:
-    cmd = [
-        "openclaw", "agent", "--local", "--agent", "jobs",
+    cmd = openclaw_argv(
+        "agent", "--local", "--agent", "jobs",
         "--session-key", session_key, "--message", message, "--json",
-    ]
+    )
     code, payload, stdout, stderr = run_json(cmd, timeout=180)
     reply = ""
     for item in payload.get("payloads") or []:
@@ -84,6 +108,13 @@ def run_intel(message: str, session_key: str) -> tuple[int, str, str, str]:
     return code, reply, stdout, stderr
 
 
+def jobs_env(profile_id: str | None = None) -> dict[str, str]:
+    env = os.environ.copy()
+    if profile_id:
+        env.update(get_profile(profile_id).env())
+    return env
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Delegate Jobs agent")
     parser.add_argument("--text", required=True)
@@ -92,11 +123,29 @@ def main() -> None:
     args = parser.parse_args()
 
     message = JOBS_PREFIX_RE.sub("", args.text or "").strip()
+    message, profile_id = parse_profile_from_text(message)
+    env = jobs_env(profile_id)
+
+    if PROFILES_RE.search(message):
+        payload = {
+            "status": "ok",
+            "agent": "jobs",
+            "profiles": [
+                {"id": p.profile_id, "label": p.label, "workspace": str(p.workspace)}
+                for p in list_profiles()
+            ],
+            "whatsapp_reply": "Perfiles Jobs:\n" + "\n".join(
+                f"@{p.profile_id} — {p.label}" for p in list_profiles()
+            ) + "\n\nUsa: /jobs @perfil buscar linkedin",
+        }
+        print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload["whatsapp_reply"])
+        return
+
     if not message:
         message = "buscar linkedin vacantes devops"
 
     if INDEX_RE.search(message):
-        code, payload, _, stderr = run_json([PY, f"{SCR}/jobs_cv_index.py", "--json"])
+        code, payload, _, stderr = run_json([PY, f"{SCR}/jobs_cv_index.py", "--json"], env=env)
         if code != 0 and not payload.get("whatsapp_reply"):
             payload = {"status": "error", "agent": "jobs", "whatsapp_reply": f"Index CV fallo: {stderr[-400:]}"}
         payload.setdefault("agent", "jobs")
@@ -104,7 +153,7 @@ def main() -> None:
         return
 
     if REPORT_RE.search(message):
-        code, payload, _, _ = run_json([PY, f"{SCR}/jobs_report.py", "--json"])
+        code, payload, _, _ = run_json([PY, f"{SCR}/jobs_report.py", "--json"], env=env)
         payload.setdefault("agent", "jobs")
         print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload.get("whatsapp_reply", ""))
         return
@@ -118,14 +167,48 @@ def main() -> None:
         if job_match:
             cmd.append(job_match.group(0))
         cmd.append("--json")
-        _, payload, _, stderr = run_json(cmd, timeout=60)
+        _, payload, _, stderr = run_json(cmd, timeout=60, env=env)
         if not payload.get("whatsapp_reply"):
             payload = {"status": "error", "agent": "jobs", "whatsapp_reply": f"Decision Jobs fallo: {stderr[-400:]}"}
         print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload.get("whatsapp_reply", ""))
         return
 
+    if LABORUM_LOGIN_RE.search(message):
+        payload = {
+            "status": "ok",
+            "agent": "jobs",
+            "whatsapp_reply": (
+                "Laborum login manual: DISPLAY=:11.0 "
+                ".venv-jobs-portals/bin/python scripts/jobs_laborum_login.py login --headed"
+            ),
+        }
+        print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload["whatsapp_reply"])
+        return
+
+    if LABORUM_RE.search(message):
+        apply_changes = bool(re.search(r"\b(aplicar|actualizar|sincronizar|confirmar)\b", message, re.I))
+        cmd = [PORTAL_PY, f"{SCR}/jobs_laborum_sync.py", "--json"]
+        if apply_changes:
+            cmd.extend(["--apply", "--confirm", "UPDATE-LABORUM"])
+        lab_env = laborum_browser_env()
+        lab_env.update(env)
+        _, payload, _, stderr = run_json(
+            cmd,
+            timeout=900,
+            env=lab_env,
+        )
+        if not payload.get("whatsapp_reply"):
+            payload = {
+                "status": "error",
+                "agent": "jobs",
+                "whatsapp_reply": f"Laborum fallo: {stderr[-500:]}",
+            }
+        payload.setdefault("agent", "jobs")
+        print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload["whatsapp_reply"])
+        return
+
     if OPS_RE.search(message) or re.search(r"https?://\S+", message) or len(message) > 160:
-        code, payload, _, stderr = run_json([PY, f"{SCR}/jobs_ops.py", "--text", message, "--json"], timeout=240)
+        code, payload, _, stderr = run_json([PY, f"{SCR}/jobs_ops.py", "--text", message, "--json"], timeout=240, env=env)
         if code != 0 and not payload.get("whatsapp_reply"):
             payload = {"status": "error", "agent": "jobs", "whatsapp_reply": f"Career ops fallo: {stderr[-500:]}"}
         payload.setdefault("agent", "jobs")
@@ -136,6 +219,7 @@ def main() -> None:
         code, payload, _, stderr = run_json(
             [PY, f"{SCR}/jobs_apply.py", "--text", message, "--json"],
             timeout=900,
+            env=env,
         )
         if code != 0 and not payload.get("whatsapp_reply"):
             payload = {"status": "error", "agent": "jobs", "whatsapp_reply": f"Postular fallo: {stderr[-500:]}"}
@@ -151,6 +235,7 @@ def main() -> None:
             capture_output=True,
             timeout=180,
             check=False,
+            env=env,
         )
         reply = (proc.stdout or proc.stderr).strip() or "ChileTrabajos: sesion guardada."
         payload = {"status": "ok" if proc.returncode == 0 else "error", "agent": "jobs", "whatsapp_reply": reply[-900:]}
@@ -158,36 +243,9 @@ def main() -> None:
         return
 
     if CHILETRABAJOS_RE.search(message):
-        code, payload, _, stderr = run_json([LINKEDIN_PY, f"{SCR}/jobs_chiletrabajos_scrape.py", "--json"], timeout=300)
+        code, payload, _, stderr = run_json([LINKEDIN_PY, f"{SCR}/jobs_chiletrabajos_scrape.py", "--json"], timeout=300, env=env)
         if code != 0 and not payload.get("whatsapp_reply"):
             payload = {"status": "error", "agent": "jobs", "whatsapp_reply": f"ChileTrabajos fallo: {stderr[-500:]}"}
-        payload.setdefault("agent", "jobs")
-        print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload.get("whatsapp_reply", ""))
-        return
-
-    if LABORUM_LOGIN_RE.search(message):
-        payload = {
-            "status": "ok",
-            "agent": "jobs",
-            "whatsapp_reply": (
-                "Laborum login MANUAL (no auto — evita spam MFA):\n"
-                "xvfb-run -a .venv-jobs-portals/bin/python scripts/jobs_laborum_login.py login --headed\n"
-                "Completa login + codigo MFA en Chromium, luego ENTER.\n"
-                "Verificar sesion: ... jobs_laborum_login.py check"
-            ),
-        }
-        print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload.get("whatsapp_reply", ""))
-        return
-
-    if LABORUM_RE.search(message):
-        mode = "cv" if re.search(r"\bcv\b|pdf|mia\b", message, re.I) else "form"
-        dry = bool(re.search(r"\bdry[- ]?run\b", message, re.I))
-        cmd = [PORTAL_PY, f"{SCR}/jobs_laborum_sync.py", "--mode", mode, "--json"]
-        if dry:
-            cmd.append("--dry-run")
-        _, payload, _, stderr = run_json(cmd, timeout=900)
-        if not payload.get("whatsapp_reply"):
-            payload = {"status": "error", "agent": "jobs", "whatsapp_reply": f"Laborum fallo: {stderr[-500:]}"}
         payload.setdefault("agent", "jobs")
         print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload.get("whatsapp_reply", ""))
         return
@@ -197,6 +255,7 @@ def main() -> None:
         code, payload, _, stderr = run_json(
             [LINKEDIN_PY, f"{SCR}/{script}", "--json"],
             timeout=600,
+            env=env,
         )
         if code != 0 and not payload.get("whatsapp_reply"):
             payload = {"status": "error", "agent": "jobs", "whatsapp_reply": f"Busqueda LinkedIn fallo: {stderr[-500:]}"}
@@ -205,7 +264,7 @@ def main() -> None:
         return
 
     if MATCH_RE.search(message):
-        code, payload, _, stderr = run_json([PY, f"{SCR}/jobs_match.py", "--text", message, "--json"], timeout=180)
+        code, payload, _, stderr = run_json([PY, f"{SCR}/jobs_match.py", "--text", message, "--json"], timeout=180, env=env)
         if code != 0 and not payload.get("whatsapp_reply"):
             payload = {"status": "error", "agent": "jobs", "whatsapp_reply": f"Match fallo: {stderr[-400:]}"}
         payload.setdefault("agent", "jobs")

@@ -24,6 +24,7 @@ if not Path(PY).exists():
 SCR = str(ROOT / "scripts")
 sys.path.insert(0, SCR)
 from hl_go_common import checkout_branch, current_branch, repo_root, resolve_branch_from_text
+from openclaw_cli import openclaw_argv
 
 HL_PREFIX_RE = re.compile(r"^\s*/(?:hl|hlgo|hl-go)\b", re.I)
 PULL_RE = re.compile(r"\b(pull|actualizar?\s+(?:el\s+)?repo|clonar?|clone)\b", re.I)
@@ -50,10 +51,10 @@ def run_json(cmd: list[str], timeout: int = 300) -> tuple[int, dict[str, Any], s
 
 
 def run_hl_agent(message: str, session_key: str) -> tuple[int, str, str, str]:
-    cmd = [
-        "openclaw", "agent", "--local", "--agent", "hlgo",
+    cmd = openclaw_argv(
+        "agent", "--local", "--agent", "hlgo",
         "--session-key", session_key, "--message", message, "--json",
-    ]
+    )
     code, payload, stdout, stderr = run_json(cmd, timeout=300)
     reply = ""
     for item in payload.get("payloads") or []:
