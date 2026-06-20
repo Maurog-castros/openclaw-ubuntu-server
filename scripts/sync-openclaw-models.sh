@@ -144,7 +144,7 @@ def write_litellm(env: dict[str, str], text_model: str, vision_model: str | None
     return [alias for alias, _, _ in aliases]
 
 
-def model_entry(alias: str, name: str, context_window: int = 32768, max_tokens: int = 4096) -> dict[str, Any]:
+def model_entry(alias: str, name: str, context_window: int = 131072, max_tokens: int = 8192) -> dict[str, Any]:
     return {
         "id": alias,
         "name": name,
@@ -161,14 +161,27 @@ def model_entry(alias: str, name: str, context_window: int = 32768, max_tokens: 
     }
 
 
-def normalize_agent_models(aliases: list[str], models: dict[str, Any]) -> dict[str, Any]:
-    primary = "remote-lm/openclaw-remote"
-    fallback_values = ["remote-lm/openclaw-remote-coder"]
-    if "openclaw-remote-vision" in aliases:
-        fallback_values.append("remote-lm/openclaw-remote-vision")
+TOOL_AGENT_PRIMARY = "remote-lm/openrouter-auto"
+TOOL_AGENT_FALLBACKS = [
+    "remote-lm/openclaw-remote",
+    "remote-lm/openclaw-remote-coder",
+    "remote-lm/openclaw-remote-vision",
+]
 
-    models["primary"] = primary
-    models["fallbacks"] = fallback_values
+OPENROUTER_MODELS = [
+    ("openrouter-auto", "OpenRouter auto (primario tool-calling)", 200000),
+    ("openrouter-gemini", "OpenRouter Gemini 2.5 Flash", 1048576),
+    ("openrouter-free", "OpenRouter free tier", 200000),
+    ("openrouter-gemma", "OpenRouter Gemma 4 31B free", 200000),
+]
+
+
+def normalize_agent_models(aliases: list[str], models: dict[str, Any]) -> dict[str, Any]:
+    # Preserve OpenRouter-first routing (Hermes requires >=64K context on iamiko).
+    if models.get("primary") == TOOL_AGENT_PRIMARY:
+        return models
+    models["primary"] = TOOL_AGENT_PRIMARY
+    models["fallbacks"] = list(TOOL_AGENT_FALLBACKS)
     return models
 
 
@@ -202,6 +215,8 @@ def write_openclaw_config(aliases: list[str], selected: dict[str, str | None]) -
         provider_models.append(
             model_entry("openclaw-remote-embed", f"{selected['embedding']} embeddings via Iamiko (LiteLLM)", 8192, 8192)
         )
+    for alias, label, ctx in OPENROUTER_MODELS:
+        provider_models.append(model_entry(alias, label, ctx))
 
     data["models"]["providers"] = {
         "remote-lm": {

@@ -1,0 +1,57 @@
+{
+  "owner": "Mauricio Guillermo Castro Sandoval",
+  "updated_at": "2026-06-19",
+  "source_cv": "content/CV/CV_MauricioCastro-IaC-022026.pdf",
+  "experiences": [
+    {
+      "id": "exp-hdi-2024",
+      "company": "HDI Seguros",
+      "title": "Senior DevSecOps / Cloud Engineer",
+      "start": "2024-10",
+      "end": "",
+      "current": true,
+      "location": "Santiago, Chile",
+      "description": "Diseño y operación de infraestructura AWS/CI/CD para más de 200 aplicaciones. IaC, IAM least-privilege, pipelines Jenkins/GitHub Actions, observabilidad, DevSecOps y continuidad operacional en entorno financiero."
+    },
+    {
+      "id": "exp-innovacion-radical-2026",
+      "company": "Innovación Radical SpA",
+      "title": "Consultor Freelance / Cloud Automation",
+      "start": "2026-03",
+      "end": "",
+      "current": true,
+      "location": "Santiago, Chile",
+      "description": "Automatización con Power Automate, integraciones empresariales y optimización de procesos operativos."
+    },
+    {
+      "id": "exp-geodis-2023",
+      "company": "GEODIS",
+      "title": "Senior Developer / DevSecOps Tech Lead",
+      "start": "2023-03",
+      "end": "2024-04",
+      "current": false,
+      "location": "Santiago, Chile",
+      "description": "MFA y cifrado con AWS KMS. Migración a microservicios Node.js, observabilidad CloudWatch/X-Ray, optimización de APIs y automatización de pipelines."
+    },
+    {
+      "id": "exp-ingenia-2020",
+      "company": "Ingenia Global",
+      "title": "Web Development Lead / Cloud Architect",
+      "start": "2020-01",
+      "end": "2022-08",
+      "current": false,
+      "location": "Argentina / España / Chile",
+      "description": "Arquitecturas serverless AWS Lambda/Step Functions, Terraform, CI/CD, API Gateway + WAF, reducción de costos cloud y calidad automatizada."
+    },
+    {
+      "id": "exp-innovacion-radical-2014",
+      "company": "Innovación Radical",
+      "title": "Technical Lead / Senior Consultant",
+      "start": "2014-07",
+      "end": "2017-08",
+      "current": false,
+      "location": "Santiago, Chile",
+      "description": "Automatización de procesos, integraciones REST/SOAP, dashboards analíticos y diseño de soluciones técnicas."
+    }
+  ]
+}

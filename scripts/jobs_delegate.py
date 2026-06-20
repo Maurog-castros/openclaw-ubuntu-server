@@ -31,6 +31,13 @@ SCR = str(ROOT / "scripts")
 INDEX_RE = re.compile(r"\b(index(?:ar)?\s+cv|cv\s+index|actualizar\s+cv)\b", re.I)
 SEARCH_RE = re.compile(r"\b(buscar\s+linkedin|linkedin\s+jobs|vacantes?\s+linkedin|refresh\s+jobs)\b", re.I)
 RECOMMENDED_RE = re.compile(r"\b(recommended|recomendad[oa]s?|jymbii|jobs\s+home)\b", re.I)
+CHILETRABAJOS_RE = re.compile(r"\b(chiletrabajos|chile\s*trabajos)\b", re.I)
+CHILETRABAJOS_LOGIN_RE = re.compile(r"\b(chiletrabajos\s+login|login\s+chiletrabajos)\b", re.I)
+LABORUM_RE = re.compile(r"\b(laborum|sync\s+experiencia|experiencia\s+portal|curriculum\s+laborum)\b", re.I)
+LABORUM_LOGIN_RE = re.compile(r"\b(laborum\s+login|login\s+laborum)\b", re.I)
+PORTAL_PY = str(ROOT / ".venv-jobs-portals/bin/python")
+if not Path(PORTAL_PY).exists():
+    PORTAL_PY = PY
 DECISION_RE = re.compile(r"\b(aprobar|approve|descartar|discard|estado|status)\b", re.I)
 MATCH_RE = re.compile(
     r"\b(vacantes?|match|oportunidades?\s+laboral|trabajos?\s+para\s+mi|"
@@ -132,6 +139,55 @@ def main() -> None:
         )
         if code != 0 and not payload.get("whatsapp_reply"):
             payload = {"status": "error", "agent": "jobs", "whatsapp_reply": f"Postular fallo: {stderr[-500:]}"}
+        payload.setdefault("agent", "jobs")
+        print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload.get("whatsapp_reply", ""))
+        return
+
+    if CHILETRABAJOS_LOGIN_RE.search(message):
+        proc = subprocess.run(
+            [LINKEDIN_PY, f"{SCR}/jobs_chiletrabajos_login.py", "auto"],
+            cwd=str(ROOT),
+            text=True,
+            capture_output=True,
+            timeout=180,
+            check=False,
+        )
+        reply = (proc.stdout or proc.stderr).strip() or "ChileTrabajos: sesion guardada."
+        payload = {"status": "ok" if proc.returncode == 0 else "error", "agent": "jobs", "whatsapp_reply": reply[-900:]}
+        print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload.get("whatsapp_reply", ""))
+        return
+
+    if CHILETRABAJOS_RE.search(message):
+        code, payload, _, stderr = run_json([LINKEDIN_PY, f"{SCR}/jobs_chiletrabajos_scrape.py", "--json"], timeout=300)
+        if code != 0 and not payload.get("whatsapp_reply"):
+            payload = {"status": "error", "agent": "jobs", "whatsapp_reply": f"ChileTrabajos fallo: {stderr[-500:]}"}
+        payload.setdefault("agent", "jobs")
+        print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload.get("whatsapp_reply", ""))
+        return
+
+    if LABORUM_LOGIN_RE.search(message):
+        payload = {
+            "status": "ok",
+            "agent": "jobs",
+            "whatsapp_reply": (
+                "Laborum login MANUAL (no auto — evita spam MFA):\n"
+                "xvfb-run -a .venv-jobs-portals/bin/python scripts/jobs_laborum_login.py login --headed\n"
+                "Completa login + codigo MFA en Chromium, luego ENTER.\n"
+                "Verificar sesion: ... jobs_laborum_login.py check"
+            ),
+        }
+        print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload.get("whatsapp_reply", ""))
+        return
+
+    if LABORUM_RE.search(message):
+        mode = "cv" if re.search(r"\bcv\b|pdf|mia\b", message, re.I) else "form"
+        dry = bool(re.search(r"\bdry[- ]?run\b", message, re.I))
+        cmd = [PORTAL_PY, f"{SCR}/jobs_laborum_sync.py", "--mode", mode, "--json"]
+        if dry:
+            cmd.append("--dry-run")
+        _, payload, _, stderr = run_json(cmd, timeout=900)
+        if not payload.get("whatsapp_reply"):
+            payload = {"status": "error", "agent": "jobs", "whatsapp_reply": f"Laborum fallo: {stderr[-500:]}"}
         payload.setdefault("agent", "jobs")
         print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload.get("whatsapp_reply", ""))
         return

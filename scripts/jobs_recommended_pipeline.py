@@ -9,8 +9,26 @@ from jobs_linkedin_browser import ensure_login, launch_browser, new_context
 VACANCIES_DIR=JOBS_WS/"vacancies"
 DETAIL_JS=r"""() => {const t=s=>(document.querySelector(s)?.innerText||'').replace(/\s+/g,' ').trim();return {title:t('.job-details-jobs-unified-top-card__job-title')||t('h1'),company:t('.job-details-jobs-unified-top-card__company-name'),location:t('.job-details-jobs-unified-top-card__primary-description-container'),description:t('.jobs-description__content')||t('.jobs-box__html-content')||t('#job-details')||t('[class*="jobs-description"]'),body:(document.body.innerText||'')}}"""
 def rows():
- p=JOBS_WS/"linkedin_recommended_latest.csv"
- with p.open(encoding="utf-8",newline="") as h:return list(csv.DictReader(h))
+ out=[]
+ for name in ("linkedin_recommended_latest.csv","chiletrabajos_latest.csv"):
+  p=JOBS_WS/name
+  if not p.exists(): continue
+  with p.open(encoding="utf-8",newline="") as h:
+   for row in csv.DictReader(h):
+    if row.get("job_url"): out.append(row)
+ seen=set();dedup=[]
+ for row in out:
+  key=row.get("job_id") or row.get("job_url")
+  if key in seen: continue
+  seen.add(key);dedup.append(row)
+ return dedup
+def extract_chiletrabajos(row,d):
+ from jobs_chiletrabajos_scrape import fetch_job_detail
+ data=fetch_job_detail(row["job_url"])
+ if len(str(data.get("description") or ""))<120:
+  shot=d/"extraction-error.png"
+  raise RuntimeError(f"JD incompleta ChileTrabajos ({len(data.get('description') or '')}); url={row['job_url']}")
+ return data
 def old(d):
  try:return json.loads((d/"job.json").read_text(encoding="utf-8"))
  except (OSError,json.JSONDecodeError):return {}
@@ -41,7 +59,9 @@ def vacancy_score(data,row):
  loc=1.5 if any(x in text for x in ("remote","remoto","híbrido","hibrido","chile","latam")) else .5
  return round(max(0,min(10,min(3,r*1.5)+min(4,s*.4)+loc+(1 if row.get("easy_apply")=="1" else .5)+.5-d)),2)
 def process(page,row,threshold):
- jid=row.get("job_id") or row["job_url"].rstrip("/").split("/")[-1];d=VACANCIES_DIR/jid;d.mkdir(parents=True,exist_ok=True);prev=old(d);data=extract(page,row,d)
+ jid=row.get("job_id") or row["job_url"].rstrip("/").split("/")[-1];d=VACANCIES_DIR/jid;d.mkdir(parents=True,exist_ok=True);prev=old(d)
+ if "chiletrabajos.cl" in str(row.get("job_url") or ""): data=extract_chiletrabajos(row,d)
+ else: data=extract(page,row,d)
  (d/"description.txt").write_text(data["description"]+"\n",encoding="utf-8");ranks=rank_cvs(data["description"]);ranking=write_ranking_csv(ranks,d,"cv");best=float(ranks[0].get("score") or 0) if ranks else 0
  generated=str(generate_adapted_cv(data["description"],d,f"{jid}-adapted")) if best<threshold else ""
  state={"job_id":jid,"discovered_at":row.get("scraped_at"),"analyzed_at":datetime.now().astimezone().isoformat(timespec="seconds"),**data,"workplace":row.get("workplace"),"easy_apply":row.get("easy_apply")=="1","job_url":row.get("job_url"),"vacancy_score":vacancy_score(data,row),"best_cv":ranks[0] if ranks else {},"best_cv_score":best,"generated_cv":generated,"ranking_csv":str(ranking),"decision_status":prev.get("decision_status") or "pending_approval","decision_at":prev.get("decision_at") or "","applied_at":prev.get("applied_at") or ""}
@@ -59,7 +79,9 @@ def main():
  with sync_playwright() as p:
   browser=launch_browser(p,headless=not a.headed);context=new_context(browser);page=context.new_page()
   try:
-   ensure_login(page)
+   pending=[r for r in rows()[:a.limit] if "linkedin.com" in str(r.get("job_url") or "")]
+   if pending:
+    ensure_login(page)
    for row in rows()[:a.limit]:
     try:states.append(process(page,row,a.threshold))
     except Exception as exc:errors.append({"job_id":row.get("job_id",""),"error":str(exc)[:500]})

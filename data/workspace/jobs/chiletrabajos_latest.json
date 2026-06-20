@@ -1,0 +1,10 @@
+{
+  "status": "error",
+  "agent": "jobs",
+  "source": "chiletrabajos",
+  "count": 0,
+  "csv_file": "",
+  "latest_csv": "/home/mauro/Dev/openclaw-mauro/data/workspace/jobs/chiletrabajos_latest.csv",
+  "jobs": [],
+  "whatsapp_reply": "ChileTrabajos fallo: ChileTrabajos no mostro formulario de login en headless. Ejecuta login manual headed."
+}

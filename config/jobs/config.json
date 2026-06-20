@@ -55,6 +55,31 @@
     "platform engineer",
     "mlops engineer"
   ],
+  "chiletrabajos": {
+    "category_slug": "informatica",
+    "category_id": "2007",
+    "extra_categories": ["teletrabajo"],
+    "mode": "both",
+    "rss_limit": 600,
+    "pages": 4,
+    "keyword": "",
+    "min_score": 12,
+    "limit": 80,
+    "use_session": true,
+    "storage_state": "secrets/chiletrabajos_storage_state.json",
+    "headless": true
+  },
+  "profile_experience_path": "config/jobs/profile_experience.json",
+  "job_portals": {
+    "laborum": {
+      "storage_state": "secrets/laborum_storage_state.json",
+      "login_url": "https://www.laborum.cl/login?returnTo=/candidatos/curriculum",
+      "experience_url": "https://www.laborum.cl/candidatos/curriculum/experiencia/agregar",
+      "curriculum_url": "https://www.laborum.cl/candidatos/curriculum",
+      "headless": true,
+      "auto_login": false
+    }
+  },
   "profile_answers": {
     "years_experience": "15+",
     "work_authorization": "Chilean citizen, authorized to work in Chile",

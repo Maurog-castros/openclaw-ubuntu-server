@@ -13,7 +13,11 @@ Esta carpeta **no se sube a GitHub**. Crea aquí tus archivos reales en el servi
 | `hl_go.env` | Variables HL-Go (DB, URLs) |
 | `linkedin_innovacionradical.env` | Login LinkedIn intel |
 | `linkedin_innovacionradical_storage_state.json` | Sesión Playwright LinkedIn |
+| `linkedin_storage_state.json` | Sesión LinkedIn personal (/jobs postular) |
+| `laborum_storage_state.json` | Sesión Laborum (/jobs laborum sync) |
 | `whatsapp_allow_from.txt` | Números permitidos WhatsApp (uno por línea) |
+
+Credenciales portales en `data/secrets/.env`: `laborum_email`, `laborum_password` (opcional si usas login manual headed).
 
 ## OpenClaw stack
 
