@@ -4,7 +4,7 @@ set -euo pipefail
 
 ROOT="${OPENCLAW_REPO:-/home/mauro/openclaw-mauro}"
 SLOT="${1:-morning}"
-LOG_DIR="$ROOT/logs"
+LOG_DIR="$ROOT/runtime/logs"
 LOG_FILE="$LOG_DIR/intel-chile-daily-${SLOT}.log"
 LOCK="/tmp/openclaw-intel-chile-${SLOT}.lock"
 PY="${ROOT}/.venv-finanzas/bin/python"

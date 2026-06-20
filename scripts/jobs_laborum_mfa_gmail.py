@@ -11,17 +11,17 @@ from pathlib import Path
 from typing import Any
 
 from jobs_common import ROOT
+from runtime_paths import secret_file
 
 GMAIL_QUERY = 'from:no_reply@laborum.cl subject:acceso newer_than:30m'
 SUBJECT_CODE_RE = re.compile(r"c[oó]digo de acceso es:\s*(\d{6})", re.I)
 BODY_CODE_RE = re.compile(r"\b(\d{6})\b")
 
-DEFAULT_CREDENTIALS = ROOT / "secrets/gmail_credentials.json"
+DEFAULT_CREDENTIALS = secret_file("runtime/secrets/gmail_credentials.json")
 TOKEN_CANDIDATES = [
-    ROOT / "secrets/gmail_modify_token.json",
-    ROOT / "data/secrets/gmail_modify_token.json",
-    ROOT / "secrets/gmail_token.json",
-    ROOT / "data/secrets/gmail_calendar_token.json",
+    secret_file("runtime/secrets/gmail_modify_token.json"),
+    secret_file("runtime/secrets/gmail_token.json"),
+    secret_file("runtime/secrets/gmail_calendar_token.json"),
 ]
 
 

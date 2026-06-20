@@ -9,9 +9,18 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
-ROOT = Path("/home/node/openclaw-mauro") if Path("/home/node/openclaw-mauro").exists() else Path(__file__).resolve().parent.parent
-JOBS_WS = Path(os.environ.get("OPENCLAW_JOBS_DATA", "")).expanduser() if os.environ.get("OPENCLAW_JOBS_DATA") else ROOT / "data/workspace/jobs"
-CONFIG_PATH = ROOT / "config/jobs/config.json"
+from runtime_paths import repo_root, resolve_repo_path
+
+ROOT = repo_root()
+
+
+def _bootstrap_paths() -> tuple[Path, Path, str]:
+    from jobs_profile import resolve_runtime_paths
+
+    return resolve_runtime_paths()
+
+
+JOBS_WS, CONFIG_PATH, ACTIVE_PROFILE_ID = _bootstrap_paths()
 CV_INDEX = JOBS_WS / "cv_index.json"
 APPLICATIONS = JOBS_WS / "applications"
 APPLICATIONS_JSONL = JOBS_WS / "applications.jsonl"
@@ -25,8 +34,8 @@ def load_config() -> dict[str, Any]:
 
 def cv_dir(cfg: dict[str, Any] | None = None) -> Path:
     cfg = cfg or load_config()
-    p = Path(cfg.get("cv_dir") or "content/CV")
-    return p if p.is_absolute() else ROOT / p
+    raw = cfg.get("cv_dir") or "runtime/jobs/cv-library"
+    return resolve_repo_path(raw)
 
 
 def list_cv_files(cfg: dict[str, Any] | None = None) -> list[Path]:

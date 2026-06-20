@@ -7,8 +7,9 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Iterator
 
-from jobs_common import ROOT, load_config
+from jobs_common import load_config
 from jobs_linkedin_browser import USER_AGENT, credentials_env_path, launch_browser
+from runtime_paths import resolve_repo_path
 
 BASE = "https://www.chiletrabajos.cl"
 LOGIN_URL = f"{BASE}/chtlogin"
@@ -17,9 +18,8 @@ HOME_URL = f"{BASE}/encuentra-un-empleo"
 
 def storage_state_path(cfg: dict[str, Any] | None = None) -> Path:
     cfg = cfg or load_config()
-    raw = (cfg.get("chiletrabajos") or {}).get("storage_state") or "secrets/chiletrabajos_storage_state.json"
-    path = Path(raw)
-    return path if path.is_absolute() else ROOT / raw
+    raw = (cfg.get("chiletrabajos") or {}).get("storage_state") or "runtime/secrets/chiletrabajos_storage_state.json"
+    return resolve_repo_path(raw)
 
 
 def load_chiletrabajos_credentials(path: Path | None = None) -> tuple[str, str] | None:

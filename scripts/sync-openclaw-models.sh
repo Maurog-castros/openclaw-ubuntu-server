@@ -11,10 +11,10 @@ LITELLM_CONFIG="$OPENCLAW_DIR/litellm-config.yaml"
 OPENWEBUI_DB="/app/backend/data/webui.db"
 MODELS_URL="${MODELS_URL:-https://ia.iamiko.cl/v1/models}"
 CRON_MARKER="# openclaw-model-sync"
-CRON_CMD="17 3 * * * flock -n /tmp/openclaw-model-sync.lock $ROOT/scripts/sync-openclaw-models.sh >> $ROOT/logs/model-sync.log 2>&1 $CRON_MARKER"
+CRON_CMD="17 3 * * * flock -n /tmp/openclaw-model-sync.lock $ROOT/scripts/sync-openclaw-models.sh >> $ROOT/runtime/logs/model-sync.log 2>&1 $CRON_MARKER"
 
 install_cron() {
-  mkdir -p "$ROOT/logs"
+  mkdir -p "$ROOT/runtime/logs"
   current="$(crontab -l 2>/dev/null || true)"
   filtered="$(printf '%s\n' "$current" | grep -vF "$CRON_MARKER" || true)"
   printf '%s\n%s\n' "$filtered" "$CRON_CMD" | sed '/^$/d' | crontab -

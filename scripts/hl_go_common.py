@@ -8,9 +8,9 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-OPENCLAW_ROOT = Path("/home/node/openclaw-mauro")
-if not OPENCLAW_ROOT.exists():
-    OPENCLAW_ROOT = Path(__file__).resolve().parent.parent
+from runtime_paths import repo_root, secret_file
+
+OPENCLAW_ROOT = repo_root()
 
 HL_MIKO_REPO = os.getenv("HL_MIKO_REPO", "")
 HL_GO_APP = os.getenv("HL_GO_APP", "")
@@ -19,8 +19,8 @@ REPO_URL = "https://github.com/Maurog-castros/hl_miko.git"
 # origin/HEAD → dev.h-l.cl (rama activa del proyecto HL-Go)
 DEFAULT_BRANCH = "dev.h-l.cl"
 OPENCLAW_WORK_BRANCH = "openclaw/mantenedores-tablas-ui-20260528"
-GIT_CREDENTIALS = OPENCLAW_ROOT / "secrets/github_hl_miko_credentials"
-ENV_SOURCE = OPENCLAW_ROOT / "secrets/hl_go.env"
+GIT_CREDENTIALS = secret_file("runtime/secrets/github_hl_miko_credentials")
+ENV_SOURCE = secret_file("runtime/secrets/hl_go.env")
 APP_URL_DEFAULT = "http://localhost:8001"
 
 

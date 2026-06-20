@@ -8,9 +8,9 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-ROOT = Path("/home/node/openclaw-mauro")
-if not ROOT.exists():
-    ROOT = Path(__file__).resolve().parent.parent
+from runtime_paths import repo_root, secrets_dir
+
+ROOT = repo_root()
 WS = ROOT / "data/workspace/care"
 TZ = ZoneInfo("America/Santiago")
 
@@ -22,10 +22,8 @@ def care_data() -> Path:
     return WS / "data"
 
 SECRET_DIRS = [
-    ROOT / "secrets",
+    secrets_dir(),
     Path("/home/node/.openclaw-secrets"),
-    Path("/home/mauro/openclaw-mauro/secrets"),
-    ROOT / "data/secrets",
 ]
 
 
@@ -38,18 +36,9 @@ def secret_path(name: str) -> Path | None:
 
 
 def writable_secret_path(name: str) -> Path:
-    host_dir = Path("/home/mauro/openclaw-mauro/secrets")
-    if host_dir.exists():
-        try:
-            test = host_dir / ".write_test"
-            test.write_text("ok", encoding="utf-8")
-            test.unlink(missing_ok=True)
-            return host_dir / name
-        except OSError:
-            pass
-    fallback = ROOT / "data/secrets"
-    fallback.mkdir(parents=True, exist_ok=True)
-    return fallback / name
+    target = secrets_dir() / name
+    target.parent.mkdir(parents=True, exist_ok=True)
+    return target
 
 
 def now_local() -> datetime:

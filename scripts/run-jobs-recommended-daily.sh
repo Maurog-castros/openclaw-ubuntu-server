@@ -3,7 +3,7 @@
 set -euo pipefail
 
 ROOT="${OPENCLAW_REPO:-/home/mauro/Dev/openclaw-mauro}"
-LOG_DIR="$ROOT/logs"
+LOG_DIR="$ROOT/runtime/logs"
 LOG_FILE="$LOG_DIR/jobs-recommended-daily.log"
 LOCK="/tmp/openclaw-jobs-recommended.lock"
 PY="${ROOT}/.venv-linkedin-intel/bin/python"

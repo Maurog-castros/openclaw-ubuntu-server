@@ -1,199 +1,205 @@
 #!/usr/bin/env python3
-"""Sincroniza experiencia laboral de Mauro en Laborum.cl."""
-
+"""Sincroniza experiencia Laborum desde perfil extraído del CV."""
 from __future__ import annotations
 
 import argparse
 import json
-import re
+import os
 import time
+from pathlib import Path
 from typing import Any
 
-from jobs_common import load_config
-from jobs_laborum_browser import ensure_login, launch_laborum_browser, new_context, save_session_if_logged_in
-from jobs_profile_experience import best_cv_path, load_experiences
+from jobs_common import JOBS_WS
+from jobs_laborum_profile import build_profile
+from runtime_paths import secret_file
+
+LABORUM_URL = "https://www.laborum.cl/candidatos/curriculum/experiencia/agregar"
+STATE_PATH = secret_file("runtime/secrets/laborum_storage_state.json")
+OUTPUT_DIR = JOBS_WS / "laborum"
+SYNC_STATE = OUTPUT_DIR / "sync_state.json"
+MONTH_NAMES = {
+    1: "Ene", 2: "Feb", 3: "Mar", 4: "Abr", 5: "May", 6: "Jun",
+    7: "Jul", 8: "Ago", 9: "Sep", 10: "Oct", 11: "Nov", 12: "Dic",
+}
 
 
-def _month_year(value: str) -> tuple[str, str]:
-    value = (value or "").strip()
-    if not value:
-        return "", ""
-    match = re.match(r"(\d{4})-(\d{2})", value)
-    if match:
-        year, month = match.group(1), match.group(2)
-        months = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
-        idx = int(month)
-        return months[idx] if 1 <= idx <= 12 else month, year
-    return value, ""
-
-
-def _fill_if_present(page, labels: list[str], value: str) -> bool:
-    if not value:
-        return False
-    for label in labels:
-        try:
-            loc = page.get_by_label(label, exact=False)
-            if loc.count():
-                loc.first.fill(value)
-                return True
-        except Exception:
-            pass
-    return False
-
-
-def _select_react_option(page, label: str, value: str) -> bool:
-    if not value:
-        return False
+def load_registry() -> dict[str, Any]:
     try:
-        field = page.get_by_label(label, exact=False).first
-        field.click(timeout=3000)
-        time.sleep(0.4)
-        page.keyboard.type(value[:40])
-        time.sleep(0.8)
-        option = page.get_by_role("option", name=re.compile(re.escape(value[:20]), re.I))
-        if option.count():
-            option.first.click(timeout=3000)
-            return True
-        page.keyboard.press("Enter")
-        return True
-    except Exception:
-        return False
+        return json.loads(SYNC_STATE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {"synced": {}}
 
 
-def fill_experience_form(page, exp: dict[str, Any]) -> None:
-    cfg = load_config()
-    url = ((cfg.get("job_portals") or {}).get("laborum") or {}).get(
-        "experience_url", "https://www.laborum.cl/candidatos/curriculum/experiencia/agregar"
+def save_registry(registry: dict[str, Any]) -> None:
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    temporary = SYNC_STATE.with_suffix(".tmp")
+    temporary.write_text(json.dumps(registry, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    temporary.replace(SYNC_STATE)
+
+
+def launch(playwright: Any, *, headless: bool) -> Any:
+    chrome = "/opt/google/chrome/chrome"
+    kwargs = {
+        "headless": headless,
+        "args": ["--disable-blink-features=AutomationControlled"],
+    }
+    if Path(chrome).exists():
+        kwargs["executable_path"] = chrome
+    return playwright.chromium.launch(**kwargs)
+
+
+def context(browser: Any) -> Any:
+    if not STATE_PATH.exists():
+        raise FileNotFoundError("Falta sesión Laborum. Ejecuta jobs_laborum_login.py --headed.")
+    return browser.new_context(
+        storage_state=str(STATE_PATH),
+        viewport={"width": 1440, "height": 1000},
+        locale="es-CL",
     )
-    page.goto(url, wait_until="domcontentloaded", timeout=90000)
-    time.sleep(2)
-    _fill_if_present(page, ["Puesto", "Cargo", "Nombre del puesto"], str(exp.get("title") or ""))
-    _fill_if_present(page, ["Empresa", "Compañía", "Compania"], str(exp.get("company") or ""))
-    _fill_if_present(page, ["Descripción", "Descripcion", "Funciones"], str(exp.get("description") or ""))
-    start_m, start_y = _month_year(str(exp.get("start") or ""))
-    end_m, end_y = _month_year(str(exp.get("end") or ""))
-    _select_react_option(page, "Mes", start_m)
-    _select_react_option(page, "Año", start_y)
-    if exp.get("current"):
-        try:
-            page.get_by_label("Trabajo actual", exact=False).check(timeout=2000)
-        except Exception:
-            try:
-                page.get_by_text("Actualmente trabajo aquí", exact=False).click(timeout=2000)
-            except Exception:
-                pass
-    elif end_m and end_y:
-        _select_react_option(page, "Mes", end_m)
-        _select_react_option(page, "Año", end_y)
-    saved = False
-    for label in ("Guardar", "Agregar", "Continuar", "Siguiente"):
-        try:
-            btn = page.get_by_role("button", name=re.compile(label, re.I))
-            if btn.count():
-                btn.first.click(timeout=5000)
-                saved = True
-                break
-        except Exception:
-            continue
-    if not saved:
-        raise RuntimeError(f"No pude guardar experiencia {exp.get('id')} en Laborum (revisar selectores/formulario).")
-    time.sleep(2)
 
 
-def upload_cv_pdf(page, cv_path) -> None:
-    page.goto("https://www.laborum.cl/candidatos/curriculum", wait_until="domcontentloaded", timeout=90000)
-    time.sleep(2)
-    selectors = [
-        "input[type='file']",
-        "input[accept*='pdf']",
-        "input[name*='cv']",
-    ]
-    for sel in selectors:
-        try:
-            input_el = page.locator(sel).first
-            if input_el.count():
-                input_el.set_input_files(str(cv_path))
-                time.sleep(4)
-                return
-        except Exception:
-            continue
-    raise RuntimeError("No encontre input de subida de CV en Laborum (Mia/importar PDF).")
+def select_react(dialog: Any, page: Any, select_id: int, query: str, exact: str) -> None:
+    input_box = dialog.locator(f"#react-select-{select_id}-input")
+    if input_box.get_attribute("readonly") is not None:
+        input_box.locator("xpath=../..").click(force=True)
+    else:
+        input_box.fill(query)
+    option = page.get_by_text(exact, exact=True).last
+    option.wait_for(state="visible", timeout=10000)
+    option.click()
+    time.sleep(0.2)
 
 
-def sync_experiences(*, headless: bool = True, dry_run: bool = False, mode: str = "form") -> dict[str, Any]:
-    experiences = load_experiences()
-    if not experiences:
-        raise RuntimeError("Sin experiencias en config/jobs/profile_experience.json")
-    if dry_run:
-        results = [
-            {"id": exp.get("id", ""), "company": exp.get("company", ""), "title": exp.get("title", ""), "status": "dry_run"}
-            for exp in experiences
-        ]
-        if mode == "cv":
-            results = [{"action": "cv_upload", "file": str(best_cv_path()), "status": "dry_run"}]
-        return {"status": "ok", "mode": mode, "count": len(results), "results": results}
-    cfg = load_config()
+def fill_experience(page: Any, experience: dict[str, Any]) -> None:
+    dialog = page.get_by_role("dialog", name="Sumar experiencia laboral *")
+    dialog.locator("#empresa").fill(experience["company"])
+    select_react(dialog, page, 5, "Informática", experience["company_activity"])
+    dialog.locator("#puesto").fill(experience["role"])
+    select_react(dialog, page, 6, "Senior", experience["experience_level"])
+    select_react(dialog, page, 7, "Tecnología", experience["area"])
+    select_react(dialog, page, 8, experience["subarea"], experience["subarea"])
+    select_react(dialog, page, 9, "Chile", experience["country"])
+    select_react(dialog, page, 10, MONTH_NAMES[experience["start_month"]], MONTH_NAMES[experience["start_month"]])
+    select_react(dialog, page, 11, str(experience["start_year"]), str(experience["start_year"]))
+    if experience["current"]:
+        dialog.locator("#alPresente").check()
+    else:
+        select_react(dialog, page, 12, MONTH_NAMES[experience["end_month"]], MONTH_NAMES[experience["end_month"]])
+        select_react(dialog, page, 13, str(experience["end_year"]), str(experience["end_year"]))
+    dialog.locator("#detalle").fill(experience["description"])
+    dialog.locator("#personasACargo").fill(str(experience["people_managed"]))
+    budget_id = "#radiobutton-presupuesto-true" if experience["managed_budget"] else "#radiobutton-presupuesto-false"
+    dialog.locator(budget_id).check(force=True)
+
+
+def assert_laborum_ready(page: Any) -> None:
+    if "Attention Required" in page.title() or "cloudflare" in page.url.lower():
+        raise RuntimeError("Cloudflare bloqueó Laborum. Ejecuta headed en DISPLAY XRDP.")
+    page.get_by_role("dialog", name="Sumar experiencia laboral *").wait_for(timeout=20000)
+
+
+def sync(*, cv_path: Path | None, apply: bool, headless: bool) -> dict[str, Any]:
+    profile = build_profile(cv_path)
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    (OUTPUT_DIR / "profile.json").write_text(
+        json.dumps(profile, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    registry = load_registry()
+    synced = registry.setdefault("synced", {})
     results: list[dict[str, str]] = []
     from playwright.sync_api import sync_playwright
 
-    with sync_playwright() as p:
-        browser = launch_laborum_browser(p, headless=headless)
-        context = new_context(browser, cfg)
-        page = context.new_page()
+    with sync_playwright() as playwright:
+        browser = launch(playwright, headless=headless)
+        browser_context = context(browser)
+        page = browser_context.new_page()
         try:
-            ensure_login(page, cfg)
-            if mode == "cv":
-                cv = best_cv_path(cfg)
-                if dry_run:
-                    results.append({"action": "cv_upload", "file": str(cv), "status": "dry_run"})
-                else:
-                    upload_cv_pdf(page, cv)
-                    results.append({"action": "cv_upload", "file": str(cv), "status": "ok"})
-            else:
-                for exp in experiences:
-                    if dry_run:
-                        results.append({"id": exp.get("id", ""), "company": exp.get("company", ""), "status": "dry_run"})
-                        continue
-                    fill_experience_form(page, exp)
-                    results.append({"id": exp.get("id", ""), "company": exp.get("company", ""), "status": "ok"})
-            save_session_if_logged_in(page, cfg)
+            experiences = profile["experiences"] if apply else profile["experiences"][:1]
+            for experience in experiences:
+                if experience["key"] in synced:
+                    results.append({"key": experience["key"], "status": "skipped", "company": experience["company"]})
+                    continue
+                page.goto(LABORUM_URL, wait_until="domcontentloaded", timeout=90000)
+                time.sleep(4)
+                assert_laborum_ready(page)
+                body = page.locator("body").inner_text()
+                if experience["company"] in body and experience["role"] in body:
+                    synced[experience["key"]] = {"status": "already_present"}
+                    save_registry(registry)
+                    results.append({"key": experience["key"], "status": "already_present", "company": experience["company"]})
+                    continue
+                fill_experience(page, experience)
+                save = page.locator("#experiencias-form-guardar:visible").first
+                save.wait_for(state="visible", timeout=10000)
+                if save.is_disabled():
+                    raise RuntimeError(f"Formulario inválido para {experience['company']}; Guardar deshabilitado.")
+                if not apply:
+                    preview = OUTPUT_DIR / "preview.png"
+                    page.screenshot(path=str(preview), full_page=True)
+                    results.append({"key": experience["key"], "status": "preview", "company": experience["company"]})
+                    break
+                save.click()
+                page.get_by_role("dialog", name="Sumar experiencia laboral *").wait_for(state="hidden", timeout=30000)
+                time.sleep(1)
+                if experience["company"] not in page.locator("body").inner_text():
+                    raise RuntimeError(f"Laborum no confirmó experiencia {experience['company']}.")
+                synced[experience["key"]] = {
+                    "status": "saved",
+                    "company": experience["company"],
+                    "role": experience["role"],
+                    "saved_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+                }
+                save_registry(registry)
+                results.append({"key": experience["key"], "status": "saved", "company": experience["company"]})
+        except Exception:
+            error_shot = OUTPUT_DIR / "sync-error.png"
+            page.screenshot(path=str(error_shot), full_page=True)
+            raise
         finally:
-            context.close()
+            browser_context.close()
             browser.close()
-    return {"status": "ok", "mode": mode, "count": len(results), "results": results}
+    return {"profile": profile, "results": results}
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Sync experiencia Laborum")
-    parser.add_argument("--mode", choices=["form", "cv"], default="form", help="form=campo a campo; cv=subir PDF (Mia)")
-    parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("--headed", action="store_true")
+    parser = argparse.ArgumentParser(description="Sincronizar CV con Laborum")
+    parser.add_argument("--cv", default="")
+    parser.add_argument("--apply", action="store_true")
+    parser.add_argument("--confirm", default="")
+    parser.add_argument("--headless", action="store_true")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
     try:
+        if args.apply and args.confirm != "UPDATE-LABORUM":
+            raise PermissionError("Apply requiere --confirm UPDATE-LABORUM")
+        result = sync(
+            cv_path=Path(args.cv) if args.cv else None,
+            apply=args.apply,
+            headless=args.headless,
+        )
+        counts: dict[str, int] = {}
+        for row in result["results"]:
+            counts[row["status"]] = counts.get(row["status"], 0) + 1
         payload = {
             "status": "ok",
             "agent": "jobs",
-            "portal": "laborum",
-            **sync_experiences(headless=not args.headed, dry_run=args.dry_run, mode=args.mode),
-            "whatsapp_reply": "",
+            "mode": "apply" if args.apply else "preview",
+            "counts": counts,
+            "results": result["results"],
+            "profile_file": str(OUTPUT_DIR / "profile.json"),
+            "preview_file": str(OUTPUT_DIR / "preview.png") if not args.apply else "",
+            "whatsapp_reply": (
+                f"Laborum {'actualizado' if args.apply else 'preview listo'}: {counts}. "
+                f"Perfil: {OUTPUT_DIR / 'profile.json'}"
+            ),
         }
-        if args.mode == "cv":
-            payload["whatsapp_reply"] = f"Laborum: CV subido ({payload['count']} acciones)."
-        else:
-            payload["whatsapp_reply"] = f"Laborum: {payload['count']} experiencias sincronizadas."
-        if args.dry_run:
-            payload["whatsapp_reply"] = "Laborum dry-run: " + payload["whatsapp_reply"]
     except Exception as exc:
         payload = {
             "status": "error",
             "agent": "jobs",
-            "portal": "laborum",
-            "whatsapp_reply": f"Laborum sync fallo: {exc}",
+            "whatsapp_reply": f"Laborum sync: {exc}",
         }
-    print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload.get("whatsapp_reply", ""))
-    if payload.get("status") != "ok":
-        raise SystemExit(1)
+    print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload["whatsapp_reply"])
 
 
 if __name__ == "__main__":

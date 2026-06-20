@@ -3,7 +3,7 @@
   "email": "maurog.castros@gmail.com",
   "linkedin": "https://www.linkedin.com/in/maurog-castros/",
   "location": "Santiago, Chile",
-  "cv_dir": "content/CV",
+  "cv_dir": "runtime/jobs/cv-library",
   "cv_include_globs": ["Mauricio*.pdf", "CV_Mauricio*.pdf"],
   "cv_exclude_patterns": ["Carlos_Perez"],
   "target_roles": [
@@ -39,7 +39,7 @@
   ],
   "min_match_score": 12,
   "linkedin_signals_glob": "data/workspace/marketing/intel/data/linkedin_signals_*.json",
-  "linkedin_storage_state": "secrets/linkedin_storage_state.json",
+  "linkedin_storage_state": "runtime/secrets/linkedin_storage_state.json",
   "applications_csv": "data/workspace/jobs/applications.csv",
   "geo_urn": "104621616",
   "location_search": "Chile",
@@ -66,13 +66,13 @@
     "min_score": 12,
     "limit": 80,
     "use_session": true,
-    "storage_state": "secrets/chiletrabajos_storage_state.json",
+    "storage_state": "runtime/secrets/chiletrabajos_storage_state.json",
     "headless": true
   },
   "profile_experience_path": "config/jobs/profile_experience.json",
   "job_portals": {
     "laborum": {
-      "storage_state": "secrets/laborum_storage_state.json",
+      "storage_state": "runtime/secrets/laborum_storage_state.json",
       "login_url": "https://www.laborum.cl/login?returnTo=/candidatos/curriculum",
       "experience_url": "https://www.laborum.cl/candidatos/curriculum/experiencia/agregar",
       "curriculum_url": "https://www.laborum.cl/candidatos/curriculum",

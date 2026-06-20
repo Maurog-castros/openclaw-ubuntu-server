@@ -4,12 +4,12 @@ set -euo pipefail
 
 ROOT="/home/mauro/Dev/openclaw-mauro"
 cd "$ROOT"
-mkdir -p graphify-out logs
+mkdir -p graphify-out runtime/logs
 
 if command -v graphify >/dev/null 2>&1; then
-  graphify . --update --no-viz >> logs/graphify-refresh.log 2>&1 || true
+  graphify . --update --no-viz >> runtime/logs/graphify-refresh.log 2>&1 || true
 else
-  echo "$(date -Is) graphify CLI not installed; indexing existing graph only" >> logs/graphify-refresh.log
+  echo "$(date -Is) graphify CLI not installed; indexing existing graph only" >> runtime/logs/graphify-refresh.log
 fi
 
-python3 scripts/graphify_repo_index.py --json >> logs/graphify-refresh.log 2>&1
+python3 scripts/graphify_repo_index.py --json >> runtime/logs/graphify-refresh.log 2>&1

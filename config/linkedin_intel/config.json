@@ -2,7 +2,7 @@
   "company_name": "Innovación Radical",
   "company_page_url": "https://www.linkedin.com/company/innovaci%C3%B3nradical/",
   "website": "https://innovacionradical.cl/",
-  "storage_state": "secrets/linkedin_innovacionradical_storage_state.json",
+  "storage_state": "runtime/secrets/linkedin_innovacionradical_storage_state.json",
   "locale": "es-CL",
   "region": {
     "name": "Chile",

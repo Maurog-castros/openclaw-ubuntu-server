@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from jobs_common import ROOT, load_config
+from runtime_paths import resolve_repo_path
 
 PROFILE_PATH = ROOT / "config/jobs/profile_experience.json"
 
@@ -32,6 +33,5 @@ def load_experiences(cfg: dict[str, Any] | None = None) -> list[dict[str, Any]]:
 def best_cv_path(cfg: dict[str, Any] | None = None) -> Path:
     cfg = cfg or load_config()
     profile = json.loads(profile_path(cfg).read_text(encoding="utf-8")) if profile_path(cfg).exists() else {}
-    raw = profile.get("source_cv") or cfg.get("default_cv") or "content/CV/CV_MauricioCastro-IaC-022026.pdf"
-    path = Path(raw)
-    return path if path.is_absolute() else ROOT / raw
+    raw = profile.get("source_cv") or cfg.get("default_cv") or "runtime/jobs/cv-library/CV_MauricioCastro-IaC-022026.pdf"
+    return resolve_repo_path(raw)

@@ -207,3 +207,63 @@ regenerar credenciales ni iniciar login nuevo.
 
 Commits: `9babfa7`, `7ea7659`. Graphify refresh post-reorg OK (200k nodos;
 `graph.html` omitido por limite de viz).
+
+## Audit refs legacy (2026-06-20)
+
+Inventario antes de retirar symlinks. Conteos en `scripts/` + `config/` versionados
+(excluye `data/workspace/`, docs de reorg y submodulo `openclaw/` upstream):
+
+| Patron legacy | Archivos | Notas |
+|---|---|---|
+| `content/CV` | 7 | Jobs config + `jobs_common.py` default |
+| `data/CV` | 1 | `jobs_laborum_profile.py` (sin track aun) |
+| `secrets/` | ~39 | Finanzas, Jobs portales, HL-Go, Intel, WhatsApp |
+| `data/secrets` | 9 | OAuth pending/tokens, `.env` portales, `google_workspace_oauth.py` |
+| `logs/` | 11 | Cron shell scripts + `graphify_repo_refresh.sh` |
+
+### Cron (activo)
+
+Todas las entradas OpenClaw escriben a `$ROOT/logs/*.log` (7 lineas). El symlink
+`logs -> runtime/logs` las satisface; migrar implica editar crontab o wrappers.
+
+Sin refs a `content/CV`, `secrets/` ni `data/secrets` en crontab.
+
+### Docker / stack
+
+Sin refs legacy en `docker-overrides/`. Mounts de secretos/logs viven en
+`openclaw/docker-compose*.yml` (revisar en fase 2 con stack productivo).
+
+### Prioridad de migracion sugerida
+
+1. **Helper unico** — `runtime_paths.py` con `cv_dir()`, `secrets_dir()`, `logs_dir()`
+   (similar a `openclaw_cli.py`); reemplazar defaults hardcodeados.
+2. **Jobs** — `config/jobs/config.json`, `jobs_common.py`, browsers Laborum/ChileTrabajos.
+3. **OAuth / finanzas** — `vida_common.py`, gmail agents, `google_workspace_oauth.py`.
+4. **Cron scripts** — `$ROOT/logs/` → `$ROOT/runtime/logs/` o env `OPENCLAW_LOG_DIR`.
+5. **Agent docs** — SOUL.md / skills (baja prioridad; symlinks cubren).
+6. **Retirar symlinks** — solo cuando conteos lleguen a 0 en scripts+cron+Docker.
+
+### Fuera de alcance del audit
+
+- `data/workspace/jobs/**` — rutas embebidas en JSON de vacantes (runtime).
+- `REPO_MAP.md`, `REPO_REORGANIZATION_HANDOFF.md`, `docs/SECRETS.md` — documentacion.
+- `openclaw/` submodulo — `src/secrets/` es codigo upstream, no repo local.
+
+## Fase 2 — runtime_paths (2026-06-20)
+
+Completado en esta sesion:
+
+- `scripts/runtime_paths.py` + `scripts/test_runtime_paths.py` (5 tests OK).
+- Jobs: `config/jobs/config.json`, `jobs_common.py`, browsers, `jobs_laborum_*`,
+  `jobs_profile*.py`, `profile_experience.json`.
+- Secretos/OAuth: `vida_common.py`, `google_workspace_oauth.py`, `gmail_modify_oauth.py`,
+  `vida_calendar_oauth.py`, `jobs_laborum_mfa_gmail.py`, `hl_go_common.py`,
+  `config/linkedin_intel/config.json`.
+- Logs cron: scripts `*.sh` migrados a `$ROOT/runtime/logs/` (symlink sigue OK).
+
+Pendiente fase 2:
+
+- Finanzas CLI defaults (`secrets/gmail_*.json` en argparse de agents).
+- `setup_whatsapp_openclaw.sh`, `deploy_vida.py`, `linkedin_intel_scout.py`.
+- Docs/skills/SOUL.md con rutas legacy (baja prioridad).
+- Retirar symlinks cuando refs legacy en scripts+cron = 0.

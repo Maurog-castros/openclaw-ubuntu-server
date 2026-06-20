@@ -17,6 +17,7 @@ os.environ.setdefault("OAUTHLIB_INSECURE_TRANSPORT", "1")
 
 from google_auth_oauthlib.flow import Flow
 
+from runtime_paths import secrets_dir
 from vida_common import secret_path, writable_secret_path
 
 SCOPES = [
@@ -24,7 +25,7 @@ SCOPES = [
     "https://www.googleapis.com/auth/gmail.readonly",
 ]
 REDIRECT = "http://localhost:44565/"
-PENDING = Path(__file__).resolve().parent.parent / "data/secrets/gmail_modify_oauth_pending.json"
+PENDING = secrets_dir() / "gmail_modify_oauth_pending.json"
 
 
 def pkce_pair() -> tuple[str, str]:

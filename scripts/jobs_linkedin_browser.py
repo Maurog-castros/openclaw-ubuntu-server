@@ -8,6 +8,7 @@ from typing import Any
 from urllib.parse import quote_plus
 
 from jobs_common import ROOT, load_config
+from runtime_paths import resolve_repo_path, secrets_dir
 
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -17,13 +18,12 @@ USER_AGENT = (
 
 def storage_state_path(cfg: dict[str, Any] | None = None) -> Path:
     cfg = cfg or load_config()
-    raw = cfg.get("linkedin_storage_state") or "secrets/linkedin_storage_state.json"
-    p = Path(raw)
-    return p if p.is_absolute() else ROOT / raw
+    raw = cfg.get("linkedin_storage_state") or "runtime/secrets/linkedin_storage_state.json"
+    return resolve_repo_path(raw)
 
 
 def credentials_env_path() -> Path:
-    return ROOT / "data/secrets/.env"
+    return secrets_dir() / ".env"
 
 
 def load_linkedin_credentials(path: Path | None = None) -> tuple[str, str] | None:

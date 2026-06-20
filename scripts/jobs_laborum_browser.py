@@ -9,8 +9,9 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Iterator
 
-from jobs_common import ROOT, load_config
+from jobs_common import load_config
 from jobs_linkedin_browser import USER_AGENT, credentials_env_path, launch_browser
+from runtime_paths import resolve_repo_path
 
 DISPLAY = os.environ.get("DISPLAY", "")
 BASE = "https://www.laborum.cl"
@@ -22,7 +23,7 @@ def laborum_cfg(cfg: dict[str, Any] | None = None) -> dict[str, Any]:
     cfg = cfg or load_config()
     raw = (cfg.get("job_portals") or {}).get("laborum") or {}
     return {
-        "storage_state": str(raw.get("storage_state") or "secrets/laborum_storage_state.json"),
+        "storage_state": str(raw.get("storage_state") or "runtime/secrets/laborum_storage_state.json"),
         "curriculum_url": str(raw.get("curriculum_url") or CURRICULUM_URL),
         "login_url": str(raw.get("login_url") or LOGIN_URL),
         "headless": bool(raw.get("headless", cfg.get("headless", True))),
@@ -31,8 +32,7 @@ def laborum_cfg(cfg: dict[str, Any] | None = None) -> dict[str, Any]:
 
 
 def storage_state_path(cfg: dict[str, Any] | None = None) -> Path:
-    path = Path(laborum_cfg(cfg)["storage_state"])
-    return path if path.is_absolute() else ROOT / path
+    return resolve_repo_path(laborum_cfg(cfg)["storage_state"])
 
 
 def load_laborum_credentials(path: Path | None = None) -> tuple[str, str] | None:

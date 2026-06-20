@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT="/home/mauro/openclaw-mauro"
 TS="$(date +%F_%H%M%S)"
-LOGS_DIR="$ROOT/logs"
+LOGS_DIR="$ROOT/runtime/logs"
 LOG_FILE="$LOGS_DIR/intel-daily-radar-${TS}.log"
 COMPOSE_FILE="$ROOT/openclaw/docker-compose.yml"
 COMPOSE_FINANZAS="$ROOT/openclaw/docker-compose.finanzas-mounts.yml"
