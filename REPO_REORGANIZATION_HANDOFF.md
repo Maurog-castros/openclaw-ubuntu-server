@@ -31,12 +31,16 @@ Completado (2026-06-20, shell Ubuntu `/home/mauro/Dev/openclaw-mauro`):
 - Conflictos CV resueltos segun SHA-256 (2 legacy `__legacy-content-CV-*`).
 - Conflictos OAuth resueltos (`gmail_modify_*` activo desde `data/secrets`).
 - Cron sin cambios (`crontab diff` exit 0).
+- Commits de cierre: `9babfa7` (reorg docs), `7ea7659` (`pypdf` en linkedin-intel).
+- `pypdf` instalado en `.venv-linkedin-intel`; shebangs corregidos a
+  `/home/mauro/Dev/openclaw-mauro`.
+- Shebangs corregidos en `.venv-finanzas` y `.venv-lider` (cron activo).
 
 Pendiente fuera de alcance de esta fase:
 
 - Retirar enlaces legacy cuando `git grep`, crontab y Docker dejen de usarlos.
-- Instalar `pypdf` en `.venv-linkedin-intel` (falla preexistente del handoff).
 - `channel_delegate` requiere binario `openclaw` en PATH (falla preexistente).
+- Auditar y migrar referencias legacy en scripts/config hacia rutas `runtime/`.
 
 ## Reglas canonicas de esta fase
 
@@ -153,8 +157,7 @@ git status --short
 | CV legible via `content/CV` | OK |
 | OAuth via `secrets/` y `data/secrets/` | OK |
 | `py_compile` jobs | OK |
-| `jobs_cv_index.py` (handoff venv) | FAIL preexistente: falta `pypdf` en `.venv-linkedin-intel` |
-| `jobs_cv_index.py` (`.venv-jobs-portals`) | OK — 20 PDF indexados, `cv_dir` resuelve a `content/CV` |
+| `jobs_cv_index.py` (handoff venv) | OK — 20 PDF (`7ea7659` + shebang fix) |
 | `test_jobs_profile.py` | OK (4 tests) |
 | `channel_delegate /jobs ayuda` | FAIL preexistente: `FileNotFoundError: openclaw` |
 | Crontab sin cambios | OK (`diff` exit 0) |
@@ -198,4 +201,5 @@ regenerar credenciales ni iniciar login nuevo.
 - [x] Confirmar solo documentacion y reglas versionadas; `runtime/` queda fuera de
   Git y nunca debe incluirse en un commit.
 
-**Nota:** no se hizo commit en esta sesion (instruccion explicita del operador).
+Commits: `9babfa7`, `7ea7659`. Graphify refresh post-reorg OK (200k nodos;
+`graph.html` omitido por limite de viz).
