@@ -12,14 +12,14 @@
 
 ## Resumen ejecutivo
 
-Sistema que convierte mensajería instantánea en un **centro de operaciones con agentes especializados**: finanzas personales, bienestar, soporte de infraestructura, inteligencia de mercado, contenido, postulaciones laborales y desarrollo de producto logístico (HL-Go).
+Sistema que convierte mensajería instantánea en un **centro de operaciones con agentes especializados**: finanzas, bienestar, compañía narrativa (Broh), soporte OpenClaw, inteligencia de mercado, contenido, empleabilidad, logística HL-Go, Jenkins (`/jenki`), fondos pyme y pipeline comercial — **13 agentes** registrados en el gateway (ver catálogo abajo).
 
 El diseño prioriza **rutas determinísticas** (scripts Python + reglas) sobre alucinaciones del LLM en flujos críticos: saldos bancarios, boletas, pull de código y respuestas a WhatsApp. El modelo interviene donde aporta valor: conversación empática, síntesis de tendencias y redacción de contenido.
 
 | Métrica | Valor |
 |---------|-------|
 | Scripts Python operativos | ~100 |
-| Agentes especializados | 11 |
+| Agentes en gateway | 13 |
 | Canales | WhatsApp, Telegram, Control UI |
 | Gateway | OpenClaw 2026.6.5 (Docker) |
 | LLM | Qwen3-Coder-Next vía LiteLLM → Iamiko |
@@ -41,21 +41,24 @@ flowchart TB
         GW[OpenClaw Gateway<br/>Docker]
         HOOK[channel-delegate-hook<br/>plugin Node]
         CD[channel_delegate.py<br/>router Python]
-        subgraph Agentes["Agentes especializados"]
+        subgraph Agentes["Agentes (WhatsApp + MC)"]
             FIN[fin · finanzas]
             CARE[care · bienestar]
+            BROH[broh · compañía]
             SUPP[supp · soporte]
             INTEL[intel · radar]
             JOBS[jobs · postulaciones]
             HLGO[hlgo · logística]
             CONTENT[content · marketing]
+            JENKI[jenki · Jenkins]
+            PYME[pyme-chile · fondos]
         end
     end
 
     subgraph Datos["Datos y secretos"]
         CSV[(finanzas_movimientos.csv)]
         GMAIL[Gmail API · boletas]
-        SEC[(secrets/ · local)]
+        SEC[(runtime/secrets · local)]
     end
 
     subgraph IA["Capa de modelos"]
@@ -68,7 +71,7 @@ flowchart TB
     UI --> GW
     GW --> HOOK
     HOOK -->|pre-LLM| CD
-    CD --> FIN & CARE & SUPP & INTEL & JOBS & HLGO & CONTENT
+    CD --> FIN & CARE & BROH & SUPP & INTEL & JOBS & HLGO & CONTENT & JENKI & PYME
     FIN --> CSV
     FIN --> GMAIL
     CARE & INTEL & CONTENT --> LITELLM --> IAMIKO
@@ -116,7 +119,7 @@ sequenceDiagram
 flowchart LR
     MSG[Mensaje entrante]
 
-    MSG --> PREF{¿Prefijo explícito?<br/>/fin /care /hlgo…}
+    MSG --> PREF{¿Prefijo explícito?<br/>/fin /care /broh /jenki /pyme…}
     PREF -->|Sí| STICKY[Actualizar hilo sticky]
     STICKY --> AGENT[Agente destino]
 
@@ -130,7 +133,7 @@ flowchart LR
 
 | Regla | Comportamiento |
 |-------|----------------|
-| Prefijo `/care`, `/fin`, etc. | Abre o cambia el hilo a ese agente |
+| Prefijo `/care`, `/broh`, `/fin`, etc. | Abre o cambia el hilo a ese agente |
 | Mensajes sin prefijo | Continúan en el **mismo agente** del hilo |
 | `/new` o `/reset` | Corta el hilo y reinicia sesión |
 | Sin prefijo ni sticky | Detección por intención (ej. «dame el saldo» → fin) |
@@ -139,18 +142,25 @@ flowchart LR
 
 ## Catálogo de agentes
 
+Catálogo compartido machine-readable: [`data/workspace/_catalog/agents/README.md`](data/workspace/_catalog/agents/README.md).
+
 | Agente | Prefijo | Dominio | Implementación destacada |
 |--------|---------|---------|--------------------------|
 | **main** | — | Orquestador canal | `channel_delegate.py`, plugin hook |
 | **fin** | `/fin` | Finanzas CLP | Saldo Santander, boletas OCR, transferencias, dedupe Gmail+screenshot |
 | **care** | `/care` | Bienestar personal | Conversación LLM acotada (≤250 chars), diario solo explícito |
+| **broh** | `/broh` | Compañía narrativa | Memoria de historias, perspectiva empática; pulso proactivo vía cron |
 | **supp** | `/supp` | SRE / OpenClaw | Scan de logs, cron, remediación gateway |
 | **intel** | `/intel` | Business intel | Radar diario HN/Reddit/GitHub/LinkedIn, YouTube |
 | **content** | `/content` | Marketing | Instagram, borradores LinkedIn |
-| **jobs** | `/jobs` | Empleabilidad | Match CV, búsqueda LinkedIn, Easy Apply |
-| **hlgo** | `/hlgo` | Producto HL-Go | Git pull determinístico, Playwright QA, rama `dev.h-l.cl` |
-| **sales** | — | Pipeline comercial | Leads desde intel |
-| **pyme-chile** | — | Fondos concursables | Workspace dedicado |
+| **jobs** | `/jobs`, `/postula` | Empleabilidad | Match CV, búsqueda LinkedIn, Easy Apply |
+| **hlgo** | `/hlgo`, `/hl` | Producto HL-Go | Git pull determinístico, Playwright QA, rama `dev.h-l.cl` |
+| **jenki** | `/jenki` | Jenkins / CI | API Jenkins vía `jk`; builds, logs, cola (ver [MODEL-LAYER](docs/MODEL-LAYER-AND-MISSION-CONTROL.md)) |
+| **pyme-chile** | `/pyme` | Fondos concursables | Sercotec, Corfo, capital semilla; workspace dedicado |
+| **sales** | — | Pipeline comercial | Leads desde intel; sesión LLM / Mission Control |
+| **hl-miko-web** | — | Dev web hl_miko | Backend PHP HL-Go, APIs; mismo repo que hlgo, enfoque web |
+
+Agentes sin prefijo WhatsApp (`sales`, `hl-miko-web`) no pasan por `channel_delegate`; se usan desde Mission Control o sesiones LLM directas. El resto admite prefijo explícito, hilo sticky o detección por intención.
 
 ---
 
@@ -184,6 +194,22 @@ Evolución del sistema en el ciclo de desarrollo actual (junio 2026).
 | Diario **solo explícito** (`anótalo en el diario`) | Elimina falsos positivos con mensajes que empiezan por «hoy» |
 | `truncate_whatsapp(250)` | Mensajes legibles en móvil |
 | Separación check-in / diario / conversación emocional | Routing claro en `vida_delegate.py` |
+
+### Agente broh (`/broh`)
+
+| Cambio | Impacto |
+|--------|---------|
+| `broh_delegate.py` + agente LLM `broh` | Compañía y perspectiva; no reemplaza `/care` clínico |
+| Memoria narrativa en `data/workspace/broh/data/` | Historias, observaciones y estado de pulso |
+| `broh_pulse.py` + cron | Mensajes proactivos de baja frecuencia (10–21 h) |
+
+### Agente jenki (`/jenki`)
+
+| Cambio | Impacto |
+|--------|---------|
+| Agente `jenki` en gateway | Operaciones Jenkins vía wrapper `jk` y API token |
+| Prefijo `/jenki` en WhatsApp | Builds, logs y cola CI desde el canal |
+| Detalle operativo | [`docs/MODEL-LAYER-AND-MISSION-CONTROL.md`](docs/MODEL-LAYER-AND-MISSION-CONTROL.md) § Jenkins |
 
 ### Agente fin (`/fin`)
 
@@ -276,7 +302,8 @@ openclaw-mauro/
 ├── config/               # Plantillas y skills por dominio
 ├── docker-overrides/     # Imagen openclaw-with-ssh + compose mounts
 ├── openclaw/             # Submódulo upstream OpenClaw
-├── secrets/              # Solo local (ver secrets/README.md)
+├── runtime/              # CV, secretos, logs (canónico; ver REPO_MAP.md)
+├── secrets/              # Symlink → runtime/secrets (ver docs/SECRETS.md)
 └── docs/SETUP.md         # Guía operativa detallada
 ```
 
