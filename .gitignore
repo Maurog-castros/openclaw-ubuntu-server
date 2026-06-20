@@ -34,6 +34,7 @@ playwright/.cache/
 dist/
 build/
 *.log
+logs
 logs/
 setup.log
 
@@ -61,14 +62,14 @@ Thumbs.db
 *.ico
 *.raw
 *.avif
+content/CV
 content/CV/
 
 # =============================================================================
 # Secretos y credenciales (nunca versionar)
 # =============================================================================
-secrets/*
-!secrets/README.md
-data/secrets/
+secrets
+data/secrets
 *.pem
 *.key
 client_secret*.json
@@ -94,6 +95,7 @@ data/auth-profile-secrets/
 # =============================================================================
 # Runtime OpenClaw — datos locales, sesiones, media entrante
 # =============================================================================
+runtime/
 data/*
 !data/support_findings.csv
 !data/config/
@@ -146,6 +148,7 @@ data/workspace/data/*_state.json
 data/workspace/*/data/*_state.json
 data/workspace/*/data/selfcare_profile.json
 data/workspace/jobs/reports/
+data/workspace/jobs/laborum/
 
 # Caché graphify / artefactos generados
 graphify-out/

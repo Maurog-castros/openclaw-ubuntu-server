@@ -1,5 +1,8 @@
 # OpenClaw Personal AI Platform
 
+> Empieza por [`REPO_MAP.md`](REPO_MAP.md): estructura, propietarios, runtime y
+> rutas de compatibilidad para humanos y agentes.
+
 **Plataforma multi-agente en producción** — WhatsApp y Telegram como interfaz, orquestación determinística, LLM vía LiteLLM y despliegue Docker en DMZ.
 
 > Proyecto personal de **Mauro Castro** · DevOps · Arquitectura cloud · Automatización con IA  

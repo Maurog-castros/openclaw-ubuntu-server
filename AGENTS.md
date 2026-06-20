@@ -1,5 +1,14 @@
 # AGENTS.md
 
+## Active repository reorganization
+
+- Before moving, deleting or deduplicating repository paths, read
+  `REPO_REORGANIZATION_HANDOFF.md` and `REPO_MAP.md`.
+- The reorganization is intentionally phased. Do not improvise alternate
+  canonical paths or remove compatibility links early.
+- Execute filesystem migration on the Ubuntu checkout over SSH, not through the
+  mapped Windows drive.
+
 ## Repo hygiene
 
 - Work in `/home/mauro/Dev/openclaw-mauro` on the Ubuntu Server when changing production OpenClaw.
