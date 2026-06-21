@@ -53,6 +53,11 @@ REPORT_RE = re.compile(
     r"reporte\s+postul|donde\s+postul|vacantes?\s+postuladas?)\b",
     re.I,
 )
+ON_DEMAND_REPORT_RE = re.compile(
+    r"\b((reporte|informe)\s+(ahora|manual|on\s*demand|de\s+vacantes)|"
+    r"(buscar|actualizar)\s+(vacantes?\s+)?ahora)\b",
+    re.I,
+)
 OPS_RE = re.compile(
     r"\b(career\s*ops|evaluar|evalua|analiza|analizar|pipeline|oferta|jd|job\s+description)\b",
     re.I,
@@ -115,6 +120,103 @@ def jobs_env(profile_id: str | None = None) -> dict[str, str]:
     return env
 
 
+def run_recommended_on_demand(env: dict[str, str]) -> dict[str, Any]:
+    source_warnings: list[str] = []
+    code, payload, _, stderr = run_json(
+        [LINKEDIN_PY, f"{SCR}/jobs_linkedin_recommended.py", "--json"],
+        timeout=600,
+        env=env,
+    )
+    if code != 0:
+        return {
+            "status": "error",
+            "agent": "jobs",
+            "whatsapp_reply": payload.get("whatsapp_reply")
+            or f"Búsqueda manual LinkedIn falló: {stderr[-400:]}",
+        }
+
+    code, payload, _, _ = run_json(
+        [LINKEDIN_PY, f"{SCR}/jobs_chiletrabajos_scrape.py", "--json"],
+        timeout=300,
+        env=env,
+    )
+    if code != 0:
+        code, payload, _, stderr = run_json(
+            [LINKEDIN_PY, f"{SCR}/jobs_chiletrabajos_scrape.py", "--no-session", "--json"],
+            timeout=300,
+            env=env,
+        )
+        if code != 0:
+            source_warnings.append(payload.get("whatsapp_reply") or stderr[-300:])
+
+    code, pipeline, _, stderr = run_json(
+        [LINKEDIN_PY, f"{SCR}/jobs_recommended_pipeline.py", "--json"],
+        timeout=900,
+        env=env,
+    )
+    if code != 0:
+        return {
+            "status": "error",
+            "agent": "jobs",
+            "whatsapp_reply": pipeline.get("whatsapp_reply")
+            or f"Análisis manual falló: {stderr[-400:]}",
+        }
+
+    code, digest, _, stderr = run_json(
+        [PY, f"{SCR}/jobs_recommended_digest.py", "--json"],
+        timeout=60,
+        env=env,
+    )
+    if code != 0:
+        return {
+            "status": "error",
+            "agent": "jobs",
+            "whatsapp_reply": digest.get("whatsapp_reply")
+            or f"Reporte manual falló: {stderr[-400:]}",
+        }
+    digest.update(
+        {
+            "status": "partial" if source_warnings else "ok",
+            "agent": "jobs",
+            "on_demand": True,
+            "pipeline": {
+                "processed": pipeline.get("processed", 0),
+                "closed_excluded": len(pipeline.get("closed_excluded") or []),
+                "errors": len(pipeline.get("errors") or []),
+            },
+            "source_warnings": source_warnings,
+        }
+    )
+    if source_warnings:
+        digest["whatsapp_reply"] += "\n\nAviso: ChileTrabajos no respondió; reporte basado en fuentes disponibles."
+    return digest
+
+
+def start_recommended_on_demand(env: dict[str, str]) -> dict[str, Any]:
+    log_dir = ROOT / "runtime/logs"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_file = log_dir / "jobs-recommended-on-demand.log"
+    with log_file.open("a", encoding="utf-8") as handle:
+        proc = subprocess.Popen(
+            [LINKEDIN_PY, f"{SCR}/jobs_recommended_on_demand.py"],
+            cwd=str(ROOT),
+            env=env,
+            stdout=handle,
+            stderr=subprocess.STDOUT,
+            start_new_session=True,
+        )
+    return {
+        "status": "ok",
+        "agent": "jobs",
+        "on_demand": True,
+        "pid": proc.pid,
+        "whatsapp_reply": (
+            "Búsqueda iniciada. Enviaré avance cada 5 segundos y el reporte final "
+            "cuando termine."
+        ),
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Delegate Jobs agent")
     parser.add_argument("--text", required=True)
@@ -149,6 +251,11 @@ def main() -> None:
         if code != 0 and not payload.get("whatsapp_reply"):
             payload = {"status": "error", "agent": "jobs", "whatsapp_reply": f"Index CV fallo: {stderr[-400:]}"}
         payload.setdefault("agent", "jobs")
+        print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload.get("whatsapp_reply", ""))
+        return
+
+    if ON_DEMAND_REPORT_RE.search(message):
+        payload = start_recommended_on_demand(env)
         print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload.get("whatsapp_reply", ""))
         return
 
