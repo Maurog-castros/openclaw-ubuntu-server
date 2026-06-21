@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Cron diario: LinkedIn recommended -> CSV. No postula.
+# Cron diario: LinkedIn + ChileTrabajos -> CSV frescos. No postula.
 set -euo pipefail
 
 ROOT="${OPENCLAW_REPO:-/home/mauro/Dev/openclaw-mauro}"
@@ -22,5 +22,7 @@ fi
 
 flock -n "$LOCK" "$PY" "$ROOT/scripts/jobs_linkedin_recommended.py" --json \
   || echo "[$(date -Is)] jobs recommended daily skipped (lock busy or error)"
+
+bash "$ROOT/scripts/run-jobs-chiletrabajos-daily.sh"
 
 echo "[$(date -Is)] jobs recommended daily done"

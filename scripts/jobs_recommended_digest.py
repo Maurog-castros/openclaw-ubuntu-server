@@ -8,8 +8,9 @@ def build():
  p=JOBS_WS/"ranked_vacancies_latest.csv"
  if not p.exists():raise FileNotFoundError(f"Falta {p}")
  with p.open(encoding="utf-8",newline="") as h:rows=list(csv.DictReader(h))
+ rows=[r for r in rows if r.get("availability_status")=="open"]
  pending=[r for r in rows if r.get("decision_status")=="pending_approval"]
- lines=[f"Jobs recomendados: {len(rows)} analizados / {len(pending)} pendientes",""]
+ lines=[f"Jobs recomendados: {len(rows)} vacantes abiertas verificadas / {len(pending)} pendientes",""]
  for r in pending[:8]:
   lines += [f"{r['job_id']} | {r.get('vacancy_score')}/10 | {r.get('title')} @ {r.get('company')}",f"CV {r.get('best_cv_score')}/10: {r.get('best_cv_file')}",f"{r.get('job_url')}","Aprobar: /jobs aprobar "+r["job_id"],""]
  lines.append(f"Ranking: {p}");return "\n".join(lines),rows
