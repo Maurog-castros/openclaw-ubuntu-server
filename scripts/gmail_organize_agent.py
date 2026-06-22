@@ -14,15 +14,15 @@ from email.header import decode_header, make_header
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+from gmail_oauth_common import GMAIL_MODIFY, GMAIL_READONLY, load_gmail_credentials
+from runtime_paths import resolve_repo_path
 from vida_common import secret_path, writable_secret_path
 
 
-SCOPES = ["https://www.googleapis.com/auth/gmail.modify"]
+SCOPES = [GMAIL_MODIFY, GMAIL_READONLY]
 ROOT = Path(__file__).resolve().parent.parent
 
 LABELS = {
@@ -80,24 +80,15 @@ def save_json(path: Path, data: Any) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def load_credentials(token_file: Path) -> Credentials:
-    if not token_file.exists():
-        raise FileNotFoundError(
-            f"Falta {token_file}. Ejecuta gmail_modify_oauth.py auth-url y luego exchange."
-        )
-    creds = Credentials.from_authorized_user_file(str(token_file), SCOPES)
-    if creds.expired and creds.refresh_token:
-        creds.refresh(Request())
-        token_file.write_text(creds.to_json(), encoding="utf-8")
-    if not creds.valid:
-        raise RuntimeError("Token Gmail modify invalido. Reautoriza con gmail_modify_oauth.py.")
+def load_credentials(token_file: Path):
+    creds, _ = load_gmail_credentials(SCOPES, preferred=token_file)
     return creds
 
 
-
 def resolve_modify_token(token_arg: str) -> Path:
-    if token_arg != "secrets/gmail_modify_token.json":
-        return ROOT / token_arg
+    resolved = resolve_repo_path(token_arg)
+    if resolved.exists():
+        return resolved
     found = secret_path("gmail_modify_token.json")
     return found if found else writable_secret_path("gmail_modify_token.json")
 
@@ -409,7 +400,7 @@ def main() -> None:
         result = {
             "status": "needs_auth",
             "error": str(exc),
-            "next": "Ejecuta: gmail_modify_oauth.py --json auth-url",
+            "next": "Ejecuta: google_workspace_oauth.py auth-url",
         }
     except HttpError as exc:
         result = {"status": "error", "error": str(exc)}

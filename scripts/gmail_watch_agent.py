@@ -14,13 +14,16 @@ from email.header import decode_header, make_header
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
-ROOT = Path(__file__).resolve().parent.parent
+_SCRIPTS = Path(__file__).resolve().parent
+if str(_SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS))
+from gmail_oauth_common import load_gmail_credentials
+from runtime_paths import repo_root, resolve_repo_path
+
+ROOT = repo_root()
 
 DEFAULT_RULES = {
     "categories": [
@@ -91,22 +94,9 @@ DEFAULT_RULES = {
 }
 
 
-def load_credentials(credentials_file: Path, token_file: Path) -> Credentials:
-    creds: Optional[Credentials] = None
-    if token_file.exists():
-        creds = Credentials.from_authorized_user_file(str(token_file), SCOPES)
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(str(credentials_file), SCOPES)
-            creds = flow.run_local_server(port=0)
-        token_file.write_text(creds.to_json(), encoding="utf-8")
-    return creds
-
-
 def gmail_service(credentials_file: Path, token_file: Path):
-    return build("gmail", "v1", credentials=load_credentials(credentials_file, token_file))
+    creds, _ = load_gmail_credentials(SCOPES, preferred=token_file)
+    return build("gmail", "v1", credentials=creds)
 
 
 def load_json(path: Path, default: Any) -> Any:
@@ -328,7 +318,10 @@ def main() -> None:
     state = load_json(state_path, {"seen": {}, "last_run": None})
     seen: Dict[str, Any] = state.setdefault("seen", {})
 
-    service = gmail_service(ROOT / args.credentials, ROOT / args.token)
+    service = gmail_service(
+        resolve_repo_path(args.credentials),
+        resolve_repo_path(args.token),
+    )
     alerts: List[Dict[str, Any]] = []
     scanned = 0
     for mail in fetch_messages(service, args.query, args.max_results):

@@ -20,6 +20,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
 
 from runtime_paths import secrets_dir
+from gmail_oauth_common import sync_legacy_tokens_from_workspace
 from vida_common import ROOT, secret_path
 
 os.environ.setdefault("OAUTHLIB_INSECURE_TRANSPORT", "1")
@@ -181,10 +182,12 @@ def cmd_exchange(callback_url: str) -> dict[str, Any]:
     token_path = Path(pending["token"])
     write_secret_json(token_path, credentials_json)
     PENDING_PATH.unlink(missing_ok=True)
+    sync_legacy_tokens_from_workspace(force=True)
     return {
         "status": "ok",
         "token": str(token_path),
         "scope_count": len(credentials_json["scopes"]),
+        "synced_legacy": True,
         "instruction": "Valida con: google_workspace_oauth.py check",
     }
 
@@ -209,6 +212,7 @@ def cmd_check(spreadsheet_id: str = "") -> dict[str, Any]:
     if not credentials.valid or not credentials.has_scopes(SCOPES):
         raise PermissionError("Token Google Workspace invalido o sin scopes completos.")
     api_check("https://gmail.googleapis.com/gmail/v1/users/me/profile", credentials)
+    sync_legacy_tokens_from_workspace()
     api_check(
         "https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults=1",
         credentials,
