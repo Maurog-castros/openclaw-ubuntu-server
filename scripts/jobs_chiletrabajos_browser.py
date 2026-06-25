@@ -14,6 +14,7 @@ from runtime_paths import resolve_repo_path
 BASE = "https://www.chiletrabajos.cl"
 LOGIN_URL = f"{BASE}/chtlogin"
 HOME_URL = f"{BASE}/encuentra-un-empleo"
+RECOMMENDED_URL = f"{BASE}/dashboard/ofertas-recomendadas"
 
 
 def storage_state_path(cfg: dict[str, Any] | None = None) -> Path:
@@ -34,7 +35,8 @@ def load_chiletrabajos_credentials(path: Path | None = None) -> tuple[str, str] 
         key, value = line.split("=", 1)
         values[key.strip()] = value.strip().strip('"').strip("'")
     email = (
-        values.get("chiletrabajos_account_email")
+        values.get("chiletrabajos_account_user")
+        or values.get("chiletrabajos_account_email")
         or values.get("chiletrabajos_email")
         or values.get("CHILETRABAJOS_EMAIL")
         or values.get("linkedin_account_email")
@@ -119,7 +121,7 @@ def ensure_login(page: Any, cfg: dict[str, Any] | None = None) -> Path | None:
     credentials = load_chiletrabajos_credentials()
     if not credentials:
         raise RuntimeError(
-            "Sin credenciales ChileTrabajos en data/secrets/.env. "
+            "Sin credenciales ChileTrabajos en runtime/secrets/.env. "
             "Agrega chiletrabajos_account_email/chiletrabajos_account_passwd."
         )
 
@@ -135,7 +137,7 @@ def ensure_login(page: Any, cfg: dict[str, Any] | None = None) -> Path | None:
         body_lower = page.content().lower()
         if "contrase" in body_lower and "incorrect" in body_lower:
             raise RuntimeError(
-                "Credenciales ChileTrabajos invalidas en data/secrets/.env. "
+                "Credenciales ChileTrabajos invalidas en runtime/secrets/.env. "
                 "Revisa chiletrabajos_account_email y chiletrabajos_account_passwd."
             )
     except RuntimeError:

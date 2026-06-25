@@ -1,7 +1,18 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 import unittest
-from jobs_chiletrabajos_scrape import fetch_job_detail, job_id_from_url, merge_rows, parse_listing_page, parse_rss, scrape_listings
+from jobs_chiletrabajos_scrape import (
+    fetch_job_detail,
+    is_login_redirect,
+    is_recommended_dashboard,
+    job_id_from_url,
+    merge_rows,
+    parse_listing_page,
+    parse_recommended_page,
+    parse_rss,
+    recommended_page_html,
+    scrape_listings,
+)
 from jobs_profile_experience import load_experiences
 
 
@@ -41,7 +52,7 @@ class ChileTrabajosScrapeTest(unittest.TestCase):
         from jobs_chiletrabajos_browser import load_chiletrabajos_credentials, storage_state_path
 
         creds = load_chiletrabajos_credentials()
-        self.assertIsNotNone(creds, "Se esperan credenciales en data/secrets/.env")
+        self.assertIsNotNone(creds, "Se esperan credenciales en runtime/secrets/.env")
         email, password = creds
         self.assertIn("@", email)
         self.assertGreater(len(password), 3)
@@ -78,6 +89,41 @@ class ChileTrabajosScrapeTest(unittest.TestCase):
     def test_scrape_listings_filters_by_score(self):
         rows = scrape_listings(pages=1, category_slug="informatica", min_score=50, limit=5)
         self.assertEqual(rows, [])
+
+    def test_is_login_redirect(self):
+        self.assertTrue(is_login_redirect("<form id='username'>", "https://www.chiletrabajos.cl/chtlogin"))
+        self.assertFalse(
+            is_recommended_dashboard(
+                "<form id='username'>Ingresa a Chiletrabajos",
+                "https://www.chiletrabajos.cl/chtlogin",
+            )
+        )
+        self.assertTrue(
+            is_recommended_dashboard(
+                "<h1>Ofertas recomendadas</h1><div class='job-item'>",
+                "https://www.chiletrabajos.cl/dashboard/ofertas-recomendadas",
+            )
+        )
+
+    def test_parse_recommended_page_bonus_and_promoted(self):
+        cfg = {"core_skills": ["kubernetes", "aws"], "target_roles": ["SRE"], "demote_terms": []}
+        html = (
+            "<h2>Ofertas recomendadas</h2>"
+            + SAMPLE_LISTING
+            + "<h2>Ofertas destacadas</h2><div class='job-item'>otro</div>"
+        )
+        section = recommended_page_html(html)
+        self.assertNotIn("destacadas", section.lower())
+        rows = parse_recommended_page(
+            html,
+            "2026-06-19T12:00:00-04:00",
+            "https://www.chiletrabajos.cl/dashboard/ofertas-recomendadas",
+            cfg,
+            score_bonus=4,
+        )
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["promoted"], "1")
+        self.assertGreaterEqual(int(rows[0]["match_score"]), 16)
 
     def test_parse_rss_sample(self):
         sample = """

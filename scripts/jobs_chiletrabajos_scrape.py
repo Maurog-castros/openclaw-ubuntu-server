@@ -19,10 +19,11 @@ from urllib.parse import quote, urljoin
 from jobs_common import JOBS_WS, load_config, score_vacancy
 
 try:
-    from jobs_chiletrabajos_browser import ChileTrabajosFetcher, chiletrabajos_session
+    from jobs_chiletrabajos_browser import RECOMMENDED_URL, ChileTrabajosFetcher, chiletrabajos_session
 except ImportError:
     ChileTrabajosFetcher = None  # type: ignore[misc, assignment]
     chiletrabajos_session = None  # type: ignore[misc, assignment]
+    RECOMMENDED_URL = f"{BASE}/dashboard/ofertas-recomendadas"
 
 BASE = "https://www.chiletrabajos.cl"
 USER_AGENT = "Mozilla/5.0 (compatible; OpenClawJobs/1.0; +https://github.com/openclaw)"
@@ -59,6 +60,13 @@ DETAIL_DESC_RE = re.compile(
     re.I | re.S,
 )
 RSS_ITEM_RE = re.compile(r"<item>(.*?)</item>", re.S)
+LOGIN_MARKERS = (
+    "/chtlogin",
+    "form_validation",
+    'id="username"',
+    "name='username'",
+    "ingresa a chiletrabajos",
+)
 
 
 def job_id_from_url(url: str) -> str:
@@ -100,6 +108,64 @@ def listing_url(*, category_slug: str, offset: int = 0, keyword: str = "") -> st
         sep = "&" if "?" in url else "?"
         url = f"{url}{sep}palabra={quote(keyword)}"
     return url
+
+
+def recommended_url(cfg: dict[str, Any] | None = None) -> str:
+    cfg = cfg or load_config()
+    raw = (cfg.get("chiletrabajos") or {}).get("recommended_url") or RECOMMENDED_URL
+    return str(raw).strip()
+
+
+def is_login_redirect(page_html: str, final_url: str = "") -> bool:
+    blob = f"{final_url} {page_html[:12000]}".lower()
+    return any(marker in blob for marker in LOGIN_MARKERS)
+
+
+def is_recommended_dashboard(page_html: str, final_url: str) -> bool:
+    if is_login_redirect(page_html, final_url):
+        return False
+    url = final_url.lower()
+    if "ofertas-recomendadas" in url:
+        return True
+    return "ofertas recomendadas" in page_html.lower()
+
+
+def recommended_page_html(page_html: str) -> str:
+    lower = page_html.lower()
+    start = -1
+    for marker in ("ofertas recomendadas", "ofertas-recomendadas"):
+        idx = lower.find(marker)
+        if idx >= 0:
+            start = idx
+            break
+    if start < 0:
+        return page_html
+    end = len(page_html)
+    destacadas_idx = lower.find("ofertas destacadas", start + 20)
+    if destacadas_idx >= 0:
+        h2_idx = lower.rfind("<h2", start, destacadas_idx)
+        end = h2_idx if h2_idx >= 0 else destacadas_idx
+    publicidad_idx = lower.find("publicidad", start + 20)
+    if publicidad_idx >= 0:
+        end = min(end, publicidad_idx)
+    return page_html[start:end]
+
+
+def parse_recommended_page(
+    page_html: str,
+    scraped_at: str,
+    collection_url: str,
+    cfg: dict[str, Any],
+    *,
+    score_bonus: int = 0,
+) -> list[dict[str, str]]:
+    section = recommended_page_html(page_html)
+    rows = parse_listing_page(section, scraped_at, collection_url, cfg)
+    for row in rows:
+        row["promoted"] = "1"
+        if score_bonus:
+            row["match_score"] = str(int(row.get("match_score") or 0) + score_bonus)
+    return rows
 
 
 def parse_listing_page(page_html: str, scraped_at: str, collection_url: str, cfg: dict[str, Any]) -> list[dict[str, str]]:
@@ -223,6 +289,41 @@ def scrape_listings(
     return out
 
 
+def scrape_recommended(
+    *,
+    min_score: int | None = None,
+    limit: int = 40,
+    score_bonus: int = 0,
+    fetcher: ChileTrabajosFetcher,
+    collection_url: str | None = None,
+) -> list[dict[str, str]]:
+    cfg = load_config()
+    ct = chiletrabajos_cfg(cfg)
+    min_score = min_score if min_score is not None else int(ct["min_score"])
+    collection_url = collection_url or recommended_url(cfg)
+    scraped_at = datetime.now().astimezone().isoformat(timespec="seconds")
+    page_html = fetch_html(collection_url, fetcher=fetcher)
+    final_url = str(getattr(fetcher.page, "url", "") or collection_url)
+    if not is_recommended_dashboard(page_html, final_url):
+        return []
+    rows = parse_recommended_page(
+        page_html,
+        scraped_at,
+        collection_url,
+        cfg,
+        score_bonus=score_bonus,
+    )
+    rows.sort(key=lambda item: int(item.get("match_score") or 0), reverse=True)
+    out: list[dict[str, str]] = []
+    for row in rows:
+        if int(row.get("match_score") or 0) < min_score:
+            continue
+        out.append(row)
+        if len(out) >= limit:
+            break
+    return out
+
+
 def output_csv_path(run_date: str | None = None) -> Path:
     run_date = run_date or datetime.now().strftime("%Y-%m-%d")
     return JOBS_WS / f"chiletrabajos_{run_date}.csv"
@@ -253,8 +354,12 @@ def chiletrabajos_cfg(cfg: dict[str, Any] | None = None) -> dict[str, Any]:
         "mode": str(raw.get("mode") or "both"),
         "rss_limit": int(raw.get("rss_limit") or 600),
         "use_session": bool(raw.get("use_session", True)),
-        "storage_state": str(raw.get("storage_state") or "secrets/chiletrabajos_storage_state.json"),
+        "storage_state": str(raw.get("storage_state") or "runtime/secrets/chiletrabajos_storage_state.json"),
         "headless": bool(raw.get("headless", cfg.get("headless", True))),
+        "recommended": bool(raw.get("recommended", True)),
+        "recommended_url": str(raw.get("recommended_url") or RECOMMENDED_URL),
+        "recommended_limit": int(raw.get("recommended_limit") or 40),
+        "recommended_score_bonus": int(raw.get("recommended_score_bonus") or 4),
     }
 
 
@@ -369,6 +474,16 @@ def scrape_from_config(fetcher: ChileTrabajosFetcher | None = None) -> list[dict
                 )
             )
         parts.append(listing_rows)
+    if ct["recommended"] and fetcher is not None:
+        parts.append(
+            scrape_recommended(
+                min_score=ct["min_score"],
+                limit=ct["recommended_limit"],
+                score_bonus=ct["recommended_score_bonus"],
+                fetcher=fetcher,
+                collection_url=ct["recommended_url"],
+            )
+        )
     return merge_rows(*parts, limit=ct["limit"])
 
 
@@ -380,6 +495,7 @@ def main() -> None:
     parser.add_argument("--min-score", type=int, default=-1)
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--no-session", action="store_true", help="Scrape sin login Playwright (solo HTTP)")
+    parser.add_argument("--recommended-only", action="store_true", help="Solo dashboard ofertas recomendadas (requiere sesion)")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
 
@@ -387,6 +503,19 @@ def main() -> None:
     use_session = ct["use_session"] and not args.no_session and chiletrabajos_session is not None
     try:
         def run_scrape(fetcher: ChileTrabajosFetcher | None = None) -> list[dict[str, str]]:
+            if args.recommended_only:
+                if fetcher is None:
+                    raise RuntimeError(
+                        "Ofertas recomendadas requiere sesion ChileTrabajos. "
+                        "Ejecuta sin --no-session o renueva login con jobs_chiletrabajos_login.py."
+                    )
+                return scrape_recommended(
+                    min_score=args.min_score if args.min_score >= 0 else ct["min_score"],
+                    limit=args.limit or ct["recommended_limit"],
+                    score_bonus=ct["recommended_score_bonus"],
+                    fetcher=fetcher,
+                    collection_url=ct["recommended_url"],
+                )
             if args.pages > 0 or args.category or args.keyword:
                 return scrape_listings(
                     pages=args.pages or ct["pages"],
@@ -405,6 +534,15 @@ def main() -> None:
             rows = run_scrape(None)
         path = write_csv(rows, output_csv_path())
         top = rows[0]["title"] if rows else "sin matches"
+        recommended_count = sum(
+            1 for row in rows if "ofertas-recomendadas" in str(row.get("collection_url") or "")
+        )
+        reply = (
+            f"ChileTrabajos: {len(rows)} vacantes (score>={ct['min_score']}). "
+            f"Top: {top[:70]}. CSV: {path.name}"
+        )
+        if recommended_count:
+            reply += f". Recomendadas: {recommended_count}"
         payload = {
             "status": "ok",
             "agent": "jobs",
@@ -413,7 +551,8 @@ def main() -> None:
             "csv_file": str(path),
             "latest_csv": str(path.parent / "chiletrabajos_latest.csv"),
             "jobs": rows,
-            "whatsapp_reply": f"ChileTrabajos: {len(rows)} vacantes (score>={ct['min_score']}). Top: {top[:70]}. CSV: {path.name}",
+            "recommended_count": recommended_count,
+            "whatsapp_reply": reply,
         }
     except Exception as exc:
         payload = {
