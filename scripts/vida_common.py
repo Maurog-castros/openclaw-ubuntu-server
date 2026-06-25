@@ -62,6 +62,39 @@ def reply(text: str, **extra) -> dict:
     return payload
 
 
+LEAKED_TOOL_LINE_RE = re.compile(
+    r"^\s*(?:memory_search|memory_get|read|write|exec|message|web_search|browser)\s*\(",
+    re.I,
+)
+LEAKED_TOOL_ONLY_RE = re.compile(
+    r"^\s*(?:memory_search|memory_get|read|write|exec|message|web_search|browser)"
+    r"\s*\([^)]*\)\s*\.?\s*$",
+    re.I | re.S,
+)
+
+
+def is_leaked_tool_call(text: str) -> bool:
+    """True when the model emitted a tool invocation as user-visible text."""
+    cleaned = (text or "").strip()
+    if not cleaned:
+        return False
+    if LEAKED_TOOL_ONLY_RE.match(cleaned):
+        return True
+    lines = [ln.strip() for ln in cleaned.splitlines() if ln.strip()]
+    return bool(lines) and all(LEAKED_TOOL_LINE_RE.match(ln) for ln in lines)
+
+
+def strip_leaked_tool_calls(text: str) -> str:
+    if not text or is_leaked_tool_call(text):
+        return ""
+    kept: list[str] = []
+    for line in text.splitlines():
+        if LEAKED_TOOL_LINE_RE.match(line.strip()):
+            continue
+        kept.append(line)
+    return "\n".join(kept).strip()
+
+
 def truncate_whatsapp(text: str, max_len: int = 500) -> str:
     """Un mensaje WhatsApp; sin bloques largos ni citas pegadas."""
     cleaned = re.sub(r"\s+", " ", (text or "").strip())

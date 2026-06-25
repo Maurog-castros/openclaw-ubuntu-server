@@ -19,8 +19,12 @@ RUN = SCR / "run-vida-py.sh"
 
 sys.path.insert(0, str(SCR))
 from openclaw_cli import openclaw_argv
-from vida_common import truncate_whatsapp
+from vida_common import is_leaked_tool_call, truncate_whatsapp
 from vida_selfcare import handle as handle_selfcare
+
+CARE_TOOL_LEAK_FALLBACK = (
+    "Fede: perdón, me trabé un momento. Cuéntame en una frase qué necesitas y te respondo directo."
+)
 
 CARE_PREFIX = re.compile(r"^\s*/care\b\s*", re.I)
 IMAGE_EXT = {".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"}
@@ -127,6 +131,11 @@ def run_care_conversation(body: str, session_key: str | None = None) -> dict:
             ),
             "stderr": stderr[-400:],
         }
+    if is_leaked_tool_call(reply):
+        fallback = handle_selfcare(body)
+        if fallback and fallback.get("status") != "skip":
+            return fallback
+        return {"status": "ok", "whatsapp_reply": truncate_whatsapp(CARE_TOOL_LEAK_FALLBACK)}
     return {"status": "ok", "whatsapp_reply": truncate_whatsapp(reply)}
 
 
@@ -182,7 +191,7 @@ def route(text: str, *, has_media: bool = False, image_path: str | None = None) 
         return run_script("vida_diary.py", "--text", entry or body)
 
     selfcare = handle_selfcare(body)
-    if selfcare:
+    if selfcare and selfcare.get("status") != "skip":
         return selfcare
 
     if any(k in lower for k in ("medic", "pastilla", "farmaco", "fármaco")):

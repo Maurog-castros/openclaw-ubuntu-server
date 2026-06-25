@@ -9,7 +9,9 @@ import textwrap
 from datetime import datetime
 from pathlib import Path
 
-ROOT = Path("/home/mauro/openclaw-mauro")
+from runtime_paths import repo_root
+
+ROOT = repo_root()
 WS = ROOT / "data/workspace/vida"
 SCR = ROOT / "scripts"
 DATA = WS / "data"
@@ -570,12 +572,12 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
-from vida_common import ROOT, reply
+from vida_common import ROOT, reply, secrets_dir
 
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 TOKEN_CANDIDATES = [
-    ROOT / "secrets/gmail_calendar_token.json",
-    ROOT / "secrets/gmail_token.json",
+    secrets_dir() / "gmail_calendar_token.json",
+    secrets_dir() / "gmail_token.json",
 ]
 
 
@@ -648,11 +650,13 @@ from pathlib import Path
 
 from google_auth_oauthlib.flow import Flow
 
+from vida_common import secrets_dir
+
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 ROOT = Path(__file__).resolve().parent.parent
-CREDS = ROOT / "secrets/gmail_credentials.json"
-TOKEN = ROOT / "secrets/gmail_calendar_token.json"
-PENDING = ROOT / "secrets/gmail_calendar_oauth_pending.json"
+CREDS = secrets_dir() / "gmail_credentials.json"
+TOKEN = secrets_dir() / "gmail_calendar_token.json"
+PENDING = secrets_dir() / "gmail_calendar_oauth_pending.json"
 REDIRECT = "http://localhost:44566/"
 
 

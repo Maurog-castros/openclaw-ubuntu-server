@@ -29,6 +29,20 @@ MICRO_WIN_RE = re.compile(
     r"buen\s+[aá]nimo|dorm[ií]\s+mejor|me\s+levant[eé]|desayun[eé])\b",
     re.I,
 )
+HEALTH_DATA_RE = re.compile(
+    r"\b("
+    r"datos\s+de\s+salud|"
+    r"ultim(?:os|as)\s+(?:datos|registros?).*salud|"
+    r"qu[eé]\s+registr(?:aste|ó)|"
+    r"registr(?:aste|ó)\s+(?:de\s+)?(?:salud|autocuidado)|"
+    r"ultimo\s+registro\s+de\s+salud"
+    r")\b",
+    re.I,
+)
+REPETITIVE_FEEDBACK_RE = re.compile(
+    r"\b(mismo\s+consejo|siempre\s+(?:me\s+)?(?:das|dices)\s+(?:lo\s+mismo|el\s+mismo|ese\s+mismo))\b",
+    re.I,
+)
 
 
 DEFAULT_PROFILE: dict[str, Any] = {
@@ -101,6 +115,93 @@ def append_log(intent: str, text: str, *, risk: str = "none") -> None:
         handle.write(json.dumps(event, ensure_ascii=False) + "\n")
 
 
+def care_context_dir() -> Path:
+    return care_data().parent / "context"
+
+
+def read_log_tail(limit: int = 3) -> list[dict[str, Any]]:
+    path = care_data() / LOG_FILE
+    if not path.exists():
+        return []
+    rows: list[dict[str, Any]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            rows.append(json.loads(line))
+        except json.JSONDecodeError:
+            continue
+    return rows[-limit:]
+
+
+def handle_repetitive_feedback(text: str) -> dict[str, Any] | None:
+    if not REPETITIVE_FEEDBACK_RE.search(text):
+        return None
+    return reply(
+        "Fede: tienes razón, suena repetido. Cambio el enfoque: dime qué parte te cansó "
+        "(ánimo, sueño, tinnitus, rutina) y te propongo una acción distinta de 2-10 min. "
+        "¿Ánimo 0-10 ahora?"
+    )
+
+
+def handle_health_data_query(text: str) -> dict[str, Any] | None:
+    if not HEALTH_DATA_RE.search(text):
+        return None
+
+    lines = ["Fede: últimos datos de salud que tengo registrados:"]
+    logs = read_log_tail(3)
+    if logs:
+        for item in reversed(logs):
+            day = str(item.get("at") or "")[:10] or "?"
+            intent = item.get("intent") or "nota"
+            preview = str(item.get("text_preview") or "").strip()
+            lines.append(f"• {day} ({intent}): {preview or '(sin texto)'}")
+    else:
+        lines.append("• Aún no hay entradas en selfcare_log.")
+
+    profile = load_profile()
+    tinnitus = (profile.get("health") or {}).get("tinnitus") or {}
+    if tinnitus:
+        side = tinnitus.get("side") or "?"
+        months = tinnitus.get("duration_months")
+        status = tinnitus.get("status") or ""
+        lines.append(
+            f"• Perfil tinnitus: lado {side}"
+            + (f", ~{months} meses" if months else "")
+            + (f", estado {status}" if status else "")
+            + "."
+        )
+
+    supplements = profile.get("supplements") or []
+    if supplements:
+        names = ", ".join(str(s.get("name") or "?") for s in supplements[:4])
+        lines.append(f"• Suplementos en perfil: {names}.")
+
+    coverage_path = care_context_dir() / "health_coverage.json"
+    if coverage_path.exists():
+        try:
+            coverage = json.loads(coverage_path.read_text(encoding="utf-8"))
+            summary = str(coverage.get("freshness_summary") or "").strip()
+            metric_day = str(coverage.get("last_metric_date") or "").strip()
+            if summary:
+                lines.append(f"• Apple Health: {summary}")
+            elif metric_day:
+                lines.append(f"• Apple Health: métricas hasta {metric_day}.")
+        except json.JSONDecodeError:
+            pass
+
+    health_today = care_context_dir() / "health_today.md"
+    if health_today.exists():
+        head = health_today.read_text(encoding="utf-8").splitlines()[:8]
+        title = next((ln.strip("# ").strip() for ln in head if ln.startswith("# Health")), "")
+        if title:
+            lines.append(f"• Reporte: {title}.")
+
+    lines.append("Si falta algo, dime qué registrar (sueño, ánimo, tinnitus 0-10).")
+    return reply(truncate_whatsapp("\n".join(lines), max_len=500))
+
+
 def detect_intent(text: str) -> str | None:
     if CRISIS_RE.search(text):
         return "crisis"
@@ -118,6 +219,14 @@ def detect_intent(text: str) -> str | None:
 
 
 def handle(text: str) -> dict[str, Any] | None:
+    feedback = handle_repetitive_feedback(text)
+    if feedback:
+        return feedback
+
+    health = handle_health_data_query(text)
+    if health:
+        return health
+
     intent = detect_intent(text)
     if not intent:
         return None

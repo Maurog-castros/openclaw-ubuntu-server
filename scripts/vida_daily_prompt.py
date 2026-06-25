@@ -6,10 +6,16 @@ import json
 import random
 import re
 import subprocess
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 
+_SCRIPTS = Path(__file__).resolve().parent
+if str(_SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS))
+
+from openclaw_message_router import save_sticky_agent
 from vida_common import ROOT, care_data, now_local, reply, truncate_whatsapp
 
 COMPOSE_DIR = ROOT / "openclaw"
@@ -19,6 +25,25 @@ STATE_FILE = "daily_prompt_state.json"
 MIN_DIARY_CHARS = 12
 DEFAULT_DAILY_LIMIT = 2
 DEFAULT_INTERVAL_MINUTES = 15
+
+FALLBACK_PROMPTS = (
+    (
+        "paso a acompañarte un momento. No necesitas resolver todo hoy; "
+        "solo cerrar el día un poco mejor que como empezó. ¿Ánimo 0-10?"
+    ),
+    (
+        "check-in breve: una cosa pequeña que sí hiciste hoy cuenta. "
+        "¿Qué fue, aunque parezca mínima? ¿Ánimo 0-10?"
+    ),
+    (
+        "sin presión de arreglarlo todo. Si hoy fue pesado, basta con "
+        "nombrarlo. ¿Cómo va el ánimo, 0-10?"
+    ),
+    (
+        "antes de cerrar el día: ¿hubo algo de autocuidado, por mínimo que fuera? "
+        "¿Ánimo 0-10?"
+    ),
+)
 
 
 def state_path() -> Path:
@@ -72,6 +97,12 @@ def recent_diary_entry(days: int = 7) -> tuple[str, str] | None:
     return None
 
 
+def fallback_message(slot: int) -> str:
+    day_key = now_local().strftime("%Y-%m-%d")
+    idx = (hash(f"{day_key}:{slot}") % len(FALLBACK_PROMPTS))
+    return FALLBACK_PROMPTS[idx]
+
+
 def build_message(slot: int) -> str:
     found = recent_diary_entry()
     intro = f"Fede /care {slot}/{DEFAULT_DAILY_LIMIT}:"
@@ -87,11 +118,7 @@ def build_message(slot: int) -> str:
             "Acción chica: 2 min de pausa. ¿Ánimo 0-10?",
             max_len=420,
         )
-    return truncate_whatsapp(
-        f"{intro} paso a acompañarte un momento. No necesitas resolver todo hoy; "
-        "solo cerrar el día un poco mejor que como empezó. ¿Ánimo 0-10?",
-        max_len=420,
-    )
+    return truncate_whatsapp(f"{intro} {fallback_message(slot)}", max_len=420)
 
 
 def in_window(now: datetime, start_hour: int, end_hour: int) -> bool:
@@ -244,6 +271,7 @@ def main() -> None:
                 state["last_sent_at"] = now.isoformat()
                 state["last_target"] = args.target
                 save_state(state)
+                save_sticky_agent("care")
             out = reply(
                 "Check-in Care enviado.",
                 message=message,
