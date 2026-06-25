@@ -38,8 +38,10 @@ Completado (2026-06-20, shell Ubuntu `/home/mauro/Dev/openclaw-mauro`):
 
 Pendiente fuera de alcance de esta fase:
 
-- Retirar enlaces legacy cuando `git grep`, crontab y Docker dejen de usarlos.
-- Auditar y migrar referencias legacy en scripts/config hacia rutas `runtime/`.
+- Retirar enlaces legacy cuando `git grep`, crontab y Docker dejen de usarlos
+  (fase 3; ver audit refs legacy y seccion Fase 2).
+- Actualizar textos agent-facing en `apply_openclaw_*_config.py` y skills
+  (`content/CV`, `secrets/` en markdown) — symlinks siguen cubriendo.
 
 Resuelto post-fase-1:
 
@@ -251,19 +253,42 @@ Sin refs legacy en `docker-overrides/`. Mounts de secretos/logs viven en
 
 ## Fase 2 — runtime_paths (2026-06-20)
 
-Completado en esta sesion:
+Completado:
 
-- `scripts/runtime_paths.py` + `scripts/test_runtime_paths.py` (5 tests OK).
+- `scripts/runtime_paths.py` + `scripts/test_runtime_paths.py` (6 tests OK).
 - Jobs: `config/jobs/config.json`, `jobs_common.py`, browsers, `jobs_laborum_*`,
-  `jobs_profile*.py`, `profile_experience.json`.
+  `jobs_profile*.py`, `jobs_profile_init.py`, `profiles.json`, `_template.json`.
 - Secretos/OAuth: `vida_common.py`, `google_workspace_oauth.py`, `gmail_modify_oauth.py`,
   `vida_calendar_oauth.py`, `jobs_laborum_mfa_gmail.py`, `hl_go_common.py`,
   `config/linkedin_intel/config.json`.
 - Logs cron: scripts `*.sh` migrados a `$ROOT/runtime/logs/` (symlink sigue OK).
+- Finanzas Gmail CLI: `gmail_watch_agent.py`, `gmail_organize_agent.py`,
+  `transferencias_agent.py`, `santander_cartola_agent.py`, `lider_receipts_agent.py`
+  (defaults legacy + `resolve_repo_path` al leer).
+- WhatsApp allow: `setup_whatsapp_openclaw.sh`, `apply_openclaw_finanzas_config.py`,
+  `channel_user_context.py`, `jobs_daily_auto.py`, `intel_chile_daily_report.py`.
+- `linkedin_intel_scout.py`, `deploy_vida.py` (plantillas calendar OAuth).
+- `jobs_chiletrabajos_scrape.py` default storage_state → `runtime/secrets/`.
 
-Pendiente fase 2:
+Pendiente fase 3 (retirar symlinks):
 
-- Finanzas CLI defaults (`secrets/gmail_*.json` en argparse de agents).
-- `setup_whatsapp_openclaw.sh`, `deploy_vida.py`, `linkedin_intel_scout.py`.
-- Docs/skills/SOUL.md con rutas legacy (baja prioridad).
-- Retirar symlinks cuando refs legacy en scripts+cron = 0.
+- Textos en agent docs/skills (`apply_openclaw_*_config.py`, `config/jobs/*.md`) —
+  baja prioridad; symlinks cubren.
+- Argparse defaults que aún dicen `secrets/...` (compat CLI; resuelven vía
+  `resolve_repo_path`).
+- Crontab: entradas escriben a `$ROOT/logs/*.log` (7 lineas); symlink activo.
+- Docker: mounts en `openclaw/docker-compose*.yml` (revisar con stack productivo).
+- Retirar symlinks cuando refs legacy en scripts+cron+Docker = 0.
+
+Validacion fase 2b (2026-06-20):
+
+```bash
+cd /home/mauro/Dev/openclaw-mauro
+python3 -m py_compile scripts/runtime_paths.py scripts/gmail_watch_agent.py \
+  scripts/gmail_organize_agent.py scripts/transferencias_agent.py \
+  scripts/setup_whatsapp_openclaw.sh 2>/dev/null || true
+python3 scripts/test_runtime_paths.py
+.venv-linkedin-intel/bin/python scripts/test_jobs_profile.py
+python3 scripts/channel_delegate.py --text '/jobs ayuda' --peer +56945046845 --json
+find content/CV data/CV secrets data/secrets logs -maxdepth 0 -type l -ls
+```

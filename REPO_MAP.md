@@ -1,7 +1,8 @@
 # Repository Map
 
-> Estado: migracion fisica completada el 2026-06-20. Los enlaces de compatibilidad
-> siguen activos; consultar `REPO_REORGANIZATION_HANDOFF.md` para evidencias.
+> Estado: migracion fisica completada el 2026-06-20. Fase 2 (`runtime_paths`) en
+> scripts versionados completada; enlaces de compatibilidad siguen activos.
+> Consultar `REPO_REORGANIZATION_HANDOFF.md` para evidencias y fase 3 pendiente.
 
 Este archivo es el punto de entrada para humanos y agentes. El checkout canonico
 vive en `/home/mauro/Dev/openclaw-mauro` en Ubuntu. La unidad Windows `Y:` es una
@@ -45,19 +46,23 @@ vista por red; ejecucion, Git, permisos, cron y Docker se operan por SSH en Ubun
 
 ## Compatibilidad temporal
 
-Estas rutas deben convertirse en enlaces relativos. Mientras el handoff no se
-marque como completado, pueden seguir siendo directorios reales:
+Estas rutas son **enlaces relativos** hacia `runtime/`. Los scripts versionados ya
+resuelven rutas canonicas via `scripts/runtime_paths.py`; los enlaces permanecen
+hasta que cron, Docker y docs agent-facing dejen de referenciarlos:
 
 | Ruta legacy | Destino canonico | Consumidores |
 |---|---|---|
-| `content/CV` | `runtime/jobs/cv-library` | Jobs actual y documentos existentes |
-| `data/CV` | `runtime/jobs/cv-library` | Scripts historicos y herramientas manuales |
-| `secrets` | `runtime/secrets` | Agentes, OAuth, HL-Go y canales |
-| `data/secrets` | `runtime/secrets` | Login de portales y OAuth legacy |
-| `logs` | `runtime/logs` | Cron y scripts operativos existentes |
+| `content/CV` | `runtime/jobs/cv-library` | Docs agente Jobs, JSON historicos |
+| `data/CV` | `runtime/jobs/cv-library` | Alias historico |
+| `secrets` | `runtime/secrets` | Defaults CLI legacy (`resolve_repo_path`) |
+| `data/secrets` | `runtime/secrets` | Alias historico |
+| `logs` | `runtime/logs` | Crontab (`$ROOT/logs/*.log`) |
+
+Helper canonico: `scripts/runtime_paths.py` — `cv_library_dir()`, `secrets_dir()`,
+`logs_dir()`, `resolve_repo_path()`, `whatsapp_allow_files()`.
 
 No eliminar estos enlaces hasta que `git grep`, `crontab -l` y la configuracion
-Docker dejen de referenciar las rutas legacy.
+Docker dejen de referenciar las rutas legacy (ver handoff fase 3).
 
 ## Rutas operativas principales
 
