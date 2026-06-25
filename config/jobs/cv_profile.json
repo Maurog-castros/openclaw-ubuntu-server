@@ -1,0 +1,188 @@
+{
+  "owner": "Mauricio Guillermo Castro Sandoval",
+  "email": "maurog.castros@gmail.com",
+  "phone": "+56 9 4504 6845",
+  "location": "Santiago, Chile",
+  "linkedin": "linkedin.com/in/maurog-castros",
+  "github": "github.com/Maurog-castros",
+  "website": "maurocastro.cl",
+  "summary_base": "Ingeniero en Ejecución Informática con más de 15 años de experiencia en tecnología, análisis de datos, automatización, integración de sistemas y construcción de dashboards ejecutivos. Experiencia práctica con SQL, Power BI, Python, APIs REST, limpieza y validación de datos, generación de KPIs y reportabilidad para toma de decisiones en entornos corporativos. Perfil híbrido Data + Tecnología, con alta orientación a calidad del dato, confidencialidad, trazabilidad y entrega de insights accionables para áreas de negocio.",
+  "education": [
+    "Ingeniería en Ejecución Informática - Universidad Ciencias de la Informática UCINF.",
+    "Analista de Sistemas - UCINF, distinción de excelencia académica.",
+    "Certificaciones / formación: Data Scientist Learning Path, Advanced Python, Azure Machine Learning, Power BI Advanced Analytics, Statistics for Data Science, Scrum Foundation Professional Certificate, Docker on AWS."
+  ],
+  "languages": "Español: Nativo | Inglés: B2 alto / profesional técnico",
+  "skill_blocks": {
+    "data_analyst": [
+      ["Análisis y datos", "SQL, T-SQL, PostgreSQL, SQL Server, modelamiento relacional, limpieza, conciliación, validación y calidad de datos."],
+      ["BI y reporting", "Power BI, Power Query, dashboards ejecutivos, KPIs, storytelling con datos, reporting operacional y gerencial."],
+      ["Python", "pandas, automatización, scripts de validación, integración con APIs REST, procesamiento de archivos y generación de reportes."],
+      ["Automatización", "Power Automate, Jenkins, GitHub Actions, procesos batch, integración de sistemas y reducción de tareas manuales."],
+      ["Gobierno y seguridad", "Confidencialidad, trazabilidad, control de accesos, documentación, auditoría y manejo de información sensible."],
+      ["Negocio y HR Analytics", "Indicadores de dotación, rotación, ausentismo, tiempos de proceso, productividad, experiencia colaborador y tendencias."]
+    ],
+    "devops": [
+      ["Cloud y plataforma", "AWS, Lambda, Step Functions, EKS, ECS, IAM, VPC, CloudWatch, CloudFormation, CDK."],
+      ["Contenedores", "Docker, Kubernetes, Helm, troubleshooting Linux y operación productiva."],
+      ["IaC y CI/CD", "Terraform, CloudFormation, Jenkins, GitHub Actions, GitOps, despliegues multiambiente."],
+      ["Observabilidad", "Prometheus, Grafana, Datadog, métricas DORA, trazabilidad y respuesta a incidentes."],
+      ["Seguridad", "DevSecOps, SonarQube, OWASP, IAM least-privilege, secretos y entornos regulados."],
+      ["FinOps", "Optimización de costos cloud, rightsizing y eficiencia operacional."]
+    ],
+    "data_engineer": [
+      ["Datos y SQL", "SQL, T-SQL, PostgreSQL, modelamiento relacional, ETL, limpieza e integración de fuentes heterogéneas."],
+      ["Pipelines", "Python, APIs REST, procesos batch, automatización de extracción y validación de datos."],
+      ["Cloud data", "AWS Lambda, Step Functions, S3, servicios administrados y arquitecturas serverless."],
+      ["Calidad", "Validación, conciliación, documentación, trazabilidad y gobierno del dato."],
+      ["BI", "Power BI, dashboards ejecutivos, KPIs y reporting para negocio."],
+      ["Integración", "APIs REST/SOAP, microservicios, mensajería y sistemas corporativos."]
+    ],
+    "technical_lead": [
+      ["Arquitectura", "Diseño de soluciones cloud, APIs, integración, escalabilidad y resiliencia."],
+      ["Liderazgo técnico", "Coordinación de equipos distribuidos, stakeholders y roadmap tecnológico."],
+      ["Cloud", "AWS serverless, Lambda, Step Functions, API Gateway, observabilidad y costos."],
+      ["Calidad y CI/CD", "Pipelines, quality gates, automatización y reducción de fallas de despliegue."],
+      ["Integración", "APIs REST, microservicios, ERP y sistemas legacy."],
+      ["Gobierno", "Documentación, trazabilidad, seguridad y continuidad operacional."]
+    ]
+  },
+  "experiences": [
+    {
+      "id": "hdi",
+      "company": "HDI Seguros Chile",
+      "roles": {
+        "data_analyst": {
+          "title": "Senior DevOps / Data & Reporting Automation Engineer",
+          "dates": "Oct 2024 - Dic 2025",
+          "summary": "Responsable de automatización, trazabilidad y reportería técnica para una plataforma corporativa con más de 200 aplicaciones, trabajando con equipos de arquitectura, seguridad, desarrollo y operación.",
+          "bullets": [
+            "Diseñé dashboards y reportes de KPIs técnicos integrando datos desde Jenkins, GitHub Enterprise, SonarQube, Dependabot y Apache DevLake.",
+            "Automaticé procesos de extracción, validación y consolidación de información mediante Python, APIs REST y pipelines CI/CD.",
+            "Implementé métricas DORA y tableros de seguimiento para apoyar decisiones sobre desempeño de ingeniería, calidad y riesgo operacional.",
+            "Aseguré trazabilidad, control de accesos y manejo responsable de datos sensibles en un entorno regulado de seguros.",
+            "Estandaricé documentación y runbooks para facilitar continuidad operacional, auditoría y transferencia de conocimiento."
+          ],
+          "tech": "Python, SQL, Power BI, APIs REST, Jenkins, GitHub Enterprise, SonarQube, DevLake, Docker, Linux, PowerShell"
+        },
+        "devops": {
+          "title": "Senior Cloud / DevOps Engineer",
+          "dates": "Oct 2024 - Dic 2025",
+          "summary": "Diseño y operación de plataforma CI/CD corporativa para más de 200 aplicaciones con trazabilidad, DevSecOps y continuidad operacional.",
+          "bullets": [
+            "Diseñé y operé plataforma CI/CD corporativa con Jenkins, GitHub Actions, Docker y despliegues multiambiente.",
+            "Integré DevSecOps con SonarQube, Dependabot y OWASP Dependency-Check para reducir riesgo antes de producción.",
+            "Implementé observabilidad y métricas DORA para medir frecuencia de despliegue, fallas y estabilidad operacional.",
+            "Automaticé extracción y consolidación de datos técnicos mediante Python y APIs REST.",
+            "Aseguré trazabilidad y manejo responsable de datos sensibles en entorno regulado de seguros."
+          ],
+          "tech": "AWS, Jenkins, GitHub Actions, Docker, Python, SonarQube, DevLake, Linux"
+        }
+      }
+    },
+    {
+      "id": "geodis",
+      "company": "GEODIS Logistics",
+      "roles": {
+        "data_analyst": {
+          "title": "Senior Developer / Data Integration & Reporting Lead",
+          "dates": "Mar 2023 - Oct 2024",
+          "summary": "Participé en modernización de plataformas logísticas, integración de datos operacionales y optimización de procesos corporativos.",
+          "bullets": [
+            "Optimicé consultas T-SQL y procesos backend, mejorando el rendimiento de reportes y APIs operacionales en aproximadamente 25%-50%.",
+            "Integré datos desde sistemas internos y servicios externos mediante APIs REST, reduciendo tareas manuales y reprocesos.",
+            "Automaticé jobs y procesos recurrentes, reduciendo esfuerzo manual en 50% y mejorando consistencia de la información.",
+            "Colaboré con usuarios de negocio para traducir requerimientos operacionales en mejoras medibles de datos, reporting y trazabilidad."
+          ],
+          "tech": "SQL Server, T-SQL, .NET, Node.js, APIs REST, Python, Power BI, Redis"
+        },
+        "devops": {
+          "title": "Senior Developer / DevSecOps Tech Lead",
+          "dates": "Mar 2023 - Oct 2024",
+          "summary": "Modernización hacia arquitectura distribuida con observabilidad, seguridad y automatización operacional.",
+          "bullets": [
+            "Fortalecí seguridad aplicativa mediante MFA, cifrado y controles de acceso, reduciendo vulnerabilidades en 60%.",
+            "Optimicé consultas T-SQL y APIs operacionales, mejorando rendimiento en 25%-50%.",
+            "Automaticé pipelines y jobs recurrentes, reduciendo esfuerzo manual en 50%.",
+            "Migré hacia arquitectura distribuida con observabilidad CloudWatch/X-Ray."
+          ],
+          "tech": "AWS KMS, Node.js, SQL Server, CloudWatch, X-Ray, Redis"
+        }
+      }
+    },
+    {
+      "id": "conaset",
+      "company": "Babel Group / Ingenia Global - Proyecto CONASET SGL",
+      "roles": {
+        "data_analyst": {
+          "title": "Technical Lead / Cloud & Data Solutions Architect",
+          "dates": "Dic 2020 - Nov 2022",
+          "summary": "Lideré equipos distribuidos en Chile, España, Perú y Argentina en una plataforma gubernamental crítica con integración de datos, APIs y servicios cloud.",
+          "bullets": [
+            "Diseñé arquitecturas de integración y procesamiento de información usando APIs REST, AWS Lambda, Step Functions y servicios administrados.",
+            "Implementé controles de calidad, monitoreo y reportabilidad para mejorar confiabilidad de entregas y trazabilidad técnica.",
+            "Reduje fallas de despliegue en 80%, optimicé costos cloud en 30% y elevé cobertura de calidad en 25% mediante automatización y métricas.",
+            "Coordiné stakeholders técnicos y funcionales, transformando requerimientos de negocio en soluciones medibles y operables."
+          ],
+          "tech": "AWS, Lambda, Step Functions, SQL, Jenkins, SonarQube, APIs REST, CloudWatch"
+        },
+        "technical_lead": {
+          "title": "Technical Lead / Cloud Architect",
+          "dates": "Dic 2020 - Nov 2022",
+          "summary": "Liderazgo de equipos distribuidos en plataforma gubernamental crítica con arquitecturas cloud e integración.",
+          "bullets": [
+            "Diseñé arquitecturas AWS serverless con Lambda, Step Functions, API Gateway, CloudWatch e IAM para sistemas críticos.",
+            "Implementé pipelines CI/CD y quality gates, reduciendo fallas de despliegue en aproximadamente 80%.",
+            "Optimicé costos AWS en aproximadamente 30% mediante rightsizing y estrategias de eficiencia cloud.",
+            "Coordiné equipos en Chile, España, Perú y Argentina transformando requerimientos en soluciones operables."
+          ],
+          "tech": "AWS, Lambda, Step Functions, Terraform, Jenkins, API Gateway, CloudWatch"
+        }
+      }
+    },
+    {
+      "id": "innovacion",
+      "company": "Innovación Radical / InnovaProud",
+      "roles": {
+        "data_analyst": {
+          "title": "Consultor BI / Automatización / ERP",
+          "dates": "Ene 2015 - Dic 2020",
+          "summary": "Consultoría en automatización, integración de procesos y reportabilidad para clientes corporativos.",
+          "bullets": [
+            "Construí dashboards ejecutivos en Power BI para monitoreo de indicadores operacionales y soporte a decisiones estratégicas.",
+            "Automaticé procesos empresariales con Power Automate y flujos integrados, reduciendo tiempos operativos hasta en 50%.",
+            "Diseñé integraciones SOAP/REST entre ERP Odoo, SharePoint, bases de datos y sistemas corporativos.",
+            "Levanté requerimientos funcionales y técnicos, documentando procesos, datos fuente, reglas de negocio y criterios de validación."
+          ],
+          "tech": "Power BI, Power Automate, Odoo, SQL Server, PostgreSQL, SharePoint, APIs REST/SOAP"
+        },
+        "devops": {
+          "title": "Technical Lead / Senior Consultant",
+          "dates": "Ene 2015 - Dic 2020",
+          "summary": "Consultoría en automatización, integración y plataformas para clientes corporativos.",
+          "bullets": [
+            "Automaticé procesos empresariales con Power Automate y flujos integrados, reduciendo tiempos operativos hasta en 50%.",
+            "Diseñé integraciones SOAP/REST entre ERP, SharePoint, bases de datos y sistemas corporativos.",
+            "Construí dashboards y reportes para monitoreo de indicadores operacionales.",
+            "Levanté requerimientos funcionales y técnicos con documentación de procesos y reglas de negocio."
+          ],
+          "tech": "Power Automate, Odoo, SQL Server, SharePoint, APIs REST/SOAP"
+        }
+      }
+    }
+  ],
+  "value_props": {
+    "data_analyst": [
+      "Capacidad para levantar requerimientos de RR.HH., definir KPIs, construir dashboards y traducir datos en acciones concretas para negocio.",
+      "Experiencia operando información sensible en ambientes regulados, aplicando confidencialidad, trazabilidad y acceso controlado.",
+      "Enfoque en calidad de datos: validación, consistencia, documentación, automatización de controles y reducción de trabajo manual.",
+      "Orientación a insights accionables: tendencias, desviaciones, productividad, eficiencia de procesos y experiencia de usuarios internos."
+    ],
+    "devops": [
+      "Experiencia operando plataformas críticas con más de 200 aplicaciones en entorno regulado.",
+      "Automatización CI/CD, observabilidad y métricas DORA para decisiones de ingeniería y riesgo operacional.",
+      "DevSecOps integrado: calidad, seguridad y trazabilidad antes de producción.",
+      "Optimización de costos cloud y continuidad operacional con documentación y runbooks."
+    ]
+  }
+}

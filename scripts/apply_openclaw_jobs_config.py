@@ -44,6 +44,7 @@ LinkedIn: linkedin.com/in/maurog-castros
 | vacantes / match feed | `{CONTAINER_RUN_PY} {CONTAINER_SCRIPTS}/jobs_match.py --text "<msg>" --json` |
 | postular N / auto | `{CONTAINER_RUN_PY} {CONTAINER_SCRIPTS}/jobs_apply.py --text "<msg>" --json` |
 | mis postulaciones | `{CONTAINER_RUN_PY} {CONTAINER_SCRIPTS}/jobs_report.py --json` |
+| generar cv / pegar vacante | `{CONTAINER_RUN_PY} {CONTAINER_SCRIPTS}/jobs_cv_generate.py --text "<jd>" --json` |
 
 Sesion LinkedIn personal: `secrets/linkedin_storage_state.json` (NO cuenta Innovacion Radical).
 
@@ -66,6 +67,7 @@ JOBS_AGENTS_BODY = f"""# AGENTS.md — Jobs
 4. CSV obligatorio: `data/workspace/jobs/applications.csv`.
 5. Informe → `jobs_report.py` o mensaje WhatsApp tras postular.
 6. Cron diario 09:00 → `run-jobs-daily-auto-whatsapp.sh` (buscar + postular 3 + WhatsApp).
+7. CV ATS on-demand → pegar JD o `jobs_cv_generate.py` (Word + PDF desde `config/jobs/cv_profile.json`).
 
 ## CVs
 

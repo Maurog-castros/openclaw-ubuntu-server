@@ -35,6 +35,9 @@ INDEX_RE = re.compile(r"\b(index(?:ar)?\s+cv|cv\s+index|actualizar\s+cv)\b", re.
 SEARCH_RE = re.compile(r"\b(buscar\s+linkedin|linkedin\s+jobs|vacantes?\s+linkedin|refresh\s+jobs)\b", re.I)
 RECOMMENDED_RE = re.compile(r"\b(recommended|recomendad[oa]s?|jymbii|jobs\s+home)\b", re.I)
 CHILETRABAJOS_RE = re.compile(r"\b(chiletrabajos|chile\s*trabajos)\b", re.I)
+COMPUTRABAJO_RE = re.compile(r"\b(computrabajo|computrabajo\.com)\b", re.I)
+PERCEPTUAL_RE = re.compile(r"\b(perceptual|laboral\.perceptual)\b", re.I)
+COMPUTRABAJO_LOGIN_RE = re.compile(r"\b(computrabajo\s+login|login\s+computrabajo)\b", re.I)
 CHILETRABAJOS_LOGIN_RE = re.compile(r"\b(chiletrabajos\s+login|login\s+chiletrabajos)\b", re.I)
 LABORUM_RE = re.compile(r"\b(laborum|sync\s+experiencia|experiencia\s+portal|curriculum\s+laborum)\b", re.I)
 LABORUM_LOGIN_RE = re.compile(r"\b(laborum\s+login|login\s+laborum)\b", re.I)
@@ -42,6 +45,8 @@ PORTAL_PY = str(ROOT / ".venv-jobs-portals/bin/python")
 if not Path(PORTAL_PY).exists():
     PORTAL_PY = PY
 DECISION_RE = re.compile(r"\b(aprobar|approve|descartar|discard|estado|status)\b", re.I)
+APPROVE_REPORT_RE = re.compile(r"\b(todos|todo|reporte|ultimo|último)\b", re.I)
+JOB_ID_RE = re.compile(r"\b(?:\d{5,12}|[A-Fa-f0-9]{16,40})\b")
 MATCH_RE = re.compile(
     r"\b(vacantes?|match|oportunidades?\s+laboral|trabajos?\s+para\s+mi|"
     r"que\s+puedo\s+postular|buscar\s+empleo|ofertas?\s+devops)\b",
@@ -60,6 +65,10 @@ ON_DEMAND_REPORT_RE = re.compile(
 )
 OPS_RE = re.compile(
     r"\b(career\s*ops|evaluar|evalua|analiza|analizar|pipeline|oferta|jd|job\s+description)\b",
+    re.I,
+)
+CV_GENERATE_RE = re.compile(
+    r"\b(generar\s+cv|cv\s+ats|adaptar\s+cv|cv\s+para|cv\s+vacante|cv\s+adaptado)\b",
     re.I,
 )
 JOBS_PREFIX_RE = re.compile(r"^\s*/(?:jobs|postula)\b", re.I)
@@ -148,6 +157,22 @@ def run_recommended_on_demand(env: dict[str, str]) -> dict[str, Any]:
         )
         if code != 0:
             source_warnings.append(payload.get("whatsapp_reply") or stderr[-300:])
+
+    code, payload, _, stderr = run_json(
+        [LINKEDIN_PY, f"{SCR}/jobs_computrabajo_scrape.py", "--json"],
+        timeout=300,
+        env=env,
+    )
+    if code != 0:
+        source_warnings.append(payload.get("whatsapp_reply") or stderr[-300:])
+
+    code, payload, _, stderr = run_json(
+        [LINKEDIN_PY, f"{SCR}/jobs_perceptual_scrape.py", "--json"],
+        timeout=300,
+        env=env,
+    )
+    if code != 0:
+        source_warnings.append(payload.get("whatsapp_reply") or stderr[-300:])
 
     code, pipeline, _, stderr = run_json(
         [LINKEDIN_PY, f"{SCR}/jobs_recommended_pipeline.py", "--json"],
@@ -265,14 +290,34 @@ def main() -> None:
         print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload.get("whatsapp_reply", ""))
         return
 
+    from jobs_cv_generate import looks_like_vacancy_paste
+
+    wants_cv = CV_GENERATE_RE.search(message) or (
+        looks_like_vacancy_paste(message) and not OPS_RE.search(message)
+    )
+    if wants_cv and len(message) >= 120:
+        code, payload, _, stderr = run_json(
+            [PY, f"{SCR}/jobs_cv_generate.py", "--text", message, "--json"],
+            timeout=180,
+            env=env,
+        )
+        if code != 0 and not payload.get("whatsapp_reply"):
+            payload = {"status": "error", "agent": "jobs", "whatsapp_reply": f"Generar CV falló: {stderr[-400:]}"}
+        payload.setdefault("agent", "jobs")
+        print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload.get("whatsapp_reply", ""))
+        return
+
     decision = DECISION_RE.search(message)
     if decision:
         action_map = {"approve": "aprobar", "discard": "descartar", "status": "estado"}
         action = action_map.get(decision.group(1).lower(), decision.group(1).lower())
-        job_match = re.search(r"\b\d{8,12}\b", message)
         cmd = [PY, f"{SCR}/jobs_approval.py", action]
-        if job_match:
-            cmd.append(job_match.group(0))
+        if action == "aprobar" and APPROVE_REPORT_RE.search(message):
+            cmd.append("--reporte")
+        else:
+            job_match = JOB_ID_RE.search(message)
+            if job_match:
+                cmd.append(job_match.group(0))
         cmd.append("--json")
         _, payload, _, stderr = run_json(cmd, timeout=60, env=env)
         if not payload.get("whatsapp_reply"):
@@ -349,10 +394,41 @@ def main() -> None:
         print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload.get("whatsapp_reply", ""))
         return
 
+    if COMPUTRABAJO_LOGIN_RE.search(message):
+        proc = subprocess.run(
+            [LINKEDIN_PY, f"{SCR}/jobs_computrabajo_login.py", "auto"],
+            cwd=str(ROOT),
+            text=True,
+            capture_output=True,
+            timeout=180,
+            check=False,
+            env=env,
+        )
+        reply = (proc.stdout or proc.stderr).strip() or "Computrabajo: sesion guardada."
+        payload = {"status": "ok" if proc.returncode == 0 else "error", "agent": "jobs", "whatsapp_reply": reply[-900:]}
+        print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload.get("whatsapp_reply", ""))
+        return
+
     if CHILETRABAJOS_RE.search(message):
         code, payload, _, stderr = run_json([LINKEDIN_PY, f"{SCR}/jobs_chiletrabajos_scrape.py", "--json"], timeout=300, env=env)
         if code != 0 and not payload.get("whatsapp_reply"):
             payload = {"status": "error", "agent": "jobs", "whatsapp_reply": f"ChileTrabajos fallo: {stderr[-500:]}"}
+        payload.setdefault("agent", "jobs")
+        print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload.get("whatsapp_reply", ""))
+        return
+
+    if COMPUTRABAJO_RE.search(message):
+        code, payload, _, stderr = run_json([LINKEDIN_PY, f"{SCR}/jobs_computrabajo_scrape.py", "--json"], timeout=300, env=env)
+        if code != 0 and not payload.get("whatsapp_reply"):
+            payload = {"status": "error", "agent": "jobs", "whatsapp_reply": f"Computrabajo fallo: {stderr[-500:]}"}
+        payload.setdefault("agent", "jobs")
+        print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload.get("whatsapp_reply", ""))
+        return
+
+    if PERCEPTUAL_RE.search(message):
+        code, payload, _, stderr = run_json([LINKEDIN_PY, f"{SCR}/jobs_perceptual_scrape.py", "--json"], timeout=300, env=env)
+        if code != 0 and not payload.get("whatsapp_reply"):
+            payload = {"status": "error", "agent": "jobs", "whatsapp_reply": f"Perceptual fallo: {stderr[-500:]}"}
         payload.setdefault("agent", "jobs")
         print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else payload.get("whatsapp_reply", ""))
         return

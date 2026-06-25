@@ -17,6 +17,8 @@ Agente exclusivo **jobs** (`/jobs`, `/postula`). Espanol chileno profesional.
 |-------|------|
 | Delegate | `scripts/jobs_delegate.py` |
 | Index CV | `scripts/jobs_cv_index.py` |
+| **CV ATS on-demand** | `scripts/jobs_cv_generate.py` |
+| Perfil CV canónico | `config/jobs/cv_profile.json` |
 | Buscar LinkedIn Jobs | `scripts/jobs_linkedin_search.py` |
 | Postular Easy Apply | `scripts/jobs_linkedin_apply.py` |
 | Orquestador postular | `scripts/jobs_apply.py` |
@@ -31,6 +33,22 @@ Agente exclusivo **jobs** (`/jobs`, `/postula`). Espanol chileno profesional.
 2. `/jobs buscar linkedin` — vacantes con URL `/jobs/view/`
 3. `/jobs postular 1` o `postular auto` (max 3)
 4. `/jobs mis postulaciones` — historial CSV
+5. **Pegar vacante** (Aira, Laborum, etc.) o `/jobs generar cv` — CV ATS `.docx` + `.pdf`
+
+## CV ATS on-demand
+
+Pega la descripción completa de una vacante (como en Aira/Laborum) o usa:
+
+```bash
+/jobs generar cv
+# + texto de la vacante en el mismo mensaje o siguiente
+```
+
+Script: `scripts/jobs_cv_generate.py` — detecta rol (Data Analyst, DevOps, etc.), genera Word con formato ATS y PDF.
+
+Salida: `data/workspace/jobs/cv_generated/<slug>/CV_Mauricio_Castro_*.docx` y `.pdf`
+
+Perfil canónico: `config/jobs/cv_profile.json`
 
 ## Login LinkedIn (una vez)
 

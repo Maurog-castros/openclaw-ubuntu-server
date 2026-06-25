@@ -287,45 +287,11 @@ def minimal_docx(path: Path, paragraphs: list[str]) -> None:
 
 
 def generate_adapted_cv(job_text: str, out_dir: Path, slug: str) -> Path:
-    role = infer_role(job_text)
-    company = infer_company(job_text)
-    ats_keywords = ", ".join(job_keywords(job_text)[:32])
+    from jobs_cv_builder import build_docx, parse_vacancy
+
+    vacancy = parse_vacancy(job_text)
     path = out_dir / f"CV_Mauricio_Castro_{slug}.docx"
-    p = [
-        paragraph_xml(f"Mauricio Castro - {role}", bold=True, size=32),
-        paragraph_xml("Santiago, Chile | maurog.castros@gmail.com | LinkedIn: linkedin.com/in/maurog-castros", size=20),
-        paragraph_xml("Perfil objetivo", bold=True, size=26),
-        paragraph_xml(
-            f"Ingeniero Cloud / DevOps Senior orientado a {company}, con foco en AWS, Kubernetes, Terraform, CI/CD, observabilidad, seguridad cloud y optimizacion de costos. Experiencia en plataformas criticas, automatizacion multiambiente, continuidad operacional y entornos financieros/regulados.",
-            size=22,
-        ),
-        paragraph_xml("Match directo con la vacante", bold=True, size=26),
-        bullet_xml("AWS-first: Lambda, Step Functions, IAM, CloudWatch, API Gateway, S3, VPC, EKS y practicas de seguridad cloud."),
-        bullet_xml("Contenedores y plataforma: Docker, Kubernetes, Helm, troubleshooting Linux y operacion productiva."),
-        bullet_xml("IaC y automatizacion: Terraform, CloudFormation, pipelines Jenkins/GitHub Actions y despliegues multiambiente DEV/QA/PROD."),
-        bullet_xml("Observabilidad y resiliencia: CloudWatch, Grafana, Datadog, metricas DORA, trazabilidad, rollback y respuesta a incidentes."),
-        bullet_xml("FinOps: optimizacion de costos cloud cercana al 30% mediante rightsizing y revision de consumo."),
-        bullet_xml("Entorno financiero/regulado: experiencia en HDI Seguros Chile con continuidad operacional, controles DevSecOps y datos sensibles."),
-        paragraph_xml("Experiencia relevante", bold=True, size=26),
-        paragraph_xml("HDI Seguros Chile - Senior Cloud / DevOps Engineer", bold=True, size=23),
-        bullet_xml("Diseno y operacion de plataforma CI/CD corporativa para mas de 200 aplicaciones, con trazabilidad, control de cambios y continuidad operacional."),
-        bullet_xml("Automatizacion de despliegues multiambiente con Jenkins, GitHub Actions, Docker y practicas de rollback controlado."),
-        bullet_xml("Integracion DevSecOps con SonarQube, Dependabot y OWASP Dependency-Check para reducir riesgo antes de produccion."),
-        bullet_xml("Implementacion de observabilidad y metricas DORA para medir frecuencia de despliegue, fallas y estabilidad operacional."),
-        paragraph_xml("Babel / Ingenia Global - Technical Lead / Cloud Architect", bold=True, size=23),
-        bullet_xml("Diseno de arquitecturas AWS serverless con Lambda, Step Functions, API Gateway, CloudWatch e IAM para sistemas criticos."),
-        bullet_xml("Implementacion de pipelines CI/CD y quality gates, reduciendo fallas de despliegue en aproximadamente 80%."),
-        bullet_xml("Optimizacion de costos AWS en aproximadamente 30% mediante rightsizing y estrategias de eficiencia cloud."),
-        paragraph_xml("GEODIS - Senior Developer / DevSecOps Tech Lead", bold=True, size=23),
-        bullet_xml("Fortalecimiento de seguridad aplicativa mediante MFA, cifrado y controles de acceso, reduciendo vulnerabilidades en 60%."),
-        bullet_xml("Modernizacion hacia arquitectura distribuida con observabilidad y automatizacion operacional."),
-        paragraph_xml("Keywords ATS", bold=True, size=26),
-        paragraph_xml(
-            ats_keywords or "Cloud, DevOps, Software Architecture, Automation, Security, Observability",
-            size=21,
-        ),
-    ]
-    minimal_docx(path, p)
+    build_docx(vacancy, path)
     return path
 
 

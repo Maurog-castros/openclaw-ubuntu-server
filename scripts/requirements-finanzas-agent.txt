@@ -6,3 +6,5 @@ google-auth
 google-auth-oauthlib
 pypdf
 beautifulsoup4
+python-docx
+fpdf2
