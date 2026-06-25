@@ -12,18 +12,15 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
-ROOT = Path("/home/node/openclaw-mauro")
-if not ROOT.exists():
-    ROOT = Path(__file__).resolve().parent.parent
+from runtime_paths import repo_root, whatsapp_allow_files
+
+ROOT = repo_root()
 
 OPENCLAW_DIR = ROOT / "openclaw"
 COMPOSE = OPENCLAW_DIR / "docker-compose.yml"
 COMPOSE_FIN = OPENCLAW_DIR / "docker-compose.finanzas-mounts.yml"
 REPORTS_DIR = ROOT / "reports/intelligence"
-TARGET_CANDIDATES = [
-    ROOT / "secrets/whatsapp_allow_from.txt",
-    Path("/home/node/.openclaw-secrets/whatsapp_allow_from.txt"),
-]
+TARGET_CANDIDATES = list(whatsapp_allow_files())
 
 PROMPT_MORNING = """Genera el Daily Intelligence Report de hoy para Chile (edicion matutina).
 

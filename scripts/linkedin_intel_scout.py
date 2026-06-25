@@ -15,14 +15,15 @@ from urllib.parse import quote_plus
 from dotenv import load_dotenv
 
 from linkedin_intel_region import chile_score, is_job_noise, rank_signals, region_cfg
+from runtime_paths import repo_root, secrets_dir
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = repo_root()
 DEFAULT_CONFIG = ROOT / "config/linkedin_intel/config.json"
 INTEL_DATA = ROOT / "data/workspace/marketing/intel/data"
 INTEL_REPORTS = ROOT / "data/workspace/marketing/intel/reports"
 DRAFTS_DIR = ROOT / "data/workspace/marketing/content/drafts/linkedin"
 ENV_CANDIDATES = [
-    ROOT / "secrets/linkedin_innovacionradical.env",
+    secrets_dir() / "linkedin_innovacionradical.env",
     Path("/home/node/.openclaw-secrets/linkedin_innovacionradical.env"),
 ]
 RELEVANT = [
@@ -41,7 +42,7 @@ def load_env() -> None:
         if path.exists():
             load_dotenv(path)
             return
-    load_dotenv(ROOT / "secrets/linkedin_innovacionradical.env")
+    load_dotenv(secrets_dir() / "linkedin_innovacionradical.env")
 
 
 def load_config(path: Path) -> dict[str, Any]:
