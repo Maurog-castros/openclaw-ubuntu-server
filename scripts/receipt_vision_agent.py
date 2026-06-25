@@ -101,10 +101,28 @@ Responde SOLO JSON corregido, sin markdown.
 """.strip()
 
 
-def openclaw_client() -> OpenAI:
-    base_url = os.getenv("OPENCLAW_PRIMARY_URL", "https://ia.iamiko.cl/v1")
-    api_key = os.getenv("LITELLM_MASTER_KEY", "sk-openclaw-local")
-    return OpenAI(base_url=base_url, api_key=api_key)
+def openclaw_client(*, base_url: str | None = None, api_key: str | None = None) -> OpenAI:
+    resolved_url = base_url or os.getenv("OPENCLAW_PRIMARY_URL", "https://ia.iamiko.cl/v1")
+    resolved_key = api_key or os.getenv("LITELLM_MASTER_KEY", "sk-openclaw-local")
+    return OpenAI(base_url=resolved_url, api_key=resolved_key)
+
+
+def vision_endpoint_candidates(model: str) -> list[tuple[str, str]]:
+    primary = os.getenv("OPENCLAW_PRIMARY_URL", "https://ia.iamiko.cl/v1")
+    litellm = os.getenv("OPENCLAW_LITELLM_URL", "http://litellm:4000/v1").strip()
+    fallback_model = os.getenv("OPENCLAW_VISION_FALLBACK_MODEL", "openrouter-gemini")
+    candidates = [(primary, model)]
+    if litellm and litellm.rstrip("/") != primary.rstrip("/"):
+        candidates.append((litellm, fallback_model))
+    return candidates
+
+
+def _vision_error_retriable(exc: Exception) -> bool:
+    message = str(exc).lower()
+    return any(
+        token in message
+        for token in ("no connected db", "no_db_connection", "does not support image", "contain images")
+    )
 
 
 def image_to_data_url(image_path: Path) -> str:
@@ -228,17 +246,37 @@ def call_vision_model(
 
 
 def extract_receipt_from_image(image_path: Path, model: str) -> Dict[str, Any]:
-    client = openclaw_client()
-    content = call_vision_model(client, model, image_path, RECEIPT_PROMPT)
-    receipt = normalize_receipt_payload(extract_json_object(content))
-    if receipt_needs_retry(receipt):
-        retry_content = call_vision_model(client, model, image_path, RECEIPT_PROMPT, prior_assistant=content)
-        retry_receipt = normalize_receipt_payload(extract_json_object(retry_content))
-        if not receipt_needs_retry(retry_receipt) or len(retry_receipt.get("items") or []) >= len(
-            receipt.get("items") or []
-        ):
-            receipt = retry_receipt
-    return receipt
+    last_error: Exception | None = None
+    for base_url, active_model in vision_endpoint_candidates(model):
+        try:
+            client = openclaw_client(base_url=base_url)
+            content = call_vision_model(client, active_model, image_path, RECEIPT_PROMPT)
+            receipt = normalize_receipt_payload(extract_json_object(content))
+            if receipt_needs_retry(receipt):
+                retry_content = call_vision_model(
+                    client, active_model, image_path, RECEIPT_PROMPT, prior_assistant=content
+                )
+                retry_receipt = normalize_receipt_payload(extract_json_object(retry_content))
+                if not receipt_needs_retry(retry_receipt) or len(retry_receipt.get("items") or []) >= len(
+                    receipt.get("items") or []
+                ):
+                    receipt = retry_receipt
+            return receipt
+        except VisionModelUnsupportedError:
+            raise
+        except BadRequestError as exc:
+            last_error = exc
+            if _vision_error_retriable(exc):
+                continue
+            raise
+        except Exception as exc:
+            last_error = exc
+            if _vision_error_retriable(exc):
+                continue
+            raise
+    if last_error:
+        raise last_error
+    raise RuntimeError("No hay endpoint vision configurado.")
 
 
 def format_receipt_summary(receipt: Dict[str, Any]) -> str:

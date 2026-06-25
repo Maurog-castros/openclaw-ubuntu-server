@@ -16,6 +16,8 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from pypdf import PdfReader
 
+from runtime_paths import resolve_repo_path
+
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -564,8 +566,8 @@ def main() -> None:
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
-    credentials_file = Path(args.credentials)
-    token_file = Path(args.token)
+    credentials_file = resolve_repo_path(args.credentials)
+    token_file = resolve_repo_path(args.token)
     output_file = Path(args.output)
     state_file = Path(args.state)
     output_file.parent.mkdir(parents=True, exist_ok=True)

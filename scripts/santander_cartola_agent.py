@@ -26,6 +26,7 @@ from lider_receipts_agent import (
     load_state,
     save_state,
 )
+from runtime_paths import resolve_repo_path
 
 DEFAULT_QUERY = (
     'from:mensajeria@santander.cl subject:"Cartola Mensual" has:attachment newer_than:400d'
@@ -359,7 +360,10 @@ def main() -> None:
     if args.reset:
         output.unlink(missing_ok=True)
         state_path.unlink(missing_ok=True)
-    service = get_gmail_service(Path(args.credentials), Path(args.token))
+    service = get_gmail_service(
+        resolve_repo_path(args.credentials),
+        resolve_repo_path(args.token),
+    )
     count = process_messages(
         service,
         args.query,

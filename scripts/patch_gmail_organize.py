@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 from pathlib import Path
 
-path = Path("/home/mauro/openclaw-mauro/scripts/gmail_organize_agent.py")
+path = Path(__file__).resolve().parent / "gmail_organize_agent.py"
 text = path.read_text(encoding="utf-8")
 
 if "resolve_modify_token" not in text:
-    insert = "from vida_common import secret_path, writable_secret_path\n\n\n"
+    insert = "from runtime_paths import resolve_repo_path\nfrom vida_common import secret_path, writable_secret_path\n\n\n"
     text = text.replace("from googleapiclient.errors import HttpError\n\n", "from googleapiclient.errors import HttpError\n\n" + insert)
     helper = '''
 def resolve_modify_token(token_arg: str) -> Path:
-    if token_arg != "secrets/gmail_modify_token.json":
-        return ROOT / token_arg
+    resolved = resolve_repo_path(token_arg)
+    if resolved.exists():
+        return resolved
     found = secret_path("gmail_modify_token.json")
     return found if found else writable_secret_path("gmail_modify_token.json")
 

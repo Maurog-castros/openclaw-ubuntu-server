@@ -15,6 +15,8 @@ from typing import Any, Dict, List, Optional
 
 from bs4 import BeautifulSoup
 
+from runtime_paths import resolve_repo_path
+
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
 DEFAULT_QUERY = (
@@ -472,8 +474,8 @@ def main() -> None:
             print(json.dumps(row, ensure_ascii=False, indent=2))
         return
 
-    credentials_file = Path(args.credentials)
-    token_file = Path(args.token)
+    credentials_file = resolve_repo_path(args.credentials)
+    token_file = resolve_repo_path(args.token)
 
     try:
         from googleapiclient.errors import HttpError

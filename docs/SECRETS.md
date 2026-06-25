@@ -19,6 +19,7 @@ compatibilidad con scripts existentes. Ningun archivo real se sube a GitHub.
 | `linkedin_storage_state.json` | Sesion LinkedIn personal de Jobs |
 | `laborum_storage_state.json` | Sesion Laborum |
 | `chiletrabajos_storage_state.json` | Sesion ChileTrabajos |
+| `computrabajo_storage_state.json` | Sesion Computrabajo candidato |
 | `whatsapp_allow_from.txt` | Numeros permitidos de WhatsApp |
 | `.env` | Credenciales de portales Jobs |
 

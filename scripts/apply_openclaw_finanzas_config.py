@@ -11,14 +11,13 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-REPO_DEV = Path(__file__).resolve().parent.parent
-CONFIG_PATH = REPO_DEV / "data/config/openclaw.json"
-if not CONFIG_PATH.exists():
-    CONFIG_PATH = Path("/home/mauro/openclaw-mauro/data/config/openclaw.json")
-REPO_ROOT = REPO_DEV if (REPO_DEV / "data/config").exists() else Path("/home/mauro/openclaw-mauro")
+from runtime_paths import repo_root, secrets_dir
+
+REPO_ROOT = repo_root()
+CONFIG_PATH = REPO_ROOT / "data/config/openclaw.json"
 SOUL_PATH = REPO_ROOT / "data/workspace/marketing/finanzas/SOUL.md"
 MAIN_AGENTS_PATH = REPO_ROOT / "data/workspace/AGENTS.md"
-WHATSAPP_ALLOW_FILE = REPO_ROOT / "secrets/whatsapp_allow_from.txt"
+WHATSAPP_ALLOW_FILE = secrets_dir() / "whatsapp_allow_from.txt"
 WHATSAPP_AUTH_DIR = f"{REPO_ROOT}/data/config/whatsapp-auth/default"
 CONFIG_DIR = REPO_ROOT / "data/config"
 FINANZAS_COMPOSE_OVERRIDE = REPO_ROOT / "openclaw" / "docker-compose.finanzas-mounts.yml"
@@ -251,6 +250,8 @@ HOST_CONTAINER_SYMLINKS: dict[str, Path] = {}
 
 FINANZAS_DOCKER_MOUNTS = [
     f"{REPO_ROOT}/scripts:{CONTAINER_REPO}/scripts:ro",
+    f"{REPO_ROOT}/config:{CONTAINER_REPO}/config:ro",
+    f"{REPO_ROOT}/runtime:{CONTAINER_REPO}/runtime:rw",
     f"{REPO_ROOT}/.venv-finanzas-docker:{CONTAINER_REPO}/.venv-finanzas-docker:rw",
     f"{REPO_ROOT}/.venv-finanzas:{CONTAINER_REPO}/.venv-finanzas:ro",
     f"{REPO_ROOT}/data:{CONTAINER_REPO}/data:rw",
