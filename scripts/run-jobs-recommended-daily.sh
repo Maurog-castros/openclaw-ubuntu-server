@@ -25,4 +25,8 @@ flock -n "$LOCK" "$PY" "$ROOT/scripts/jobs_linkedin_recommended.py" --json \
 
 bash "$ROOT/scripts/run-jobs-chiletrabajos-daily.sh"
 
+bash "$ROOT/scripts/run-jobs-computrabajo-daily.sh"
+
+bash "$ROOT/scripts/run-jobs-perceptual-daily.sh"
+
 echo "[$(date -Is)] jobs recommended daily done"

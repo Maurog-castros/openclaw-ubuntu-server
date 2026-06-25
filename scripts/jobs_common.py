@@ -203,3 +203,19 @@ def vacancy_title(text: str) -> str:
         if sep in text:
             return text.split(sep)[0].strip()[:120]
     return text[:120].strip()
+
+
+DOCKER_NODE_UID = int(os.environ.get("OPENCLAW_NODE_UID", "1000"))
+DOCKER_NODE_GID = int(os.environ.get("OPENCLAW_NODE_GID", "1000"))
+
+
+def ensure_gateway_writable(path: Path) -> None:
+    """Gateway Docker escribe como node (uid 1000). Evita Permission denied en job.json."""
+    try:
+        if path.is_dir():
+            path.chmod(0o2775)
+        else:
+            path.chmod(0o664)
+        os.chown(path, DOCKER_NODE_UID, DOCKER_NODE_GID)
+    except OSError:
+        pass

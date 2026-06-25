@@ -16,6 +16,19 @@ class JobsPipelineTest(unittest.TestCase):
  def test_discard_blocks_apply(self):
   jobs_approval.set_decision(self.job_id,"descartar")
   with self.assertRaises(PermissionError):jobs_approval.require_approved(self.job_id)
+ def test_approve_all_from_latest_report(self):
+  import csv
+  ranked=jobs_approval.JOBS_WS/"ranked_vacancies_latest.csv"
+  ranked.parent.mkdir(parents=True,exist_ok=True)
+  jid2="3856264";d=jobs_approval.VACANCIES/jid2;d.mkdir(parents=True,exist_ok=True)
+  (d/"job.json").write_text(json.dumps({"job_id":jid2,"title":"Cloud Engineer AWS","decision_status":"pending_approval","vacancy_score":7.1}),encoding="utf-8")
+  with ranked.open("w",encoding="utf-8",newline="") as h:
+   w=csv.DictWriter(h,fieldnames=["job_id","vacancy_score","title","company","availability_status","decision_status"])
+   w.writeheader();w.writerow({"job_id":self.job_id,"vacancy_score":"8","title":"Cloud Engineer","company":"ACME","availability_status":"open","decision_status":"pending_approval"})
+   w.writerow({"job_id":jid2,"vacancy_score":"7.1","title":"Cloud Engineer AWS","company":"RyC","availability_status":"open","decision_status":"pending_approval"})
+  bulk=jobs_approval.approve_all_from_latest_report()
+  self.assertEqual(2,len(bulk["approved"]))
+  self.assertIn("2 aprobadas",bulk["whatsapp_reply"])
  def test_sparse_keyword_match_never_reaches_threshold(self):
   result=score_cv("AWS Kubernetes Python","Se requiere AWS Kubernetes Python")
   self.assertLess(result["score"],9.5)

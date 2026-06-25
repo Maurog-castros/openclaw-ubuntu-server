@@ -60,7 +60,28 @@ def run_job_id(job_id: str, *, dry_run: bool, headed: bool) -> dict[str, Any]:
     li_py = root / ".venv-linkedin-intel/bin/python"
     py = str(li_py) if li_py.exists() else "python3"
     job = load_job(job_id)
-    cmd = [py, str(root / "scripts/jobs_linkedin_apply.py"), "--job-url", job["job_url"], "--json"]
+    job_url = str(job.get("job_url") or "")
+    if "chiletrabajos.cl" in job_url:
+        script = "jobs_chiletrabajos_apply.py"
+        cmd = [py, str(root / "scripts" / script), job_id, "--json"]
+    elif "computrabajo.com" in job_url:
+        return {
+            "status": "error",
+            "whatsapp_reply": (
+                f"Computrabajo aun no tiene postulacion automatica. "
+                f"Postula manual: {job_url}"
+            ),
+        }
+    elif "perceptual.cl" in job_url:
+        return {
+            "status": "error",
+            "whatsapp_reply": (
+                f"Perceptual requiere postulacion manual en el portal. "
+                f"Postula aqui: {job_url}"
+            ),
+        }
+    else:
+        cmd = [py, str(root / "scripts/jobs_linkedin_apply.py"), "--job-url", job_url, "--json"]
     if dry_run:
         cmd.append("--dry-run")
     if headed:
@@ -88,7 +109,7 @@ def main() -> None:
         if not cv_index:
             raise RuntimeError("Sin CV indexados. Corre: /jobs indexar cv")
 
-        job_match = re.search(r"\b\d{8,12}\b", args.text)
+        job_match = re.search(r"\b(?:\d{5,12}|[A-Fa-f0-9]{16,40})\b", args.text)
         if job_match:
             results = [run_job_id(job_match.group(0), dry_run=args.dry_run, headed=args.headed)]
         else:

@@ -141,9 +141,23 @@ def main() -> int:
         if chile_code != 0:
             notifier.offer("Jobs 35% — ChileTrabajos no disponible; continuaré con LinkedIn")
 
+        ct_code = run_step(
+            [str(LINKEDIN_PY), str(SCR / "jobs_computrabajo_scrape.py"), "--json"],
+            notifier=notifier, label="buscando en Computrabajo", start=35, end=42, estimate=25,
+        )
+        if ct_code != 0:
+            notifier.offer("Jobs 42% — Computrabajo no disponible; continuaré con otras fuentes")
+
+        perc_code = run_step(
+            [str(LINKEDIN_PY), str(SCR / "jobs_perceptual_scrape.py"), "--json"],
+            notifier=notifier, label="buscando en Perceptual", start=42, end=48, estimate=20,
+        )
+        if perc_code != 0:
+            notifier.offer("Jobs 48% — Perceptual no disponible; continuaré con otras fuentes")
+
         if run_step(
             [str(LINKEDIN_PY), str(SCR / "jobs_recommended_pipeline.py"), "--json"],
-            notifier=notifier, label="verificando y evaluando vacantes", start=35, end=95, estimate=150,
+            notifier=notifier, label="verificando y evaluando vacantes", start=48, end=95, estimate=150,
         ) != 0:
             notifier.offer("Jobs detenido: falló la verificación de vacantes.")
             notifier.flush()

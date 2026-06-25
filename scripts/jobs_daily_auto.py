@@ -12,14 +12,12 @@ from typing import Any
 
 from jobs_common import ROOT, load_config
 from jobs_registry_csv import csv_path, list_applications
+from runtime_paths import whatsapp_allow_files
 
 FIN_PY = ROOT / ".venv-finanzas/bin/python"
 LI_PY = ROOT / ".venv-linkedin-intel/bin/python"
 OPENCLAW_DIR = ROOT / "openclaw"
-TARGET_CANDIDATES = [
-    ROOT / "secrets/whatsapp_allow_from.txt",
-    Path("/home/node/.openclaw-secrets/whatsapp_allow_from.txt"),
-]
+TARGET_CANDIDATES = list(whatsapp_allow_files())
 
 
 def run_script(py: Path, script: str, *args: str, timeout: int = 900) -> dict[str, Any]:

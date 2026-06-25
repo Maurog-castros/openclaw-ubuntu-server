@@ -194,7 +194,7 @@ def ensure_login(
     credentials = load_laborum_credentials()
     if not credentials:
         raise RuntimeError(
-            "Sin credenciales Laborum en data/secrets/.env. "
+            "Sin credenciales Laborum en runtime/secrets/.env. "
             "Agrega laborum_account_email y laborum_account_passwd."
         )
 
@@ -217,7 +217,7 @@ def ensure_login(
         html = page.content().lower()
         if any(x in html for x in ("contraseña incorrecta", "password incorrect", "credenciales invalidas")):
             raise RuntimeError(
-                "Credenciales Laborum invalidas en data/secrets/.env. "
+                "Credenciales Laborum invalidas en runtime/secrets/.env. "
                 "Revisa laborum_account_email y laborum_account_passwd."
             )
     except RuntimeError:

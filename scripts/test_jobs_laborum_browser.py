@@ -9,7 +9,7 @@ from jobs_laborum_browser import load_laborum_credentials, save_session, storage
 class LaborumBrowserTest(unittest.TestCase):
     def test_load_credentials_from_env(self):
         creds = load_laborum_credentials()
-        self.assertIsNotNone(creds, "Se esperan credenciales laborum en data/secrets/.env")
+        self.assertIsNotNone(creds, "Se esperan credenciales laborum en runtime/secrets/.env")
         email, password = creds
         self.assertIn("@", email)
         self.assertGreater(len(password), 3)

@@ -3,7 +3,7 @@
 from __future__ import annotations
 import argparse, csv, json, time
 from datetime import datetime, timedelta
-from jobs_common import JOBS_WS, load_config
+from jobs_common import JOBS_WS, ensure_gateway_writable, load_config
 from jobs_cv_rank import generate_adapted_cv, rank_cvs, write_ranking_csv
 from jobs_linkedin_browser import ensure_login, launch_browser, new_context
 VACANCIES_DIR=JOBS_WS/"vacancies"
@@ -21,6 +21,11 @@ CLOSED_MARKERS=(
  "no longer accepting applications",
  "this job is no longer available",
  "job is no longer available",
+ "oferta ha finalizado",
+ "oferta finalizada",
+ "ya no esta disponible",
+ "ya no está disponible",
+ "aviso finalizado",
 )
 class ClosedVacancyError(RuntimeError):pass
 def source_row_is_fresh(row,now=None,max_age_hours=MAX_SOURCE_AGE_HOURS):
@@ -38,7 +43,7 @@ def vacancy_availability(*texts):
  return "open","live detail page without closed markers"
 def rows(now=None):
  out=[]
- for name in ("linkedin_recommended_latest.csv","chiletrabajos_latest.csv"):
+ for name in ("linkedin_recommended_latest.csv","chiletrabajos_latest.csv","computrabajo_latest.csv","perceptual_latest.csv"):
   p=JOBS_WS/name
   if not p.exists(): continue
   with p.open(encoding="utf-8",newline="") as h:
@@ -49,6 +54,7 @@ def rows(now=None):
   key=row.get("job_id") or row.get("job_url")
   if key in seen: continue
   seen.add(key);dedup.append(row)
+ dedup.sort(key=lambda row:int(row.get("match_score") or 0),reverse=True)
  return dedup
 def extract_chiletrabajos(row,d):
  from jobs_chiletrabajos_scrape import fetch_job_detail
@@ -59,6 +65,24 @@ def extract_chiletrabajos(row,d):
  if len(str(data.get("description") or ""))<120:
   shot=d/"extraction-error.png"
   raise RuntimeError(f"JD incompleta ChileTrabajos ({len(data.get('description') or '')}); url={row['job_url']}")
+ return data
+def extract_computrabajo(row,d):
+ from jobs_computrabajo_scrape import fetch_job_detail
+ data=fetch_job_detail(row["job_url"])
+ status,reason=vacancy_availability(data.get("description"),data.get("title"))
+ if status!="open":raise ClosedVacancyError(f"Vacante cerrada: {reason}; url={row['job_url']}")
+ data.update(availability_status="open",availability_reason=reason)
+ if len(str(data.get("description") or ""))<120:
+  raise RuntimeError(f"JD incompleta Computrabajo ({len(data.get('description') or '')}); url={row['job_url']}")
+ return data
+def extract_perceptual(row,d):
+ from jobs_perceptual_scrape import fetch_job_detail
+ data=fetch_job_detail(row["job_url"])
+ status,reason=vacancy_availability(data.get("description"),data.get("title"))
+ if status!="open":raise ClosedVacancyError(f"Vacante cerrada: {reason}; url={row['job_url']}")
+ data.update(availability_status="open",availability_reason=reason)
+ if len(str(data.get("description") or ""))<120:
+  raise RuntimeError(f"JD incompleta Perceptual ({len(data.get('description') or '')}); url={row['job_url']}")
  return data
 def old(d):
  try:return json.loads((d/"job.json").read_text(encoding="utf-8"))
@@ -94,12 +118,14 @@ def vacancy_score(data,row):
 def process(page,row,threshold):
  jid=row.get("job_id") or row["job_url"].rstrip("/").split("/")[-1];d=VACANCIES_DIR/jid;d.mkdir(parents=True,exist_ok=True);prev=old(d)
  if "chiletrabajos.cl" in str(row.get("job_url") or ""): data=extract_chiletrabajos(row,d)
+ elif "computrabajo.com" in str(row.get("job_url") or ""): data=extract_computrabajo(row,d)
+ elif "perceptual.cl" in str(row.get("job_url") or ""): data=extract_perceptual(row,d)
  else: data=extract(page,row,d)
  (d/"description.txt").write_text(data["description"]+"\n",encoding="utf-8");ranks=rank_cvs(data["description"]);ranking=write_ranking_csv(ranks,d,"cv");best=float(ranks[0].get("score") or 0) if ranks else 0
  generated=str(generate_adapted_cv(data["description"],d,f"{jid}-adapted")) if best<threshold else ""
  state={"job_id":jid,"discovered_at":row.get("scraped_at"),"analyzed_at":datetime.now().astimezone().isoformat(timespec="seconds"),"availability_checked_at":datetime.now().astimezone().isoformat(timespec="seconds"),**data,"workplace":row.get("workplace"),"easy_apply":row.get("easy_apply")=="1","job_url":row.get("job_url"),"vacancy_score":vacancy_score(data,row),"best_cv":ranks[0] if ranks else {},"best_cv_score":best,"generated_cv":generated,"ranking_csv":str(ranking),"decision_status":prev.get("decision_status") or "pending_approval","decision_at":prev.get("decision_at") or "","applied_at":prev.get("applied_at") or ""}
  report=d/"analysis.md";report.write_text(f"# {state['title']}\n\nEmpresa: {state['company']}\nJob ID: {jid}\nURL: {state['job_url']}\nNota vacante: {state['vacancy_score']}/10\nMejor CV: {state['best_cv'].get('file','')} ({best}/10)\nCV adaptado: {generated or 'no requerido'}\nEstado: {state['decision_status']}\n\nAprobar: /jobs aprobar {jid}\nDescartar: /jobs descartar {jid}\nPostular: /jobs postular {jid}\n\n## JD\n\n{data['description']}\n",encoding="utf-8");state["analysis_report"]=str(report)
- (d/"job.json").write_text(json.dumps(state,ensure_ascii=False,indent=2)+"\n",encoding="utf-8");return state
+ (d/"job.json").write_text(json.dumps(state,ensure_ascii=False,indent=2)+"\n",encoding="utf-8");ensure_gateway_writable(d);ensure_gateway_writable(d/"job.json");return state
 def save_summary(states):
  states=[s for s in states if s.get("availability_status")=="open"];states.sort(key=lambda x:float(x.get("vacancy_score") or 0),reverse=True);p=JOBS_WS/f"ranked_vacancies_{datetime.now():%Y-%m-%d}.csv";f=["job_id","vacancy_score","title","company","location","workplace","easy_apply","best_cv_score","best_cv_file","generated_cv","decision_status","availability_status","availability_checked_at","job_url"]
  with p.open("w",encoding="utf-8",newline="") as h:

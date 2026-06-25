@@ -13,6 +13,7 @@ def build():
  lines=[f"Jobs recomendados: {len(rows)} vacantes abiertas verificadas / {len(pending)} pendientes",""]
  for r in pending[:8]:
   lines += [f"{r['job_id']} | {r.get('vacancy_score')}/10 | {r.get('title')} @ {r.get('company')}",f"CV {r.get('best_cv_score')}/10: {r.get('best_cv_file')}",f"{r.get('job_url')}","Aprobar: /jobs aprobar "+r["job_id"],""]
+ if pending:lines += ["Aprobar todas: /jobs aprobar todos",""]
  lines.append(f"Ranking: {p}");return "\n".join(lines),rows
 def main():
  ap=argparse.ArgumentParser();ap.add_argument("--send-whatsapp",action="store_true");ap.add_argument("--json",action="store_true");a=ap.parse_args()

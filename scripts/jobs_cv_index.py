@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Indexa CVs PDF de content/CV para el agente Jobs."""
+"""Indexa CVs PDF de runtime/jobs/cv-library para el agente Jobs."""
 
 from __future__ import annotations
 
