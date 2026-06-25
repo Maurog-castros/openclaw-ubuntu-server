@@ -67,7 +67,26 @@
     "limit": 80,
     "use_session": true,
     "storage_state": "runtime/secrets/chiletrabajos_storage_state.json",
+    "headless": true,
+    "recommended": true,
+    "recommended_url": "https://www.chiletrabajos.cl/dashboard/ofertas-recomendadas",
+    "recommended_limit": 40,
+    "recommended_score_bonus": 4
+  },
+  "computrabajo": {
+    "categories": ["informatica", "devops", "cloud", "devsecops", "mlops", "ingeniero-devops"],
+    "region_suffix": "en-rmetropolitana",
+    "min_score": 12,
+    "limit": 80,
+    "storage_state": "runtime/secrets/computrabajo_storage_state.json",
+    "login_url": "https://candidato.cl.computrabajo.com/acceso/",
+    "home_url": "https://candidato.cl.computrabajo.com/candidate/home",
     "headless": true
+  },
+  "perceptual": {
+    "listing_url": "https://laboral.perceptual.cl/empleos/",
+    "min_score": 6,
+    "limit": 80
   },
   "profile_experience_path": "config/jobs/profile_experience.json",
   "job_portals": {
