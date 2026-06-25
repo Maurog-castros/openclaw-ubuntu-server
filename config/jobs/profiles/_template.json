@@ -1,0 +1,70 @@
+{
+  "owner": "Nombre Apellido",
+  "email": "correo@ejemplo.com",
+  "linkedin": "",
+  "location": "Santiago, Chile",
+  "cv_dir": "runtime/jobs/cv-library/PERFIL_ID",
+  "cv_include_globs": ["*.pdf", "CV_*.pdf"],
+  "cv_exclude_patterns": [],
+  "target_roles": [
+    "DevOps Engineer",
+    "Cloud Engineer"
+  ],
+  "core_skills": [
+    "kubernetes", "docker", "aws", "terraform", "ci/cd", "devops"
+  ],
+  "job_post_terms": [
+    "vacante", "hiring", "buscamos", "postula", "empleo", "trabajo"
+  ],
+  "demote_terms": [
+    "intern", "practicante", "sin experiencia", "junior only"
+  ],
+  "min_match_score": 12,
+  "linkedin_signals_glob": "data/workspace/marketing/intel/data/linkedin_signals_*.json",
+  "linkedin_storage_state": "runtime/secrets/jobs/PERFIL_ID/linkedin_storage_state.json",
+  "applications_csv": "data/workspace/jobs/PERFIL_ID/applications.csv",
+  "geo_urn": "104621616",
+  "location_search": "Chile",
+  "easy_apply_only": true,
+  "max_auto_apply_per_run": 3,
+  "headless": true,
+  "phone": "",
+  "locale": "es-CL",
+  "job_search_keywords": [
+    "devops engineer",
+    "cloud engineer"
+  ],
+  "profile_experience_path": "config/jobs/profiles/PERFIL_ID_experience.json",
+  "chiletrabajos": {
+    "category_slug": "informatica",
+    "category_id": "2007",
+    "extra_categories": ["teletrabajo"],
+    "mode": "both",
+    "rss_limit": 600,
+    "pages": 4,
+    "keyword": "",
+    "min_score": 12,
+    "limit": 80,
+    "use_session": true,
+    "storage_state": "runtime/secrets/jobs/PERFIL_ID/chiletrabajos_storage_state.json",
+    "headless": true
+  },
+  "job_portals": {
+    "laborum": {
+      "storage_state": "runtime/secrets/jobs/PERFIL_ID/laborum_storage_state.json",
+      "login_url": "https://www.laborum.cl/login?returnTo=/candidatos/curriculum",
+      "experience_url": "https://www.laborum.cl/candidatos/curriculum/experiencia/agregar",
+      "curriculum_url": "https://www.laborum.cl/candidatos/curriculum",
+      "headless": true,
+      "auto_login": false
+    }
+  },
+  "profile_answers": {
+    "years_experience": "3+",
+    "work_authorization": "Chilean citizen, authorized to work in Chile",
+    "notice_period": "2 weeks",
+    "salary_expectation": "According to market range",
+    "english_level": "Professional working proficiency",
+    "generic_short": "Yes, I have relevant hands-on experience."
+  }
+}

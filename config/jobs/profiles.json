@@ -1,0 +1,13 @@
+{
+  "default": "mauro",
+  "profiles": {
+    "mauro": {
+      "label": "Mauricio Castro",
+      "config_path": "config/jobs/config.json",
+      "workspace": "data/workspace/jobs",
+      "spreadsheet_id": "17upYNL_QXHez2M8aOvDxWiLG3Qw7AJYrvv_H8Ev_N-U",
+      "cv_dir": "runtime/jobs/cv-library",
+      "secrets_dir": "runtime/secrets/jobs/mauro"
+    }
+  }
+}
