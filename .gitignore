@@ -150,6 +150,38 @@ data/workspace/*/data/selfcare_profile.json
 data/workspace/jobs/reports/
 data/workspace/jobs/laborum/
 
+# Jobs — pipeline runtime (regenerable; no versionar)
+data/workspace/jobs/vacancies/
+data/workspace/jobs/cv_generated/
+data/workspace/jobs/cv_rankings/
+data/workspace/jobs/chiletrabajos_latest.json
+data/workspace/jobs/computrabajo_latest.json
+data/workspace/jobs/perceptual_latest.json
+data/workspace/jobs/linkedin_recommended_latest.json
+data/workspace/jobs/recommended_pipeline_latest.json
+data/workspace/jobs/cv_index.json
+data/workspace/jobs/last_matches.json
+data/workspace/jobs/**/*.docx
+data/workspace/jobs/**/*.pdf
+
+# OpenClaw — estado runtime por agente (SOUL/AGENTS.md sí pueden versionarse)
+data/workspace/**/.openclaw/
+data/workspace/**/HEARTBEAT.md
+data/workspace/**/IDENTITY.md
+data/workspace/**/TOOLS.md
+data/workspace/**/USER.md
+data/workspace/**/MEMORY.md
+
+# Care — datos personales y contexto diario
+data/workspace/care/data/
+data/workspace/care/context/
+
+# Logs / estado append-only en workspace
+data/workspace/**/*.jsonl
+
+# Catálogo: entradas personales generadas en runtime
+data/workspace/_catalog/agents/mauro.md
+
 # Caché graphify / artefactos generados
 graphify-out/
 
