@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import unittest
 
-from runtime_paths import cv_library_dir, logs_dir, resolve_repo_path, secrets_dir
+from runtime_paths import cv_library_dir, logs_dir, resolve_repo_path, secrets_dir, whatsapp_allow_files
 
 
 class RuntimePathsTests(unittest.TestCase):
@@ -33,6 +33,10 @@ class RuntimePathsTests(unittest.TestCase):
 
     def test_logs_alias(self) -> None:
         self.assertEqual(resolve_repo_path("logs/model-sync.log"), logs_dir() / "model-sync.log")
+
+    def test_whatsapp_allow_files(self) -> None:
+        paths = whatsapp_allow_files()
+        self.assertTrue(str(paths[0]).endswith("runtime/secrets/whatsapp_allow_from.txt"))
 
 
 if __name__ == "__main__":

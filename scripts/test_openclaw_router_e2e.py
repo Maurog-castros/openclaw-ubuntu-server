@@ -14,7 +14,16 @@ ROOT = SCR.parent
 if str(SCR) not in sys.path:
     sys.path.insert(0, str(SCR))
 
-from openclaw_message_router import clear_sticky_agent, detect_agent, explicit_prefix, save_sticky_agent
+from openclaw_message_router import (
+    agent_switch_notice,
+    apply_explicit_agent_switch,
+    clear_sticky_agent,
+    detect_agent,
+    explicit_prefix,
+    is_care_checkin_followup,
+    normalize_routing_text,
+    save_sticky_agent,
+)
 
 RUN = SCR / "run-finanzas-py.sh"
 DELEGATE = SCR / "channel_delegate.py"
@@ -45,6 +54,8 @@ CASES = [
     Case("como estoy hoy", "care"),
     Case("/care diario", "care"),
     Case("/care medicamentos", "care"),
+    Case("siempre me das el mismo consejo", "care"),
+    Case("dime que datos de salud fueron los ultimos que registraste", "care"),
     # Supp
     Case("escanear logs", "supp"),
     Case("estado del sistema", "supp"),
@@ -79,6 +90,35 @@ def run_delegate(text: str, *, has_media: bool = False) -> dict:
         return {"status": "error", "whatsapp_reply": raw[:200]}
 
 
+def run_agent_switch_tests() -> int:
+    failed = 0
+    print("=== Agent switch ===")
+    clear_sticky_agent()
+
+    save_sticky_agent("jobs")
+    msg = "[WhatsApp +56945046845] /fin saldo"
+    explicit, previous, switched = apply_explicit_agent_switch(msg)
+    ok = explicit == "fin" and previous == "jobs" and switched
+    if not ok:
+        failed += 1
+    print(f"  [{'OK' if ok else 'FAIL'}] metadata WA + /fin -> explicit={explicit} prev={previous} switched={switched}")
+
+    notice = agent_switch_notice("jobs", "fin")
+    ok = "Hilo: /jobs → /fin" in notice and "automatico" in notice
+    if not ok:
+        failed += 1
+    print(f"  [{'OK' if ok else 'FAIL'}] notice switch jobs->fin")
+
+    got = detect_agent(msg, apply_switch=False)
+    ok = got == "fin"
+    if not ok:
+        failed += 1
+    print(f"  [{'OK' if ok else 'FAIL'}] prefix fin tras metadata -> {got}")
+
+    clear_sticky_agent()
+    return failed
+
+
 def run_sticky_tests() -> int:
     failed = 0
     print("=== Sticky thread ===")
@@ -110,6 +150,25 @@ def run_sticky_tests() -> int:
         failed += 1
     print(f"  [{'OK' if ok else 'FAIL'}] sin sticky + «dame el saldo» -> {got} (want fin)")
 
+    save_sticky_agent("jobs")
+    got = detect_agent("caption corta", has_media=True)
+    ok = got == "fin"
+    if not ok:
+        failed += 1
+    print(f"  [{'OK' if ok else 'FAIL'}] sticky jobs + foto -> {got} (want fin)")
+
+    save_sticky_agent("jobs")
+    got = detect_agent("siempre me das el mismo consejo")
+    ok = got == "care"
+    if not ok:
+        failed += 1
+    print(f"  [{'OK' if ok else 'FAIL'}] sticky jobs + queja Fede -> {got} (want care)")
+
+    ok = is_care_checkin_followup("este consejo de cerrar el dia")
+    if not ok:
+        failed += 1
+    print(f"  [{'OK' if ok else 'FAIL'}] follow-up check-in phrase detected")
+
     return failed
 
 
@@ -126,6 +185,7 @@ def main() -> int:
             failed += 1
         print(f"  [{mark}] {case.text!r} -> {got} (want {case.expect_agent}, prefix={prefix})")
 
+    failed += run_agent_switch_tests()
     failed += run_sticky_tests()
     clear_sticky_agent()
 

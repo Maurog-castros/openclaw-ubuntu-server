@@ -10,14 +10,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import FrozenSet
 
-ROOT = Path("/home/node/openclaw-mauro")
-if not ROOT.exists():
-    ROOT = Path(__file__).resolve().parent.parent
+from runtime_paths import repo_root, secrets_dir
+
+ROOT = repo_root()
 
 CONFIG_CANDIDATES = (
     ROOT / "data/whatsapp_users.json",
     ROOT / "config/whatsapp_users.json",
-    ROOT / "secrets/whatsapp_users.json",
+    secrets_dir() / "whatsapp_users.json",
 )
 
 PEER_SESSION_RE = re.compile(r"(?:^|:)whatsapp(?::[^:\s]+)*:(\+\d{8,15})(?:$|[:\s])", re.I)

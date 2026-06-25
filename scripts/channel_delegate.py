@@ -19,11 +19,15 @@ if str(SCR) not in sys.path:
     sys.path.insert(0, str(SCR))
 
 from openclaw_message_router import (
+    agent_switch_notice,
+    apply_explicit_agent_switch,
     clear_sticky_agent,
     current_sticky_agent,
     detect_agent,
     explicit_prefix,
+    normalize_routing_text,
     parse_month_from_text,
+    reset_openclaw_session_for_switch,
     save_sticky_agent,
     strip_agent_prefix,
 )
@@ -33,6 +37,7 @@ from channel_user_context import (
     guest_agent_denied_message,
     resolve_user_context,
 )
+from vida_common import is_leaked_tool_call, strip_leaked_tool_calls
 from whatsapp_menu import MenuOption, finish_reply, resolve_menu_choice
 
 RUN_PY = ROOT / "scripts/run-finanzas-py.sh"
@@ -110,8 +115,30 @@ def run_json(cmd: list[str], timeout: int = 200) -> tuple[int, dict, str, str]:
     return proc.returncode, payload, proc.stdout, proc.stderr
 
 
-def emit(payload: dict, *, as_json: bool, agent: str = "fin", skip_menu: bool = False) -> None:
+def emit(
+    payload: dict,
+    *,
+    as_json: bool,
+    agent: str = "fin",
+    skip_menu: bool = False,
+    switch_notice: str = "",
+) -> None:
     reply = payload.get("whatsapp_reply") or payload.get("summary") or ""
+    if reply and is_leaked_tool_call(reply):
+        reply = (
+            "Fede: perdón, me trabé un momento. Cuéntame en una frase qué necesitas y te respondo directo."
+            if agent == "care"
+            else "No pude formular la respuesta. Intenta de nuevo o usa /help."
+        )
+        payload["whatsapp_reply"] = reply
+    elif reply:
+        cleaned = strip_leaked_tool_calls(reply)
+        if cleaned != reply:
+            reply = cleaned or reply
+            payload["whatsapp_reply"] = reply
+    if switch_notice and reply:
+        reply = f"{switch_notice}{reply}"
+        payload["whatsapp_reply"] = reply
     if reply and payload.get("status") not in {"skip", "delegate_miss", "error"}:
         payload.setdefault("status", "ok")
     if reply and payload.get("status") not in {"skip", "delegate_miss"}:
@@ -126,7 +153,7 @@ def emit(payload: dict, *, as_json: bool, agent: str = "fin", skip_menu: bool = 
 
 
 def strip_fin_prefix(text: str) -> str:
-    return FIN_PREFIX_RE.sub("", text or "").strip()
+    return strip_agent_prefix(text, "fin")
 
 
 def resolve_inbound() -> Path:
@@ -311,6 +338,7 @@ def run_help() -> dict:
             "Sin prefijo: intencion automatica o continuar el hilo del ultimo /agent.\n"
             "Prefijos: /fin /care /broh /supp /intel /jobs /hlgo /content /pyme (/PymeChile)\n"
             "Tras /care (u otro), los mensajes siguientes van al mismo agente hasta /new, /reset u otro prefijo.\n"
+            "Cambiar de /jobs a /fin (u otro) reinicia el hilo automaticamente; no hace falta /new.\n"
             "/fin saldo — saldo Santander\n"
             "/fin ultimas boletas — listado\n"
             "/new o /reset — sesion limpia\n"
@@ -694,6 +722,110 @@ def _deny_agent(agent: str, user_ctx) -> dict | None:
     }
 
 
+def _route_to_agent(
+    agent: str,
+    raw_text: str,
+    *,
+    args,
+    user_ctx,
+    has_media: bool,
+    image_path: str | None,
+    explicit_agent: str | None,
+    switch_notice: str = "",
+) -> None:
+    denied = _deny_agent(agent, user_ctx)
+    if denied:
+        emit(denied, as_json=args.json, agent="fin", skip_menu=True, switch_notice=switch_notice)
+        return
+    if agent == "care":
+        emit(
+            run_care_delegate(raw_text, has_media, image_path),
+            as_json=args.json,
+            agent="care",
+            skip_menu=True,
+            switch_notice=switch_notice,
+        )
+        return
+    if agent == "broh":
+        emit(
+            run_broh_delegate(raw_text, args.session_key, args.peer),
+            as_json=args.json,
+            agent="broh",
+            skip_menu=True,
+            switch_notice=switch_notice,
+        )
+        return
+    if agent == "supp":
+        emit(run_supp_delegate(raw_text), as_json=args.json, agent="supp", switch_notice=switch_notice)
+        return
+    if agent == "intel":
+        emit(
+            run_intel_delegate(strip_agent_prefix(raw_text, "intel") or raw_text),
+            as_json=args.json,
+            agent="fin",
+            skip_menu=True,
+            switch_notice=switch_notice,
+        )
+        return
+    if agent == "jobs":
+        emit(
+            run_jobs_delegate(strip_agent_prefix(raw_text, "jobs") or raw_text),
+            as_json=args.json,
+            agent="fin",
+            skip_menu=True,
+            switch_notice=switch_notice,
+        )
+        return
+    if agent == "hlgo":
+        result = run_hlgo_delegate(strip_agent_prefix(raw_text, "hlgo") or raw_text)
+        if result.get("whatsapp_reply") and result.get("status") not in {"skip", "delegate_miss"}:
+            result.setdefault("status", "ok")
+        emit(result, as_json=args.json, agent="fin", skip_menu=True, switch_notice=switch_notice)
+        return
+    if agent == "jenki":
+        emit(
+            run_jenki_delegate(strip_agent_prefix(raw_text, "jenki") or raw_text, args.session_key, args.peer),
+            as_json=args.json,
+            agent="jenki",
+            skip_menu=True,
+            switch_notice=switch_notice,
+        )
+        return
+    if agent == "content":
+        emit(
+            run_content_delegate(strip_agent_prefix(raw_text, "content") or raw_text),
+            as_json=args.json,
+            agent="fin",
+            skip_menu=True,
+            switch_notice=switch_notice,
+        )
+        return
+    if agent == "pyme-chile":
+        emit(
+            run_pyme_chile_delegate(raw_text, args.session_key, args.peer),
+            as_json=args.json,
+            agent="pyme-chile",
+            skip_menu=True,
+            switch_notice=switch_notice,
+        )
+        return
+
+    body = strip_agent_prefix(raw_text, "fin") if explicit_agent == "fin" else strip_fin_prefix(raw_text)
+    result = dispatch_text(
+        body,
+        has_media=has_media,
+        image_path=image_path,
+        amount=int(args.amount or 0),
+        raw_text=raw_text,
+    )
+    if result.get("status") == "delegate_miss":
+        if args.json:
+            print(json.dumps(result, ensure_ascii=False))
+        sys.exit(2)
+        return
+    emit(result, as_json=args.json, switch_notice=switch_notice)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Router canal WhatsApp/Telegram (multi-agente).")
     parser.add_argument("--text", default="")
@@ -710,126 +842,94 @@ def main() -> None:
     apply_user_env(user_ctx)
 
     raw_text = (args.text or "").strip()
+    explicit_agent, previous_agent, agent_switched = apply_explicit_agent_switch(raw_text)
+    switch_notice = agent_switch_notice(previous_agent, explicit_agent) if agent_switched else ""
+    if agent_switched:
+        reset_openclaw_session_for_switch(args.session_key)
     _latest_img = latest_inbound_image() if args.has_media else None
     image_path = args.image or (str(_latest_img) if _latest_img else None)
     has_media = args.has_media or bool(image_path)
+    routing_text = normalize_routing_text(raw_text)
 
-    if NEW_RESET_RE.search(raw_text):
+    if NEW_RESET_RE.search(routing_text):
         clear_sticky_agent()
         emit(run_session_reset(), as_json=args.json)
         return
 
-    if CARE_RE.search(raw_text):
+    if explicit_agent == "care":
         denied = _deny_agent("care", user_ctx)
         if denied:
             emit(denied, as_json=args.json, agent="care", skip_menu=True)
             return
-        save_sticky_agent("care")
-        emit(run_care_delegate(raw_text, has_media, image_path), as_json=args.json, agent="care", skip_menu=True)
+        _route_to_agent(
+            "care",
+            raw_text,
+            args=args,
+            user_ctx=user_ctx,
+            has_media=has_media,
+            image_path=image_path,
+            explicit_agent=explicit_agent,
+            switch_notice=switch_notice,
+        )
         return
 
-    if BROH_RE.search(raw_text):
+    if explicit_agent == "broh":
         denied = _deny_agent("broh", user_ctx)
         if denied:
             emit(denied, as_json=args.json, agent="broh", skip_menu=True)
             return
-        save_sticky_agent("broh")
-        emit(run_broh_delegate(raw_text, args.session_key, args.peer), as_json=args.json, agent="broh", skip_menu=True)
+        _route_to_agent(
+            "broh",
+            raw_text,
+            args=args,
+            user_ctx=user_ctx,
+            has_media=has_media,
+            image_path=image_path,
+            explicit_agent=explicit_agent,
+            switch_notice=switch_notice,
+        )
         return
 
     text = strip_fin_prefix(raw_text)
-    if HELP_CMD_RE.search(text):
-        emit(run_help(), as_json=args.json)
+    if HELP_CMD_RE.search(routing_text) or HELP_CMD_RE.search(text):
+        emit(run_help(), as_json=args.json, switch_notice=switch_notice)
         return
     if GUEST_GREETING_RE.match(text) and not user_ctx.is_owner:
         emit(run_guest_welcome(user_ctx), as_json=args.json)
         return
-    if STATUS_CMD_RE.search(text):
-        emit(run_status_cmd(), as_json=args.json)
+    if STATUS_CMD_RE.search(routing_text) or STATUS_CMD_RE.search(text):
+        emit(run_status_cmd(), as_json=args.json, switch_notice=switch_notice)
         return
 
     menu_opt = resolve_menu_choice(text)
     if menu_opt:
-        emit(run_menu_option(menu_opt), as_json=args.json)
+        emit(run_menu_option(menu_opt), as_json=args.json, switch_notice=switch_notice)
         return
 
-    agent = detect_agent(raw_text, has_media=has_media)
-    denied = _deny_agent(agent, user_ctx)
-    if denied:
-        emit(denied, as_json=args.json, agent="fin", skip_menu=True)
-        return
-    if agent == "care":
-        emit(run_care_delegate(raw_text, has_media, image_path), as_json=args.json, agent="care", skip_menu=True)
-        return
-    if agent == "broh":
-        emit(run_broh_delegate(raw_text, args.session_key, args.peer), as_json=args.json, agent="broh", skip_menu=True)
-        return
-    if agent == "supp":
-        emit(run_supp_delegate(raw_text), as_json=args.json, agent="supp")
-        return
-    if agent == "intel":
-        emit(
-            run_intel_delegate(strip_agent_prefix(raw_text, "intel") or raw_text),
-            as_json=args.json,
-            agent="fin",
-            skip_menu=True,
-        )
-        return
-    if agent == "jobs":
-        emit(
-            run_jobs_delegate(strip_agent_prefix(raw_text, "jobs") or raw_text),
-            as_json=args.json,
-            agent="fin",
-            skip_menu=True,
-        )
-        return
-    if agent == "hlgo":
-        result = run_hlgo_delegate(strip_agent_prefix(raw_text, "hlgo") or raw_text)
-        if result.get("whatsapp_reply") and result.get("status") not in {"skip", "delegate_miss"}:
-            result.setdefault("status", "ok")
-        emit(result, as_json=args.json, agent="fin", skip_menu=True)
-        return
-    if agent == "jenki":
-        emit(
-            run_jenki_delegate(strip_agent_prefix(raw_text, "jenki") or raw_text, args.session_key, args.peer),
-            as_json=args.json,
-            agent="jenki",
-            skip_menu=True,
-        )
-        return
-    if agent == "content":
-        emit(
-            run_content_delegate(strip_agent_prefix(raw_text, "content") or raw_text),
-            as_json=args.json,
-            agent="fin",
-            skip_menu=True,
-        )
-        return
-    if agent == "pyme-chile":
-        emit(
-            run_pyme_chile_delegate(raw_text, args.session_key, args.peer),
-            as_json=args.json,
-            agent="pyme-chile",
-            skip_menu=True,
+    if explicit_agent:
+        _route_to_agent(
+            explicit_agent,
+            raw_text,
+            args=args,
+            user_ctx=user_ctx,
+            has_media=has_media,
+            image_path=image_path,
+            explicit_agent=explicit_agent,
+            switch_notice=switch_notice,
         )
         return
 
-    body = strip_agent_prefix(raw_text, "fin") if explicit_prefix(raw_text) == "fin" else text
-    result = dispatch_text(
-        body,
+    agent = detect_agent(raw_text, has_media=has_media, apply_switch=False)
+    _route_to_agent(
+        agent,
+        raw_text,
+        args=args,
+        user_ctx=user_ctx,
         has_media=has_media,
         image_path=image_path,
-        amount=int(args.amount or 0),
-        raw_text=raw_text,
+        explicit_agent=explicit_agent,
+        switch_notice="",
     )
-
-    if result.get("status") == "delegate_miss":
-        if args.json:
-            print(json.dumps(result, ensure_ascii=False))
-        sys.exit(2)
-        return
-
-    emit(result, as_json=args.json)
 
 
 if __name__ == "__main__":

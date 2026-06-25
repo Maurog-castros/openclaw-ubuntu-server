@@ -2,14 +2,14 @@
 # Vincula WhatsApp (QR) al gateway OpenClaw — mismo flujo que Telegram/finanzas.
 set -euo pipefail
 
-ROOT="/home/mauro/openclaw-mauro"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 COMPOSE="docker compose -f ${ROOT}/openclaw/docker-compose.yml"
 CLI="${COMPOSE} exec -T openclaw-cli"
 AUTH_HOST="${ROOT}/data/config/whatsapp-auth/default"
 AUTH_CONTAINER="/home/node/.openclaw/whatsapp-auth/default"
-ALLOW_FILE="${ROOT}/secrets/whatsapp_allow_from.txt"
+ALLOW_FILE="${ROOT}/runtime/secrets/whatsapp_allow_from.txt"
 
-mkdir -p "${AUTH_HOST}" "${ROOT}/secrets"
+mkdir -p "${AUTH_HOST}" "${ROOT}/runtime/secrets"
 
 if [[ ! -f "${ALLOW_FILE}" ]]; then
   cat >"${ALLOW_FILE}" <<'EOF'

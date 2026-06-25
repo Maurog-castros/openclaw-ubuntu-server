@@ -52,3 +52,10 @@ def resolve_repo_path(raw: str | Path) -> Path:
 
 def secret_file(relative: str) -> Path:
     return resolve_repo_path(relative)
+
+
+def whatsapp_allow_files() -> tuple[Path, ...]:
+    return (
+        secrets_dir() / "whatsapp_allow_from.txt",
+        Path("/home/node/.openclaw-secrets/whatsapp_allow_from.txt"),
+    )
